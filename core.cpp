@@ -49,10 +49,8 @@ HaControl::HaControl() {
 
     QTimer *reconnectTimer = new QTimer(this);
     reconnectTimer->setInterval(1000);
-    connect(reconnectTimer, &QTimer::timeout, this, [this]() {
-        m_client->connectToHost();
-    });
 
+    connect(reconnectTimer, &QTimer::timeout, this, &HaControl::doConnect);
            //
            // connect(&m_networkConfigurationManager, &QNetworkConfigurationManager::configurationChanged, this, connectToHost);
            //
@@ -73,11 +71,24 @@ HaControl::HaControl() {
         }
     });
 
-    m_client->connectToHost();
+    doConnect();
+
 }
 
 HaControl::~HaControl()
 {
+}
+
+void HaControl::doConnect()
+{
+    auto config = KSharedConfig::openConfig();
+    auto group = config->group("general");
+    if (group.readEntry("useSSL", false)) {
+        QSslConfiguration sslConfig = QSslConfiguration::defaultConfiguration();
+        m_client ->connectToHostEncrypted(sslConfig);
+    } else {
+        m_client->connectToHost();
+    }
 }
 
 bool HaControl::registerIntegrationFactory(QFunctionPointer plugin)
