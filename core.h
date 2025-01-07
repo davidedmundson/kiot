@@ -17,6 +17,7 @@ public:
     // you probably want the macro
     static bool registerIntegrationFactory(const QFunctionPointer factory);
 private:
+    void doConnect();
     static QList<QFunctionPointer> s_integrations;
     static HaControl *s_self;
     QMqttClient *m_client;

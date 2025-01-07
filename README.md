@@ -60,6 +60,7 @@ host=some.host
 port=1883
 user=myUsername
 password=myPassword
+useSSL=false
 
 [Scripts][myScript1]
 Name=Launch chrome
