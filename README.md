@@ -60,8 +60,6 @@ The following configuration needs to be placed in `~/.config/kiotrc`,
 On the home assistant side everything should then work out-the-box with MQTT discovery.
 Try rebooting Home Assistant, and then launch the `kiot` program and see it things go well. 
 
-You might need to add `useSSL=false` in order for it to work.
-
 # Goals
 
 Compared to other similar projects, I want to avoid exposing pointless system statistic information that's not useful in a HA context. There's no point having a sensor for "kernel version" for example. Instead the focus is towards tighter desktop integration with things that are practical and useful. This includes, but is not exclusive too some Plasma specific properties.
