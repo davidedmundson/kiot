@@ -13,13 +13,13 @@ This is pre-alpha software a level where if you're ok compiling things from sour
 
 ## Dependencies
 
-Make sure you have these packages installed
+Make sure you have these packages installed:
 - `cmake`
 - `extra-cmake-modules`
 - `qt6-base`/`qt6-base-dev`
 - `qt6-mqtt`/`qt6-mqtt-dev`
 
-(beware that depending on your distribution, these package names may vary slightly)
+Beware that depending on your distribution, these package names may vary slightly. If they simply don't exist, you will have to install them manually. 
 
 ## Download and install
 
