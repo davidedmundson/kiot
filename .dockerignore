@@ -1,0 +1,5 @@
+build/
+.idea/
+CMakeLists.txt.user
+Dockerfile
+docker-compose.yaml

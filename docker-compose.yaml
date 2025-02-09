@@ -1,0 +1,19 @@
+services:
+  kiot:
+    build:
+      context: .
+      target: runtime
+    network_mode: host
+    user: ${UID}:${GID}
+    privileged: true
+    security_opt:
+      - apparmor:unconfined
+    environment:
+      DBUS_SESSION_BUS_ADDRESS: unix:path=/run/user/${UID}/bus
+    volumes:
+      - ~/.config/kiotrc:/etc/kiot/kiotrc
+      - /var/run/dbus:/var/run/dbus
+      - /sys:/sys:rslave,rw,noexec,nosuid,nodev,rbind
+      - /dev:/dev:rslave,rw,nosuid,rbind
+      - /run/user/${UID}:/run/user/${UID}:rslave,rw,nosuid,nodev,rbind
+      - /tmp:/tmp:rslave,rw,nosuid,nodev,rbind

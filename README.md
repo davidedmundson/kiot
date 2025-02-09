@@ -77,3 +77,9 @@ Name=Do a thing
 ```
 
  
+# Docker
+To run Kiot with docker, execute the following command:
+
+```
+UID=$(id -u) GID=$(id -g) docker compose up --build kiot
+```
