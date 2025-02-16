@@ -11,18 +11,39 @@ This is pre-alpha software a level where if you're ok compiling things from sour
 
 # Setup
 
+## Dependencies
+
+Make sure you have these packages installed:
+- `cmake`
+- `extra-cmake-modules`
+- `qt6-base`/`qt6-base-dev`
+- `qt6-mqtt`/`qt6-mqtt-dev`
+
+Beware that depending on your distribution, these package names may vary slightly. If they simply don't exist, you will have to install them manually. 
+
+## Download and install
+
+Download this repo, for example, by cloning it: 
+```sh
+git clone https://github.com/davidedmundson/kiot.git  # downloads the repo to your system
+cd kiot  # switches directory to the newly downloaded folder
+```
+Now, launch the following commands to proceed with installation:
+```sh
 mkdir build
 cd build
 cmake ..
 make
-make install
+make install  # might require `sudo`
+```
+Some dependencies might be missing, make sure you have 
 
 # MQTT
 
 In home assistant MQTT server must be enabled.
 See https://www.home-assistant.io/integrations/mqtt/
 
-The following configuration needs to be placed in .config/kiotrc
+The following configuration needs to be placed in `~/.config/kiotrc`,
 
 ```
  [general]
@@ -32,7 +53,12 @@ The following configuration needs to be placed in .config/kiotrc
  password=myPassword
  ```
 
+- `host` should be your Home Assistant local address,
+- `port` is correct at 1883 by default,
+- `user` and `password` should be the username and password of a Home Assistant user (**recommended to create a specific user for MQTT connection**)
+
 On the home assistant side everything should then work out-the-box with MQTT discovery.
+Try rebooting Home Assistant, and then launch the `kiot` program and see it things go well. 
 
 # Goals
 
