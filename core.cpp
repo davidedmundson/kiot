@@ -35,14 +35,15 @@ HaControl::HaControl() {
     m_client->setPassword(group.readEntry("password"));
     m_client->setKeepAlive(3); // set a low ping so we become unavailable on suspend quickly
 
-    //TODO read from config for enable or not
     if (m_client->hostname().isEmpty()) {
         qCritical() << "Server is not configured, please check " << config->name() << "is configured";
+        qCritical() << "kiotrc expected at " << QStandardPaths::writableLocation(QStandardPaths::ConfigLocation);
     }
 
     new ConnectedNode(this);
 
     // create all the integrations
+    //TODO read from config for enable or not
     for (auto factory : s_integrations) {
         factory();
     }
@@ -55,7 +56,8 @@ HaControl::HaControl() {
            // connect(&m_networkConfigurationManager, &QNetworkConfigurationManager::configurationChanged, this, connectToHost);
            //
 
-    connect(m_client, &QMqttClient::stateChanged, this, [reconnectTimer](QMqttClient::ClientState state) {
+    connect(m_client, &QMqttClient::stateChanged, this, [reconnectTimer, this](QMqttClient::ClientState state) {
+
         switch (state) {
         case QMqttClient::Connected:
             qDebug() << "connected";
@@ -64,6 +66,7 @@ HaControl::HaControl() {
             qDebug() << "connecting";
             break;
         case QMqttClient::Disconnected:
+            qDebug() << m_client->error();
             qDebug() << "disconnected";
             reconnectTimer->start();
             //do I need to reconnect?
