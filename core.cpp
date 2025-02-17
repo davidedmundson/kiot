@@ -171,7 +171,9 @@ void Entity::sendRegistration()
         config["payload_available"] = "on";
         config["payload_not_available"] = "off";
     }
-    config["device"] = QVariantMap({{"identifiers", "linux_ha_bridge_" + hostname() }});
+    if (!config.contains("device")) {
+        config["device"] = QVariantMap({{"identifiers", "linux_ha_bridge_" + hostname() }});
+    }
     config["unique_id"] = "linux_ha_control_"+ hostname() + "_" + id();
 
     HaControl::mqttClient()->publish(s_discoveryPrefix + "/" + haType() + "/" + hostname() + "/" + id() + "/config", QJsonDocument(QJsonObject::fromVariantMap(config)).toJson(QJsonDocument::Compact), 0, true);
