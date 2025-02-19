@@ -1,0 +1,37 @@
+id: org.davidedmundson.kiot
+branch: master
+runtime: org.kde.Platform
+runtime-version: "6.8" # don't forget to change QtMqtt
+sdk: org.kde.Sdk
+command: kiot
+tags:
+  - nightly
+desktop-file-name-suffix: " (Nightly)"
+finish-args:
+  - "--share=ipc"
+  - "--share=network"
+  - "--device=all"
+  - "--socket=wayland"
+  - "--socket=fallback-x11"
+  - "--socket=session-bus"
+  - "--socket=system-bus"
+
+  - "--filesystem=home:ro"
+  - "--filesystem=xdg-config/kiotrc"
+  - "--talk-name=org.kde.StatusNotifierWatcher"
+  - "--own-name=org.kde.StatusNotifierItem-2-2"
+
+
+modules:
+  - name: qtmqtt
+    buildsystem: cmake-ninja
+    sources:
+      - type: git
+        url: https://github.com/qt/qtmqtt.git
+        tag: 6.8.2
+
+  - name: kiot
+    buildsystem: cmake-ninja
+    sources:
+      - type: dir
+        path: "."

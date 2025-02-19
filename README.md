@@ -102,4 +102,19 @@ Name=Do a thing
 
 ```
 
+# Flatpak build
+
+Installing by flatpak is also possible
+
+ - Clone this repo
+ - `flatpak-builder build .flatpak-manifest.yaml --user --install --force-clean`
+ - This will build and install kiot as a flatpak fetching all dependencies
+
+## Notes:
+
+The flatpak will not autostart.
+
+## Future
+
+Long term, flatpak is the only thing that matters, I'll push to Flathub once we have a have UI
  
