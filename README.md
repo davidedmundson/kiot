@@ -53,9 +53,22 @@ The following configuration needs to be placed in `~/.config/kiotrc`,
  password=myPassword
  ```
 
+> [!NOTE]
+> If Kiot is running and you change the configuration, you will need to restart Kiot for the changes to take effect.
+
+## Home Assistant Managed
+
 - `host` should be your Home Assistant local address,
 - `port` is correct at 1883 by default,
 - `user` and `password` should be the username and password of a Home Assistant user (**recommended to create a specific user for MQTT connection**)
+
+## Home Assistant Container
+
+If running Home Assistant in a container:
+
+- `host` should be the IP address where the MQTT broker is available
+- `port` is correct at 1883 by default
+- `user` and `password` should be a username and password setup for the MQTT broker
 
 On the home assistant side everything should then work out-the-box with MQTT discovery.
 Try rebooting Home Assistant, and then launch the `kiot` program and see it things go well. 
