@@ -53,6 +53,9 @@ The following configuration needs to be placed in `~/.config/kiotrc`,
  password=myPassword
  ```
 
+> [!NOTE]
+> If Kiot is running and you change the configuration, you will need to restart Kiot for the changes to take effect.
+
 ## Home Assistant Managed
 
 - `host` should be your Home Assistant local address,
