@@ -11,6 +11,7 @@ add_library(KIOTIntegrations OBJECT
     nightmode.cpp
     camera.cpp
     accentcolour.cpp
+    activewindow.cpp
 )
 
 target_link_libraries(KIOTIntegrations
