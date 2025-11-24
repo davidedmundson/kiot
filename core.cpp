@@ -357,7 +357,7 @@ void Sensor::publishState()
 
 void Sensor::publishAttributes()
 {
-    if (m_attributes.isEmpty() || HaControl::mqttClient()->state() != QMqttClient::Connected)
+    if (HaControl::mqttClient()->state() != QMqttClient::Connected)
         return;
 
     QJsonObject obj;
