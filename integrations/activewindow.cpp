@@ -145,7 +145,7 @@ bool ActiveWindowWatcher::registerKWinScript()
             "        }\n"
             "        return;\n"
             "    }\n"
-            "    var caption = window.cation ?? window.resourceClass ?? '';;\n"
+            "    var caption = window.cation || window.resourceClass || '';;\n"
             "    if (caption !== lastCaption) {\n"
             "        lastCaption = caption;\n"
             "        callDBus('org.davidedmundson.kiot.ActiveWindow', '/ActiveWindow', 'org.davidedmundson.kiot.ActiveWindow', 'UpdateTitle', caption);\n"
