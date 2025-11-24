@@ -20,6 +20,7 @@ finish-args:
   - "--filesystem=xdg-config/kiotrc"
   - "--talk-name=org.kde.StatusNotifierWatcher"
   - "--own-name=org.kde.StatusNotifierItem-2-2"
+  - "--talk-name=org.kde.KWin"
 
 
 modules:

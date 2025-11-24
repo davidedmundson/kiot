@@ -10,25 +10,25 @@
 #include <QDebug>
 #include <QStandardPaths>
 #include <QDir>
+#include <QJsonDocument>
+#include <QJsonObject>
+#include <QJsonValue>
 
 class ActiveWindowWatcher : public QObject
 {
     Q_OBJECT
     Q_CLASSINFO("D-Bus Interface", "org.davidedmundson.kiot.ActiveWindow")
-    
+
 public:
     explicit ActiveWindowWatcher(QObject *parent = nullptr);
 
 public slots:
     Q_SCRIPTABLE void UpdateTitle(const QString &title);
-
-private slots:
-    void onActiveWindowChanged(const QString &title);
+    Q_SCRIPTABLE void UpdateAttributes(const QString &json);
 
 
 private:
     bool registerKWinScript();
-    void publish(const QString &state);
 
     Sensor *m_sensor;
     QDBusInterface *m_kwinIface = nullptr;
@@ -37,6 +37,15 @@ private:
     bool m_connected = false;
 };
 
+// Helper for detecting Plasma version
+QString detectPlasmaVersion()
+{
+    QByteArray val = qgetenv("KDE_SESSION_VERSION");
+    if (val.isEmpty())
+        return QString(); // unknown
+    return QString::fromUtf8(val);
+}
+
 ActiveWindowWatcher::ActiveWindowWatcher(QObject *parent)
     : QObject(parent)
 {
@@ -44,17 +53,17 @@ ActiveWindowWatcher::ActiveWindowWatcher(QObject *parent)
     m_sensor->setId("active_window");
     m_sensor->setName("Active Window");
     m_sensor->setDiscoveryConfig("icon", "mdi:application");
-    m_sensor->setState("Loading...");
-
     // Register DBus service first
     if (!QDBusConnection::sessionBus().registerService("org.davidedmundson.kiot.ActiveWindow")) {
         qWarning() << "ActiveWindowWatcher: Failed to register DBus service";
         m_sensor->setState("Unavailable");
         return;
     }
-    
-    // Register the object with the proper interface
-    if (!QDBusConnection::sessionBus().registerObject("/ActiveWindow", "org.davidedmundson.kiot.ActiveWindow", this, QDBusConnection::ExportAllSlots)) {
+
+    if (!QDBusConnection::sessionBus().registerObject("/ActiveWindow",
+            "org.davidedmundson.kiot.ActiveWindow",
+            this,
+            QDBusConnection::ExportAllSlots)) {
         qWarning() << "ActiveWindowWatcher: Failed to register DBus object";
         m_sensor->setState("Unavailable");
         return;
@@ -65,16 +74,8 @@ ActiveWindowWatcher::ActiveWindowWatcher(QObject *parent)
         m_sensor->setState("Unavailable");
         return;
     }
-
 }
-QString detectPlasmaVersion()
-{
-    QByteArray val = qgetenv("KDE_SESSION_VERSION");
-    if (val.isEmpty())
-        return QString(); // unknown
 
-    return QString::fromUtf8(val);
-}
 bool ActiveWindowWatcher::registerKWinScript()
 {
     m_kwinIface = new QDBusInterface(
@@ -90,26 +91,21 @@ bool ActiveWindowWatcher::registerKWinScript()
         return false;
     }
 
-    // Clean up any existing instances
+    // Clean up any existing instance
     QDBusMessage isLoadedReply = m_kwinIface->call("isScriptLoaded", "kiot_activewindow");
     if (isLoadedReply.type() != QDBusMessage::ErrorMessage && !isLoadedReply.arguments().isEmpty()) {
         bool isLoaded = isLoadedReply.arguments().first().toBool();
-        if (isLoaded) {
+        if (isLoaded)
             m_kwinIface->call("unloadScript", "kiot_activewindow");
-        }
     }
 
-    // Create script in runtime directory
     QString runtimeDir = QStandardPaths::writableLocation(QStandardPaths::RuntimeLocation);
-    if (runtimeDir.isEmpty()) {
+    if (runtimeDir.isEmpty())
         runtimeDir = "/tmp";
-    }
-    
     QString scriptDir = runtimeDir + "/kiot";
     QDir().mkpath(scriptDir);
-    
     m_scriptPath = scriptDir + "/kwin_activewindow.js";
-    
+
     QFile scriptFile(m_scriptPath);
     if (!scriptFile.open(QIODevice::WriteOnly | QIODevice::Truncate)) {
         qWarning() << "ActiveWindowWatcher: could not open script file" << m_scriptPath;
@@ -117,45 +113,63 @@ bool ActiveWindowWatcher::registerKWinScript()
     }
 
     QTextStream out(&scriptFile);
-    QString plasmaVersion = detectPlasmaVersion();
-    if (plasmaVersion == "5") {
-        out << "var lastCaption = '';\n"
-            "workspace.clientActivated.connect(function(client) {\n"
-            "    if (!client) {\n"
-            "        if (lastCaption !== '') {\n"
-            "            lastCaption = '';\n"
-            "            callDBus('org.davidedmundson.kiot.ActiveWindow', '/ActiveWindow', 'org.davidedmundson.kiot.ActiveWindow', 'UpdateTitle', '');\n"
-            "        }\n"
-            "        return;\n"
-            "    }\n"
-            "    var caption = client.caption || client.resourceClass || '';\n"
-            "    if (caption !== lastCaption) {\n"
-            "        lastCaption = caption;\n"
-            "        callDBus('org.davidedmundson.kiot.ActiveWindow', '/ActiveWindow', 'org.davidedmundson.kiot.ActiveWindow', 'UpdateTitle', caption);\n"
-            "    }\n"
-            "});\n";
-    }
-    else {
-        out << "var lastCaption = '';\n"
-            "workspace.windowActivated.connect(window => {\n"
-            "    if (!window) {\n"
-            "        if (lastCaption !== '') {\n"
-            "            lastCaption = '';\n"
-            "            callDBus('org.davidedmundson.kiot.ActiveWindow', '/ActiveWindow', 'org.davidedmundson.kiot.ActiveWindow', 'UpdateTitle', '');\n"
-            "        }\n"
-            "        return;\n"
-            "    }\n"
-            "    var caption = window.cation || window.resourceClass || '';;\n"
-            "    if (caption !== lastCaption) {\n"
-            "        lastCaption = caption;\n"
-            "        callDBus('org.davidedmundson.kiot.ActiveWindow', '/ActiveWindow', 'org.davidedmundson.kiot.ActiveWindow', 'UpdateTitle', caption);\n"
-            "    }\n"
-            "});\n";}
+    out << "var lastPayload = {};\n"
+        "var currentWindow = null;\n"
+        "\n"
+        "function updateActiveWindow(w) {\n"
+        "    if (!w) return;\n"
+        "\n"
+        "    var payload = {\n"
+        "        title: w.caption || '',\n"
+        "        resourceClass: w.resourceClass || '',\n"
+        "        windowType: w.windowType || '',\n"
+        "        minimized: w.minimized,\n"
+        "        fullscreen: w.fullScreen,\n"
+        "        screen: w.output.manufacturer,\n"
+        "        x: w.x,\n"
+        "        y: w.y,\n"
+        "        width: w.width,\n"
+        "        height: w.height,\n"
+        "        pid: w.pid\n"
+        "    };\n"
+        "\n"
+        "    var payloadStr = JSON.stringify(payload);\n"
+        "    if (payloadStr !== JSON.stringify(lastPayload)) {\n"
+        "        lastPayload = payload;\n"
+        "        callDBus('org.davidedmundson.kiot.ActiveWindow', '/ActiveWindow', 'org.davidedmundson.kiot.ActiveWindow', 'UpdateAttributes', payloadStr);\n"
+        "        callDBus('org.davidedmundson.kiot.ActiveWindow', '/ActiveWindow', 'org.davidedmundson.kiot.ActiveWindow', 'UpdateTitle', payload.title);\n"
+        "    }\n"
+        "}\n"
+        "\n"
+        "function onCaptionChanged() {\n"
+        "    updateActiveWindow(currentWindow);\n"
+        "}\n"
+        "\n"
+        "function onGeometryChanged() {\n"
+        "    updateActiveWindow(currentWindow);\n"
+        "}\n"
+        "\n"
+        "function watchWindow(w) {\n"
+        "    if (!w) return;\n"
+        "\n"
+        "    if (currentWindow) {\n"
+        "        currentWindow.captionChanged.disconnect(onCaptionChanged);\n"
+        "        currentWindow.frameGeometryChanged.disconnect(onGeometryChanged);\n"
+        "    }\n"
+        "\n"
+        "    currentWindow = w;\n"
+        "    currentWindow.captionChanged.connect(onCaptionChanged);\n"
+        "    currentWindow.frameGeometryChanged.connect(onGeometryChanged);\n"
+        "\n"
+        "    updateActiveWindow(w);\n"
+        "}\n"
+        "\n"
+        "watchWindow(workspace.activeWindow);\n"
+        "workspace.windowActivated.connect(watchWindow);\n";
+        
 
     scriptFile.flush();
     scriptFile.close();
-
-    // Set proper permissions
     QFile::setPermissions(m_scriptPath, QFile::ReadOwner | QFile::WriteOwner | QFile::ReadGroup | QFile::ReadOther);
 
     QDBusMessage reply = m_kwinIface->call("loadScript", m_scriptPath, "kiot_activewindow");
@@ -174,32 +188,16 @@ bool ActiveWindowWatcher::registerKWinScript()
     QVariant arg = reply.arguments().first();
     QString scriptObjectPath;
 
-    if (arg.canConvert<QDBusObjectPath>()) {
-        QDBusObjectPath path = arg.value<QDBusObjectPath>();
-        scriptObjectPath = path.path();
-        //qDebug() << "ActiveWindowWatcher: loadScript returned object path" << scriptObjectPath;
-    } else if (arg.canConvert<int>()) {
+    // KWin returns an int for the script ID in all supported versions
+    if (arg.canConvert<int>()) {
         int id = arg.toInt();
         scriptObjectPath = QString("/Scripting/Script%1").arg(id);
-        //qDebug() << "ActiveWindowWatcher: loadScript returned int id" << id << "-> path" << scriptObjectPath;
-    } else if (arg.canConvert<QString>()) {
-        scriptObjectPath = arg.toString();
-        if (!scriptObjectPath.startsWith("/"))
-            scriptObjectPath.prepend("/Scripting/");
-        //qDebug() << "ActiveWindowWatcher: loadScript returned string" << scriptObjectPath;
     } else {
-        qWarning() << "ActiveWindowWatcher: Unknown return type from loadScript" << arg.typeName();
+        qWarning() << "ActiveWindowWatcher: Unexpected return type from loadScript:" << arg.typeName();
         QFile::remove(m_scriptPath);
         return false;
     }
-
-    QDBusInterface scriptIface(
-        "org.kde.KWin",
-        scriptObjectPath,
-        "org.kde.kwin.Script",
-        QDBusConnection::sessionBus()
-    );
-
+    QDBusInterface scriptIface("org.kde.KWin", scriptObjectPath, "org.kde.kwin.Script", QDBusConnection::sessionBus());
     if (!scriptIface.isValid()) {
         qWarning() << "ActiveWindowWatcher: scriptIface invalid for path" << scriptObjectPath;
         QFile::remove(m_scriptPath);
@@ -213,31 +211,30 @@ bool ActiveWindowWatcher::registerKWinScript()
         return false;
     }
 
-    //qDebug() << "ActiveWindowWatcher: loaded script successfully at" << scriptObjectPath;
     return true;
 }
 
-Q_SCRIPTABLE void ActiveWindowWatcher::UpdateTitle(const QString &title)
-{
-    //qDebug() << "ActiveWindowWatcher: UpdateTitle called with:" << title;
-    onActiveWindowChanged(title);
-}
-
-void ActiveWindowWatcher::onActiveWindowChanged(const QString &title)
+void ActiveWindowWatcher::UpdateTitle(const QString &title)
 {
     if (title != m_lastTitle) {
         m_lastTitle = title;
-        publish(title);
+        m_sensor->setState(title.isEmpty() ? "" : title);
     }
 }
 
-void ActiveWindowWatcher::publish(const QString &state)
+void ActiveWindowWatcher::UpdateAttributes(const QString &json)
 {
-    if (!state.isEmpty()){
-    m_sensor->setState(state.isEmpty() ? "No active window" : state);
-    //qDebug() << "ActiveWindowWatcher: updated title:" << state;
-    }
+    QJsonParseError err;
+    QJsonDocument doc = QJsonDocument::fromJson(json.toUtf8(), &err);
+    if (err.error != QJsonParseError::NoError || !doc.isObject())
+        return;
+
+    QVariantMap attrs = doc.object().toVariantMap();
+    m_sensor->setAttributes(attrs);
 }
+
+
+
 
 void setupActiveWindow()
 {
@@ -246,5 +243,3 @@ void setupActiveWindow()
 
 REGISTER_INTEGRATION(setupActiveWindow)
 #include "activewindow.moc"
-
-
