@@ -23,7 +23,6 @@ public:
     explicit ActiveWindowWatcher(QObject *parent = nullptr);
 
 public slots:
-    Q_SCRIPTABLE void UpdateTitle(const QString &title);
     Q_SCRIPTABLE void UpdateAttributes(const QString &json);
 
 
@@ -114,8 +113,6 @@ bool ActiveWindowWatcher::registerKWinScript()
         "    var payload = {\n"
         "        title: w.caption || '',\n"
         "        resourceClass: w.resourceClass || '',\n"
-        "        windowType: w.windowType || '',\n"
-        "        minimized: w.minimized.toString(),\n"
         "        fullscreen: w.fullScreen.toString(),\n"
         "        screen: w.output.manufacturer,\n"
         "        x: w.x,\n"
@@ -129,7 +126,6 @@ bool ActiveWindowWatcher::registerKWinScript()
         "    if (payloadStr !== JSON.stringify(lastPayload)) {\n"
         "        lastPayload = payload;\n"
         "        callDBus('org.davidedmundson.kiot.ActiveWindow', '/ActiveWindow', 'org.davidedmundson.kiot.ActiveWindow', 'UpdateAttributes', payloadStr);\n"
-        "        callDBus('org.davidedmundson.kiot.ActiveWindow', '/ActiveWindow', 'org.davidedmundson.kiot.ActiveWindow', 'UpdateTitle', payload.title);\n"
         "    }\n"
         "}\n"
         "\n"
@@ -206,13 +202,6 @@ bool ActiveWindowWatcher::registerKWinScript()
     return true;
 }
 
-void ActiveWindowWatcher::UpdateTitle(const QString &title)
-{
-    if (title != m_lastTitle) {
-        m_lastTitle = title;
-        m_sensor->setState(title.isEmpty() ? "" : title);
-    }
-}
 
 void ActiveWindowWatcher::UpdateAttributes(const QString &json)
 {
@@ -222,7 +211,13 @@ void ActiveWindowWatcher::UpdateAttributes(const QString &json)
         return;
 
     QVariantMap attrs = doc.object().toVariantMap();
+    QString title = attrs["title"].toString();
+    if (title != m_lastTitle) {
+        m_lastTitle = title;
+        m_sensor->setState(title);
+    }
     m_sensor->setAttributes(attrs);
+    
 }
 
 
