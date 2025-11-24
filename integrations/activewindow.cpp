@@ -37,14 +37,6 @@ private:
     bool m_connected = false;
 };
 
-// Helper for detecting Plasma version
-QString detectPlasmaVersion()
-{
-    QByteArray val = qgetenv("KDE_SESSION_VERSION");
-    if (val.isEmpty())
-        return QString(); // unknown
-    return QString::fromUtf8(val);
-}
 
 ActiveWindowWatcher::ActiveWindowWatcher(QObject *parent)
     : QObject(parent)
