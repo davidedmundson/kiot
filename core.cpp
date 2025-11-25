@@ -323,20 +323,51 @@ Sensor::Sensor(QObject *parent)
 void Sensor::init()
 {
     setHaType("sensor");
+
+    // Standard state topic
     setHaConfig({
         {"state_topic", baseTopic()},
+        {"json_attributes_topic", baseTopic() + "/attributes"} // ny topic for attributes
     });
+
     sendRegistration();
-    setState(m_state);
+    publishState();
+    publishAttributes();
 }
 
 void Sensor::setState(const QString &state)
 {
     m_state = state;
-    if (HaControl::mqttClient()->state() == QMqttClient::Connected) {
-        HaControl::mqttClient()->publish(baseTopic(), state.toLatin1(), 0, true);
-    }
+    publishState();
 }
+
+void Sensor::setAttributes(const QVariantMap &attrs)
+{
+    m_attributes = attrs;
+    publishAttributes();
+}
+
+void Sensor::publishState()
+{
+    if (HaControl::mqttClient()->state() != QMqttClient::Connected)
+        return;
+
+    HaControl::mqttClient()->publish(baseTopic(), m_state.toUtf8(), 0, true);
+}
+
+void Sensor::publishAttributes()
+{
+    if (HaControl::mqttClient()->state() != QMqttClient::Connected)
+        return;
+
+    QJsonObject obj;
+    for (auto it = m_attributes.constBegin(); it != m_attributes.constEnd(); ++it)
+        obj[it.key()] = QJsonValue::fromVariant(it.value());
+
+    QJsonDocument doc(obj);
+    HaControl::mqttClient()->publish(baseTopic() + "/attributes", doc.toJson(QJsonDocument::Compact), 0, true);
+}
+
 
 Event::Event(QObject *parent)
     : Entity(parent)

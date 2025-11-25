@@ -85,12 +85,21 @@ class Sensor : public Entity
     Q_OBJECT
 public:
     Sensor(QObject *parent = nullptr);
+
     void setState(const QString &state);
+    void setAttributes(const QVariantMap &attrs);
+
 protected:
     void init() override;
+
 private:
     QString m_state;
+    QVariantMap m_attributes;
+
+    void publishState();
+    void publishAttributes();
 };
+
 
 class Event : public Entity
 {
@@ -129,5 +138,4 @@ private:
     bool m_state = false;
     QScopedPointer<QMqttSubscription> m_subscription;
 };
-
 
