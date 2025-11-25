@@ -1,5 +1,9 @@
+# Prøv å finne PulseAudioQt uten REQUIRED
+find_package(KF6PulseAudioQt CONFIG)
+
 include_directories(..)
-add_library(KIOTIntegrations OBJECT
+
+set(KIOT_INTEGRATIONS_SRC
     active.cpp
     notifications.cpp
     scripts.cpp
@@ -12,8 +16,17 @@ add_library(KIOTIntegrations OBJECT
     camera.cpp
     accentcolour.cpp
     activewindow.cpp
-    volume.cpp
 )
+
+# Hvis PulseAudioQt ble funnet, ta med volume.cpp
+if(KF6PulseAudioQt_FOUND)
+    message(STATUS "PulseAudioQt found, enabling volume integration")
+    list(APPEND KIOT_INTEGRATIONS_SRC volume.cpp)
+else()
+    message(WARNING "PulseAudioQt not found, skipping volume integration")
+endif()
+
+add_library(KIOTIntegrations OBJECT ${KIOT_INTEGRATIONS_SRC})
 
 target_link_libraries(KIOTIntegrations
     KF6::IdleTime
@@ -26,3 +39,8 @@ target_link_libraries(KIOTIntegrations
     Qt6::Mqtt
     Qt6::DBus
 )
+
+# Link PulseAudioQt kun hvis funnet
+if(KF6PulseAudioQt_FOUND)
+    target_link_libraries(KIOTIntegrations KF6::PulseAudioQt)
+endif()

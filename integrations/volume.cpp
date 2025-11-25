@@ -1,92 +1,134 @@
-//TODO find a way to get the volume changes directly from the OS so we dont need a timer
 #include "core.h"
+
 #include <QCoreApplication>
-#include <QTimer>
+#include <QObject>
 #include <QDebug>
-#include <QProcess>
-#include <QRegularExpression>
-#include <QRegularExpressionMatch>
+
+#include <KF6/KF6PulseAudioQt/PulseAudioQt/Context>
+#include <KF6/KF6PulseAudioQt/PulseAudioQt/Server>
+#include <KF6/KF6PulseAudioQt/PulseAudioQt/Sink>
+#include <KF6/KF6PulseAudioQt/PulseAudioQt/VolumeObject>
 
 class VolumeWatcher : public QObject
 {
     Q_OBJECT
-public:
-    Q_INVOKABLE VolumeWatcher(QObject *parent);
-    ~VolumeWatcher();
 
-private Q_SLOTS:
-    void setVolume(int value);
-    void updateVolumeFromSystem();
+public:
+    explicit VolumeWatcher(QObject *parent = nullptr);
+
+private slots:
+    void onDefaultSinkChanged(PulseAudioQt::Sink *sink);
+    void onVolumeChanged();
+    void setVolume(int v);
 
 private:
-    Number *m_sensor;
-    QTimer *m_pollTimer = nullptr;
-    int m_currentVolume = 0; // saves last known system volume
+    int paToPercent(qint64 v) const;
+    qint64 percentToPa(int percent) const;
+
+    Number *m_sensor = nullptr;
+    PulseAudioQt::Server *m_server = nullptr;
+    PulseAudioQt::Sink *m_sink = nullptr;
+
+    int m_currentVolume = 0;
 };
 
+// Constructor
 VolumeWatcher::VolumeWatcher(QObject *parent)
     : QObject(parent)
 {
     m_sensor = new Number(this);
     m_sensor->setId("volume");
     m_sensor->setName("System Volume");
-    m_sensor->setDiscoveryConfig("icon", "mdi:volume-medium");
     m_sensor->setRange(0, 100, 1, "%");
+
+    connect(m_sensor, &Number::valueChangeRequested,
+            this, &VolumeWatcher::setVolume);
+
+    auto ctx = PulseAudioQt::Context::instance();
+    if (!ctx || !ctx->isValid()) {
+        qWarning() << "VolumeWatcher: PulseAudio context not valid";
+        return;
+    }
+
+    m_server = ctx->server();
+    if (!m_server) {
+        qWarning() << "VolumeWatcher: No PulseAudio server";
+        return;
+    }
+
+    connect(m_server, &PulseAudioQt::Server::defaultSinkChanged,
+            this, &VolumeWatcher::onDefaultSinkChanged);
+
+    PulseAudioQt::Sink *initial = m_server->defaultSink();
+    if (initial) {
+        onDefaultSinkChanged(initial);
+    } else {
+        qWarning() << "VolumeWatcher: default sink not ready, waiting for signal";
+    }
+}
+
+void VolumeWatcher::onDefaultSinkChanged(PulseAudioQt::Sink *sink)
+{
+    if (!sink || !sink->isDefault()) {
+        qWarning() << "VolumeWatcher: received invalid sink";
+        return;
+    }
     
-    connect(m_sensor, &Number::valueChangeRequested, this, &VolumeWatcher::setVolume);
+    if (m_sink) {
+        disconnect(m_sink, nullptr, this, nullptr);
+    }
 
-    m_pollTimer = new QTimer(this);
-    connect(m_pollTimer, &QTimer::timeout, this, &VolumeWatcher::updateVolumeFromSystem);
-    m_pollTimer->start(5000);
+    m_sink = sink;
 
-    updateVolumeFromSystem();
+    if (!m_sink) {
+        qWarning() << "VolumeWatcher: Default sink missing";
+        return;
+    }
+
+    connect(m_sink, &PulseAudioQt::VolumeObject::volumeChanged,
+            this, &VolumeWatcher::onVolumeChanged);
+
+    int percent = paToPercent(m_sink->volume());
+    m_currentVolume = percent;
+    m_sensor->setValue(percent);
+
+    qDebug() << "VolumeWatcher: Attached to sink with" << percent << "% volume";
 }
 
-VolumeWatcher::~VolumeWatcher()
+void VolumeWatcher::onVolumeChanged()
 {
-  
+    if (!m_sink) return;
+
+    int percent = paToPercent(m_sink->volume());
+    if (percent == m_currentVolume) return;
+
+    m_currentVolume = percent;
+    m_sensor->setValue(percent);
+
+    qDebug() << "VolumeWatcher: System volume updated to" << percent << "%";
 }
 
-void VolumeWatcher::updateVolumeFromSystem()
+void VolumeWatcher::setVolume(int v)
 {
-    QProcess *p = new QProcess(this);
-    QObject::connect(p, &QProcess::finished, this, [p,  this]() {
-        QString out = p->readAllStandardOutput();
-        if (out.isEmpty()){
-            p->deleteLater();
-            return;
-        }
-        // Example line:
-        // Volume: aux0: 58327 / 89% / -3.04 dB, aux1: ...
-        QRegularExpression re("(\\d+)%");
-        QRegularExpressionMatch match = re.match(out);
-        if (!match.hasMatch()) {
-            p->deleteLater();
-            return;
-        }
-        int level = match.captured(1).toInt();
-        if (level != m_currentVolume) {
-            m_currentVolume = level;
-            m_sensor->setValue(level);
-            qDebug() << "VolumeWatcher updated home assistant to: " << level;
-        }
-        p->deleteLater();
-    });
-    p->start("pactl", {"get-sink-volume", "@DEFAULT_SINK@"});
+    if (!m_sink) return;
+    if (v == m_currentVolume) return;
+
+    qint64 paVol = percentToPa(v);
+    m_sink->setVolume(paVol);
+
+    m_currentVolume = v;
+    qDebug() << "VolumeWatcher: Set volume to" << v << "%";
 }
 
-void VolumeWatcher::setVolume(int value)
+int VolumeWatcher::paToPercent(qint64 v) const
 {
-    if (value == m_currentVolume) return;
+    double p = (double)v / PulseAudioQt::normalVolume() * 100.0;
+    return qRound(p);
+}
 
-    QProcess *p = new QProcess(this);
-    p->start("pactl", {"set-sink-volume", "@DEFAULT_SINK@", QString::number(value) + "%"});
-    connect(p, QOverload<int, QProcess::ExitStatus>::of(&QProcess::finished), this, [this, p, value](int, QProcess::ExitStatus) {
-        m_currentVolume = value;
-        m_sensor->setValue(value);
-        qDebug() << "VolumeWatcher set volume to" << value;
-        p->deleteLater();
-    });
+qint64 VolumeWatcher::percentToPa(int percent) const
+{
+    return (qint64)(PulseAudioQt::normalVolume() * (percent / 100.0));
 }
 
 void setupVolume()
