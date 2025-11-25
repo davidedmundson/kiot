@@ -12,6 +12,7 @@ add_library(KIOTIntegrations OBJECT
     camera.cpp
     accentcolour.cpp
     activewindow.cpp
+    volume.cpp
 )
 
 target_link_libraries(KIOTIntegrations

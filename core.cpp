@@ -393,5 +393,56 @@ void Event::trigger()
         HaControl::mqttClient()->publish(baseTopic(), "", 0, true);
     }
 }
+//TODO figure this out is this really number or should it be NumberSlider? since its a slider you get?
+Number::Number(QObject *parent)
+    : Entity(parent)
+{
+    setHaType("number");
+}
+
+void Number::setRange(int min, int max, int step, const QString &unit)
+{
+    m_min = min;
+    m_max = max;
+    m_step = step;
+    m_unit = unit;
+}
+
+void Number::init()
+{
+    setHaConfig({ {"state_topic", baseTopic()},
+            {"command_topic", baseTopic() + "/set"},
+            {"min", QString::number(m_min)},
+            {"max", QString::number(m_max)},
+            {"step", QString::number(m_step)},
+            {"unit_of_measurement", m_unit}
+    });
+ 
+
+    sendRegistration();
+
+    setValue(m_value);
+
+    m_subscription.reset(HaControl::mqttClient()->subscribe(baseTopic() + "/set"));
+    connect(m_subscription.data(), &QMqttSubscription::messageReceived, this, [this](const QMqttMessage &message) {
+        bool ok = false;
+        int newValue = message.payload().toInt(&ok);
+        if (ok) {
+            Q_EMIT valueChangeRequested(newValue);
+        } else {
+            qWarning() << "Invalid payload for number entity:" << message.payload();
+            //TODO figure out if this is a okay way to tell ha what its value should be if it tried to publish a non number value
+            setValue(m_value);
+        }
+    });
+}
+
+void Number::setValue(int value)
+{
+    m_value = value;
+    if (HaControl::mqttClient()->state() == QMqttClient::Connected) {
+        HaControl::mqttClient()->publish(baseTopic(), QByteArray::number(value), 0, true);
+    }
+}
 
 #include "core.moc"

@@ -89,8 +89,9 @@ The other focus is on ensuring that device triggers and actions appear in an int
  - Arbitrary Scripts (buttons)
  - Shortcuts (device_trigger)
  - Nightmode status (binary sensor)
-
- 
+ - Active window status (sensor)
+ - Volume controller (number based slider)
+  
 # Additional Config
 
 ```
