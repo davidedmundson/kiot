@@ -109,6 +109,7 @@ bool ActiveWindowWatcher::registerKWinScript()
         "\n"
         "function updateActiveWindow(w) {\n"
         "    if (!w) return;\n"
+        "    if (w.transient && w.transientFor) w = w.transientFor;"
         "\n"
         "    var payload = {\n"
         "        title: w.caption || '',\n"
