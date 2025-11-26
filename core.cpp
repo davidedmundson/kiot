@@ -13,7 +13,7 @@
 #include <KConfigGroup>
 
 HaControl *HaControl::s_self = nullptr;
-QList<QFunctionPointer> HaControl::s_integrations;
+QList<IntegrationFactory> HaControl::s_integrations;
 
 // core internal sensor
 class ConnectedNode: public Entity
@@ -41,12 +41,27 @@ HaControl::HaControl() {
     }
 
     new ConnectedNode(this);
-
-    // create all the integrations
-    //TODO read from config for enable or not
-    for (auto factory : s_integrations) {
-        factory();
+    //TODO this now uses the function name from "REGISTER_INTEGRATION(setupActiveWindow)" so make sure this matches the wanted integration name
+    auto integrationconfig = config->group("Integrations");
+    if(!integrationconfig.exists()){
+        //TODO ask if making sure a important part of the config is present is accepted with KSharedConfig?
+        //and if its okay to just write to the end of the file or it needs to be done by KSharedConfig own method (gotta read up on KSharedConfig)
+        qWarning() << "Integration group not found in config, should we auto add every integration or just say everything enabled?";
     }
+    bool integrationsExist = !integrationconfig.entryMap().isEmpty();
+    for (const auto &entry : s_integrations) {
+        bool enabled = integrationsExist ? integrationconfig.readEntry(entry.name,false) : true;
+        if(enabled){
+            entry.factory();
+            qDebug() << "Started integration:" << entry.name;
+        } else {
+            qDebug() << "Skipped integration:" << entry.name;
+        }
+    }
+    
+    //for (auto factory : s_integrations) {
+     //   factory();
+   // }
 
     QTimer *reconnectTimer = new QTimer(this);
     reconnectTimer->setInterval(1000);
@@ -94,9 +109,9 @@ void HaControl::doConnect()
     }
 }
 
-bool HaControl::registerIntegrationFactory(QFunctionPointer plugin)
+bool HaControl::registerIntegrationFactory(const QString &name, std::function<void()> plugin)
 {
-    HaControl::s_integrations.append(plugin);
+    s_integrations.append({name, plugin});
     return true;
 }
 
