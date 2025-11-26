@@ -47,7 +47,8 @@ HaControl::HaControl() {
     if(!integrationconfig.exists()){
         //TODO figure out if making sure a important part of the config is present is accepted with KSharedConfig?
         //and if its okay to just write to the end of the file or it needs to be done by KSharedConfig own method (gotta read up on KSharedConfig)
-        qWarning() << "Integration group not found in config, should we auto add every integration or just say everything enabled?";
+        Warning() << "Integration group not found in config, defaulting to all enabled";
+        integrationsExist = false;
     }
     else if(!integrationconfig.entryMap().isEmpty()){
         integrationsExist = true;
