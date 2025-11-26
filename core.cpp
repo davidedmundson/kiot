@@ -43,12 +43,15 @@ HaControl::HaControl() {
     new ConnectedNode(this);
     //TODO this now uses the function name from "REGISTER_INTEGRATION(setupActiveWindow)" so make sure this matches the wanted integration name
     auto integrationconfig = config->group("Integrations");
+    bool integrationsExist = false;
     if(!integrationconfig.exists()){
-        //TODO ask if making sure a important part of the config is present is accepted with KSharedConfig?
+        //TODO figure out if making sure a important part of the config is present is accepted with KSharedConfig?
         //and if its okay to just write to the end of the file or it needs to be done by KSharedConfig own method (gotta read up on KSharedConfig)
         qWarning() << "Integration group not found in config, should we auto add every integration or just say everything enabled?";
     }
-    bool integrationsExist = !integrationconfig.entryMap().isEmpty();
+    else if(!integrationconfig.entryMap().isEmpty()){
+        integrationsExist = true;
+    }
     for (const auto &entry : s_integrations) {
         bool enabled = integrationsExist ? integrationconfig.readEntry(entry.name,false) : true;
         if(enabled){
@@ -58,10 +61,6 @@ HaControl::HaControl() {
             qDebug() << "Skipped integration:" << entry.name;
         }
     }
-    
-    //for (auto factory : s_integrations) {
-     //   factory();
-   // }
 
     QTimer *reconnectTimer = new QTimer(this);
     reconnectTimer->setInterval(1000);
