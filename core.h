@@ -139,3 +139,28 @@ private:
     QScopedPointer<QMqttSubscription> m_subscription;
 };
 
+class Number : public Entity
+{
+    Q_OBJECT
+public:
+    Number(QObject *parent = nullptr);
+    void setValue(int value);
+    int getValue();
+// Optional customization for integrations before init()
+    void setRange(int min, int max, int step = 1, const QString &unit = "%");
+
+protected:
+    void init() override;
+    
+Q_SIGNALS:
+    void valueChangeRequested(int value);
+
+private:
+    int m_value = 0;
+    int m_min = 0;
+    int m_max = 100;
+    int m_step = 1;
+    QString m_unit = "%";
+
+    QScopedPointer<QMqttSubscription> m_subscription;
+};
