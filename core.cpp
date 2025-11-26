@@ -393,7 +393,6 @@ void Event::trigger()
         HaControl::mqttClient()->publish(baseTopic(), "", 0, true);
     }
 }
-//TODO figure this out is this really number or should it be NumberSlider? since its a slider you get?
 Number::Number(QObject *parent)
     : Entity(parent)
 {
@@ -431,8 +430,6 @@ void Number::init()
             Q_EMIT valueChangeRequested(newValue);
         } else {
             qWarning() << "Invalid payload for number entity:" << message.payload();
-            //TODO figure out if this is a okay way to tell ha what its value should be if it tried to publish a non number value
-            setValue(m_value);
         }
     });
 }
@@ -445,4 +442,8 @@ void Number::setValue(int value)
     }
 }
 
+int Number::getValue()
+{
+    return m_value;
+}
 #include "core.moc"

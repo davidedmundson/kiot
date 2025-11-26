@@ -18,10 +18,10 @@ set(KIOT_INTEGRATIONS_SRC
     activewindow.cpp
 )
 
-# Hvis PulseAudioQt ble funnet, ta med volume.cpp
+# Hvis PulseAudioQt ble funnet, ta med audio.cpp
 if(KF6PulseAudioQt_FOUND)
     message(STATUS "PulseAudioQt found, enabling volume integration")
-    list(APPEND KIOT_INTEGRATIONS_SRC volume.cpp)
+    list(APPEND KIOT_INTEGRATIONS_SRC audio.cpp)
 else()
     message(WARNING "PulseAudioQt not found, skipping volume integration")
 endif()
