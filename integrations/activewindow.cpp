@@ -224,10 +224,10 @@ void ActiveWindowWatcher::UpdateAttributes(const QString &json)
 
 
 
-void setupActiveWindow()
+void ActiveWindow()
 {
     new ActiveWindowWatcher(qApp);
 }
 
-REGISTER_INTEGRATION(setupActiveWindow)
+REGISTER_INTEGRATION(ActiveWindow)
 #include "activewindow.moc"

@@ -123,10 +123,10 @@ qint64 Audio::percentToPa(int percent) const
     return (qint64)(PulseAudioQt::normalVolume() * (percent / 100.0));
 }
 
-void setupVolume()
+void Volume()
 {
     new Audio(qApp);
 }
 
-REGISTER_INTEGRATION(setupVolume)
+REGISTER_INTEGRATION(Volume)
 #include "audio.moc"
