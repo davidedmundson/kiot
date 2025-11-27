@@ -1,3 +1,6 @@
+// SPDX-FileCopyrightText: 2025 David Edmundson <davidedmundson@kde.org>
+// SPDX-License-Identifier: LGPL-2.1-or-later
+
 #include "core.h"
 #include <QCoreApplication>
 
@@ -43,3 +46,12 @@ void setupAccentColour()
 REGISTER_INTEGRATION("AccentColour",setupAccentColour,true)
 
 #include "accentcolour.moc"
+#include "core.h"
+#include <QCoreApplication>
+
+#include <KSharedConfig>
+#include <KConfigGroup>
+#include <KConfigWatcher>
+
+
+class AccentColourWatcher: public QObject {
