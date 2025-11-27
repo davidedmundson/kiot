@@ -44,3 +44,9 @@ target_link_libraries(KIOTIntegrations
 if(KF6PulseAudioQt_FOUND)
     target_link_libraries(KIOTIntegrations KF6::PulseAudioQt)
 endif()
+
+# Install KWin script used by ActiveWindowWatcher
+install(FILES
+    ${CMAKE_CURRENT_SOURCE_DIR}/activewindow_kwin.js
+    DESTINATION ${KDE_INSTALL_DATADIR}/kiot
+)
