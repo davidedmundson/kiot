@@ -1,3 +1,6 @@
+// SPDX-FileCopyrightText: 2025 Odd Østlie <theoddpirate@gmail.com>
+// SPDX-License-Identifier: LGPL-2.1-or-later
+
 var lastPayload = {};
 var currentWindow = null;
 
