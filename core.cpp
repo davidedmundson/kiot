@@ -1,3 +1,6 @@
+// SPDX-FileCopyrightText: 2025 David Edmundson <davidedmundson@kde.org>
+// SPDX-License-Identifier: LGPL-2.1-or-later
+
 #include "core.h"
 
 #include <QDebug>
@@ -470,3 +473,4 @@ int Number::getValue()
     return m_value;
 }
 #include "core.moc"
+

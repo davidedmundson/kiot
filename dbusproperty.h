@@ -1,3 +1,6 @@
+// SPDX-FileCopyrightText: 2025 David Edmundson <davidedmundson@kde.org>
+// SPDX-License-Identifier: LGPL-2.1-or-later
+
 #ifndef DBUSPROPERTY_H
 #define DBUSPROPERTY_H
 
