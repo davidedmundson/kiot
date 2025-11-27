@@ -17,11 +17,11 @@ function updateActiveWindow(w) {
         pid: w.pid
     };
 
-    var payloadStr = JSON.stringify(payload);
-    if (payloadStr !== JSON.stringify(lastPayload)) {
-        lastPayload = payload;
-        callDBus('org.davidedmundson.kiot.ActiveWindow', '/ActiveWindow', 'org.davidedmundson.kiot.ActiveWindow', 'UpdateAttributes', payloadStr);
+    if (payload == lastPayload) {
+        return;
     }
+    lastPayload = payload;
+    callDBus('org.davidedmundson.kiot.ActiveWindow', '/ActiveWindow', 'org.davidedmundson.kiot.ActiveWindow', 'UpdateAttributes', payload);
 }
 
 function onCaptionChanged() {
