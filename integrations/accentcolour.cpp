@@ -46,12 +46,3 @@ void setupAccentColour()
 REGISTER_INTEGRATION("AccentColour",setupAccentColour,true)
 
 #include "accentcolour.moc"
-#include "core.h"
-#include <QCoreApplication>
-
-#include <KSharedConfig>
-#include <KConfigGroup>
-#include <KConfigWatcher>
-
-
-class AccentColourWatcher: public QObject {
