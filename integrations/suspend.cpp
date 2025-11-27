@@ -45,4 +45,4 @@ void setupSuspend()
     }
 }
 
-REGISTER_INTEGRATION(setupSuspend)
+REGISTER_INTEGRATION("PowerController",setupSuspend,true)

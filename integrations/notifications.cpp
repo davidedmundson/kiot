@@ -43,5 +43,5 @@ void setupNotifications()
     new Notifications(qApp);
 }
 
-REGISTER_INTEGRATION(setupNotifications)
+REGISTER_INTEGRATION("Notifications",setupNotifications,true)
 #include "notifications.moc"

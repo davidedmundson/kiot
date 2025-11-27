@@ -186,5 +186,5 @@ void setupCamera()
     new CameraWatcher(qApp);
 }
 
-REGISTER_INTEGRATION(setupCamera)
+REGISTER_INTEGRATION("CameraWatcher",setupCamera,true)
 #include "camera.moc"

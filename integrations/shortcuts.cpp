@@ -26,4 +26,4 @@ void registerShortcuts()
     }
 }
 
-REGISTER_INTEGRATION(registerShortcuts)
+REGISTER_INTEGRATION("Shortcuts",registerShortcuts,true)

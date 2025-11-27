@@ -63,6 +63,6 @@ void setupNightmode()
     new NightMode(qApp);
 }
 
-REGISTER_INTEGRATION(setupNightmode)
+REGISTER_INTEGRATION("Nightmode",setupNightmode,true)
 
 #include "nightmode.moc"

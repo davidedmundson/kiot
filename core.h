@@ -3,33 +3,36 @@
 #include <QObject>
 #include <QVariantMap>
 #include <QMqttSubscription>
-
+#include <KSharedConfig>
 class QMqttClient;
 
+struct IntegrationFactory {
+    QString name;
+    std::function<void()> factory;
+    bool onByDefault = true;  // ny flagg for default enabled
+};
+
 class HaControl : public QObject {
+    Q_OBJECT
 public:
     HaControl();
     ~HaControl();
-    static QMqttClient *mqttClient() {
-        return s_self->m_client;
-    }
 
-    // you probably want the macro
-    static bool registerIntegrationFactory(const QFunctionPointer factory);
+    static QMqttClient *mqttClient() { return s_self->m_client; }
+
+    static bool registerIntegrationFactory(const QString &name, std::function<void()> plugin, bool onByDefault = true);
+    
 private:
     void doConnect();
-    static QList<QFunctionPointer> s_integrations;
+    void loadIntegrations(KSharedConfigPtr config);
+    static QList<IntegrationFactory> s_integrations;
     static HaControl *s_self;
     QMqttClient *m_client;
-    // QNetworkConfigurationManager m_networkConfigurationManager;
 };
 
-
-
-// Dave's shitty plugin system to avoid updating this file each time we add an integration
-#define REGISTER_INTEGRATION(name) \
-static bool dummy##name = HaControl::registerIntegrationFactory(&name);
-
+// Macro for integrasjoner
+#define REGISTER_INTEGRATION(nameStr, func, onByDefault) \
+static bool dummy##func = HaControl::registerIntegrationFactory(nameStr, [](){ func(); }, onByDefault);
 /**
  * @brief The Entity class is a base class for types (binary sensor, sensor, etc)
  */

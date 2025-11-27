@@ -13,7 +13,7 @@
 #include <KConfigGroup>
 
 HaControl *HaControl::s_self = nullptr;
-QList<QFunctionPointer> HaControl::s_integrations;
+QList<IntegrationFactory> HaControl::s_integrations;
 
 // core internal sensor
 class ConnectedNode: public Entity
@@ -41,13 +41,9 @@ HaControl::HaControl() {
     }
 
     new ConnectedNode(this);
-
-    // create all the integrations
-    //TODO read from config for enable or not
-    for (auto factory : s_integrations) {
-        factory();
-    }
-
+    
+    loadIntegrations(config);
+    
     QTimer *reconnectTimer = new QTimer(this);
     reconnectTimer->setInterval(1000);
 
@@ -94,10 +90,37 @@ void HaControl::doConnect()
     }
 }
 
-bool HaControl::registerIntegrationFactory(QFunctionPointer plugin)
+bool HaControl::registerIntegrationFactory(const QString &name, std::function<void()> plugin, bool onByDefault)
 {
-    HaControl::s_integrations.append(plugin);
+    s_integrations.append({name, plugin, onByDefault});
     return true;
+}
+
+// Kjør integrasjoner
+void HaControl::loadIntegrations(KSharedConfigPtr config)
+{
+    
+    auto integrationconfig = config->group("Integrations");
+
+    if(!integrationconfig.exists()){
+        qWarning() << "Integration group not found in config, defaulting to onByDefault values";
+    }
+
+    for (const auto &entry : s_integrations) {
+        // Bruk onByDefault hvis config ikke finnes
+        if(!integrationconfig.hasKey(entry.name)) {
+            integrationconfig.writeEntry(entry.name, entry.onByDefault);
+            config->sync();
+        }
+        bool enabled = integrationconfig.readEntry(entry.name, entry.onByDefault);
+
+        if(enabled){
+            entry.factory();
+            qDebug() << "Started integration:" << entry.name;
+        } else {
+            qDebug() << "Skipped integration:" << entry.name;
+        }
+    }
 }
 
 static QString s_discoveryPrefix = "homeassistant";

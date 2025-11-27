@@ -153,5 +153,5 @@ void setupActiveWindow()
     new ActiveWindowWatcher(qApp);
 }
 
-REGISTER_INTEGRATION(setupActiveWindow)
+REGISTER_INTEGRATION("ActiveWindow",setupActiveWindow,true)
 #include "activewindow.moc"
