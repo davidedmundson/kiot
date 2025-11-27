@@ -17,4 +17,4 @@ void setupDndSensor()
     // copy switch from nightmode
 }
 
-REGISTER_INTEGRATION(setupDndSensor)
+REGISTER_INTEGRATION("DnD",setupDndSensor,true)

@@ -36,4 +36,4 @@ void registerScripts()
         });
     }
 }
-REGISTER_INTEGRATION(registerScripts)
+REGISTER_INTEGRATION("Scripts",registerScripts,true)

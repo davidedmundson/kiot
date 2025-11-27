@@ -3,12 +3,13 @@
 #include <QObject>
 #include <QVariantMap>
 #include <QMqttSubscription>
-
+#include <KSharedConfig>
 class QMqttClient;
 
 struct IntegrationFactory {
     QString name;
     std::function<void()> factory;
+    bool onByDefault = true;  // ny flagg for default enabled
 };
 
 class HaControl : public QObject {
@@ -19,20 +20,19 @@ public:
 
     static QMqttClient *mqttClient() { return s_self->m_client; }
 
-    static bool registerIntegrationFactory(const QString &name, std::function<void()> plugin);
-
+    static bool registerIntegrationFactory(const QString &name, std::function<void()> plugin, bool onByDefault = true);
+    
 private:
     void doConnect();
-
+    void loadIntegrations(KSharedConfigPtr config);
     static QList<IntegrationFactory> s_integrations;
     static HaControl *s_self;
     QMqttClient *m_client;
 };
 
 // Macro for integrasjoner
-#define REGISTER_INTEGRATION(name) \
-static bool dummy##name = HaControl::registerIntegrationFactory(#name, [](){ name(); });
- 
+#define REGISTER_INTEGRATION(nameStr, func, onByDefault) \
+static bool dummy##func = HaControl::registerIntegrationFactory(nameStr, [](){ func(); }, onByDefault);
 /**
  * @brief The Entity class is a base class for types (binary sensor, sensor, etc)
  */

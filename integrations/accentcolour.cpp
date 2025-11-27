@@ -40,6 +40,6 @@ void setupAccentColour()
     new AccentColourWatcher(qApp);
 }
 
-REGISTER_INTEGRATION(setupAccentColour)
+REGISTER_INTEGRATION("AccentColour",setupAccentColour,true)
 
 #include "accentcolour.moc"

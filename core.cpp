@@ -41,28 +41,9 @@ HaControl::HaControl() {
     }
 
     new ConnectedNode(this);
-    //TODO this now uses the function name from "REGISTER_INTEGRATION(setupActiveWindow)" so make sure this matches the wanted integration name
-    auto integrationconfig = config->group("Integrations");
-    bool integrationsExist = false;
-    if(!integrationconfig.exists()){
-        //TODO figure out if making sure a important part of the config is present is accepted with KSharedConfig?
-        //and if its okay to just write to the end of the file or it needs to be done by KSharedConfig own method (gotta read up on KSharedConfig)
-        qWarning() << "Integration group not found in config, defaulting to all enabled";
-        integrationsExist = false;
-    }
-    else if(!integrationconfig.entryMap().isEmpty()){
-        integrationsExist = true;
-    }
-    for (const auto &entry : s_integrations) {
-        bool enabled = integrationsExist ? integrationconfig.readEntry(entry.name,false) : true;
-        if(enabled){
-            entry.factory();
-            qDebug() << "Started integration:" << entry.name;
-        } else {
-            qDebug() << "Skipped integration:" << entry.name;
-        }
-    }
-
+    
+    loadIntegrations(config);
+    
     QTimer *reconnectTimer = new QTimer(this);
     reconnectTimer->setInterval(1000);
 
@@ -109,10 +90,37 @@ void HaControl::doConnect()
     }
 }
 
-bool HaControl::registerIntegrationFactory(const QString &name, std::function<void()> plugin)
+bool HaControl::registerIntegrationFactory(const QString &name, std::function<void()> plugin, bool onByDefault)
 {
-    s_integrations.append({name, plugin});
+    s_integrations.append({name, plugin, onByDefault});
     return true;
+}
+
+// Kjør integrasjoner
+void HaControl::loadIntegrations(KSharedConfigPtr config)
+{
+    
+    auto integrationconfig = config->group("Integrations");
+
+    if(!integrationconfig.exists()){
+        qWarning() << "Integration group not found in config, defaulting to onByDefault values";
+    }
+
+    for (const auto &entry : s_integrations) {
+        // Bruk onByDefault hvis config ikke finnes
+        if(!integrationconfig.hasKey(entry.name)) {
+            integrationconfig.writeEntry(entry.name, entry.onByDefault);
+            config->sync();
+        }
+        bool enabled = integrationconfig.readEntry(entry.name, entry.onByDefault);
+
+        if(enabled){
+            entry.factory();
+            qDebug() << "Started integration:" << entry.name;
+        } else {
+            qDebug() << "Skipped integration:" << entry.name;
+        }
+    }
 }
 
 static QString s_discoveryPrefix = "homeassistant";

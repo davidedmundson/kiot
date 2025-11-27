@@ -148,10 +148,10 @@ void ActiveWindowWatcher::UpdateAttributes(const QVariantMap &attributes)
 
 
 
-void ActiveWindow()
+void setupActiveWindow()
 {
     new ActiveWindowWatcher(qApp);
 }
 
-REGISTER_INTEGRATION(ActiveWindow)
+REGISTER_INTEGRATION("ActiveWindow",setupActiveWindow,true)
 #include "activewindow.moc"
