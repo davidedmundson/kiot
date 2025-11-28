@@ -244,9 +244,13 @@ ConnectedNode::ConnectedNode(QObject *parent):
 
 ConnectedNode::~ConnectedNode()
 {
+
     disconnect(HaControl::mqttClient(), &QMqttClient::connected,  this, nullptr);
 
-   // HaControl::mqttClient()->publish(baseTopic(), "off", 0, false);
+    if (HaControl::mqttClient()->state() != QMqttClient::Connected)
+        return;
+    //HaControl::mqttClient()->publish(baseTopic(), "off", 0, false);
+   
 }
 
 Button::Button(QObject *parent)
