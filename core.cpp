@@ -266,10 +266,6 @@ void Button::init()
     });
     sendRegistration();
 
-   /* m_subscription.reset(); // QtMqtt is either dumb or I'm using it wrong. It seems we need to rebuild a subscription after reconnect, but if you don't delete the old subscription first it shares it.. which does nothing
-    m_subscription.reset(HaControl::mqttClient()->subscribe(baseTopic()));
-    connect(m_subscription.data(), &QMqttSubscription::messageReceived, this, &Button::triggered);
-*/
     HaControl::mqttClient()->unsubscribe(baseTopic());
     auto subscription = HaControl::mqttClient()->subscribe(baseTopic());
     if (subscription) {
@@ -298,17 +294,6 @@ void Switch::init()
     sendRegistration();
     setState(m_state);
 
- /*   m_subscription.reset();
-    m_subscription.reset(HaControl::mqttClient()->subscribe(baseTopic() + "/set"));
-    connect(m_subscription.data(), &QMqttSubscription::messageReceived, this, [this](QMqttMessage message) {
-        if (message.payload() == "true") {
-            Q_EMIT stateChangeRequested(true);
-        } else if (message.payload() == "false") {
-            Q_EMIT stateChangeRequested(false);
-        } else {
-            qWarning() << "unknown state request" << message.payload();
-        }
-    });*/
     HaControl::mqttClient()->unsubscribe(baseTopic());
     auto subscription = HaControl::mqttClient()->subscribe(baseTopic() + "/set");
     if (subscription) {
@@ -477,18 +462,7 @@ void Number::init()
     sendRegistration();
 
     setValue(m_value);
-   // m_subscription.reset();
-  //  m_subscription.reset(HaControl::mqttClient()->subscribe(baseTopic() + "/set"));
-/*        connect(m_subscription.data(), &QMqttSubscription::messageReceived, this, [this](const QMqttMessage &message) {
-            bool ok = false;
-            int newValue = message.payload().toInt(&ok);
-            if (ok) {
-                Q_EMIT valueChangeRequested(newValue);
-            } else {
-                qWarning() << "Invalid payload for number entity:" << message.payload();
-            }
-        });
-*/
+
     HaControl::mqttClient()->unsubscribe(baseTopic());
     auto subscription = HaControl::mqttClient()->subscribe(baseTopic() + "/set");
     if (subscription) {
