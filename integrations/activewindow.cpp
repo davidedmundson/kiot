@@ -72,6 +72,10 @@ ActiveWindowWatcher::~ActiveWindowWatcher(){
 }
 
 void ActiveWindowWatcher::cleanup(){
+    if (!m_kwinIface->isValid()) {
+        qWarning() << "ActiveWindowWatcher: KWin scripting interface not available aborting cleanup";
+        return;
+    }
     // Clean up any existing instance
     QDBusMessage isLoadedReply = m_kwinIface->call("isScriptLoaded", "kiot_activewindow");
     if (isLoadedReply.type() != QDBusMessage::ErrorMessage && !isLoadedReply.arguments().isEmpty()) {
