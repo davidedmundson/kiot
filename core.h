@@ -22,9 +22,9 @@ public:
     ~HaControl();
 
     static QMqttClient *mqttClient() { return s_self->m_client; }
-
-    static bool registerIntegrationFactory(const QString &name, std::function<void()> plugin, bool onByDefault = true);
     
+    static bool registerIntegrationFactory(const QString &name, std::function<void()> plugin, bool onByDefault = true);
+     
 private:
     void doConnect();
     void loadIntegrations(KSharedConfigPtr config);
@@ -50,7 +50,7 @@ public:
     QString name() const;
 
     void setDiscoveryConfig(const QString &key, const QVariant &value);
-
+    void safePublish(const QString &topic, const QByteArray &payload, quint8 qos, bool retain);
     Entity(QObject *parent);
     QString hostname() const;
     QString baseTopic() const;
@@ -122,12 +122,14 @@ class Button : public Entity
     Q_OBJECT
 public:
     Button(QObject *parent = nullptr);
+    ~Button();
 Q_SIGNALS:
     void triggered();
 protected:
     void init() override;
 private:
-    QScopedPointer<QMqttSubscription> m_subscription;
+    //Original QScopedPointer<QMqttSubscription> m_subscription;
+    QMqttSubscription *m_subscription = nullptr;
 };
 
 class Switch : public Entity
@@ -135,6 +137,7 @@ class Switch : public Entity
     Q_OBJECT
 public:
     Switch(QObject *parent = nullptr);
+    ~Switch();
     void setState(bool state);
 Q_SIGNALS:
     void stateChangeRequested(bool state);
@@ -142,7 +145,8 @@ protected:
     void init() override;
 private:
     bool m_state = false;
-    QScopedPointer<QMqttSubscription> m_subscription;
+    //Originale QScopedPointer<QMqttSubscription> m_subscription;
+    QMqttSubscription *m_subscription = nullptr;
 };
 
 class Number : public Entity
@@ -150,6 +154,7 @@ class Number : public Entity
     Q_OBJECT
 public:
     Number(QObject *parent = nullptr);
+    ~Number();
     void setValue(int value);
     int getValue();
 // Optional customization for integrations before init()
@@ -167,7 +172,8 @@ private:
     int m_max = 100;
     int m_step = 1;
     QString m_unit = "%";
+    //originale QScopedPointer<QMqttSubscription> m_subscription;
+    QMqttSubscription *m_subscription = nullptr;
 
-    QScopedPointer<QMqttSubscription> m_subscription;
 };
 
