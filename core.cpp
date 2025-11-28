@@ -257,13 +257,7 @@ Button::Button(QObject *parent)
     : Entity(parent)
 {
 }
-Button::~Button()
-{
-    if (m_subscription) {
-        m_subscription->deleteLater(); // trygg teardown via event-loop
-        m_subscription = nullptr;
-    }
-}
+
 void Button::init()
 {
     setHaType("button");
@@ -276,9 +270,10 @@ void Button::init()
     m_subscription.reset(HaControl::mqttClient()->subscribe(baseTopic()));
     connect(m_subscription.data(), &QMqttSubscription::messageReceived, this, &Button::triggered);
 */
-    m_subscription = HaControl::mqttClient()->subscribe(baseTopic());
-    if (m_subscription) {
-        connect(m_subscription, &QMqttSubscription::messageReceived, this, [this](const QMqttMessage &){
+    HaControl::mqttClient()->unsubscribe(baseTopic());
+    auto subscription = HaControl::mqttClient()->subscribe(baseTopic());
+    if (subscription) {
+        connect(subscription, &QMqttSubscription::messageReceived, this, [this](const QMqttMessage &){
             Q_EMIT triggered();
         });
     }
@@ -290,13 +285,7 @@ Switch::Switch(QObject *parent)
 {
     setHaType("switch");
 }
-Switch::~Switch()
-{
-    if (m_subscription) {
-        m_subscription->deleteLater(); // trygg teardown via event-loop
-        m_subscription = nullptr;
-    }
-}
+
 void Switch::init()
 {
     setHaConfig({
@@ -320,9 +309,10 @@ void Switch::init()
             qWarning() << "unknown state request" << message.payload();
         }
     });*/
-    m_subscription = HaControl::mqttClient()->subscribe(baseTopic() + "/set");
-    if (m_subscription) {
-        connect(m_subscription, &QMqttSubscription::messageReceived, this, [this](const QMqttMessage &message) {
+    HaControl::mqttClient()->unsubscribe(baseTopic());
+    auto subscription = HaControl::mqttClient()->subscribe(baseTopic() + "/set");
+    if (subscription) {
+        connect(subscription, &QMqttSubscription::messageReceived, this, [this](const QMqttMessage &message) {
             if (message.payload() == "true") {
                 Q_EMIT stateChangeRequested(true);
             } else if (message.payload() == "false") {
@@ -464,13 +454,7 @@ Number::Number(QObject *parent)
 {
     setHaType("number");
 }
-Number::~Number()
-{
-    if (m_subscription) {
-        m_subscription->deleteLater(); // trygg teardown via event-loop
-        m_subscription = nullptr;
-    }
-}
+
 void Number::setRange(int min, int max, int step, const QString &unit)
 {
     m_min = min;
@@ -505,9 +489,10 @@ void Number::init()
             }
         });
 */
-    m_subscription = HaControl::mqttClient()->subscribe(baseTopic() + "/set");
-    if (m_subscription) {
-        connect(m_subscription, &QMqttSubscription::messageReceived, this,
+    HaControl::mqttClient()->unsubscribe(baseTopic());
+    auto subscription = HaControl::mqttClient()->subscribe(baseTopic() + "/set");
+    if (subscription) {
+        connect(subscription, &QMqttSubscription::messageReceived, this,
             [this](const QMqttMessage &message) {
                 bool ok = false;
                 int newValue = message.payload().toInt(&ok);
