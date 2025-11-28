@@ -1,5 +1,3 @@
-//TODO ask about the best way to make sure we get a clean shutdown 
-//so the deconstructors of the integrations can run
 #include <QApplication>
 #include <QDebug>
 
@@ -10,15 +8,20 @@
 #include <signal.h>
 #include "core.h"
 
-static void handleSigTerm(int)
+static void handleSigTerm(int s)
 {
-    QApplication::quit();
+    signal(s, SIG_DFL);//IS this needed? a answer on google said it's supposed to Restore the default behavior after
+    qApp->quit(); //Or would QApplication::quit(); be the propper way here?
 }
 
 int main(int argc, char **argv)
 {
+    //To many or just right?
     signal(SIGTERM, handleSigTerm);
+    signal(SIGQUIT, handleSigTerm);
+    signal(SIGINT, handleSigTerm);
 
+    
     QApplication app(argc, argv);
 
     KAboutData aboutData(
