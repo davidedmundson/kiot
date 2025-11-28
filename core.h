@@ -122,14 +122,11 @@ class Button : public Entity
     Q_OBJECT
 public:
     Button(QObject *parent = nullptr);
-    ~Button();
 Q_SIGNALS:
     void triggered();
 protected:
     void init() override;
-private:
-    //Original QScopedPointer<QMqttSubscription> m_subscription;
-    QMqttSubscription *m_subscription = nullptr;
+
 };
 
 class Switch : public Entity
@@ -137,7 +134,6 @@ class Switch : public Entity
     Q_OBJECT
 public:
     Switch(QObject *parent = nullptr);
-    ~Switch();
     void setState(bool state);
 Q_SIGNALS:
     void stateChangeRequested(bool state);
@@ -145,8 +141,6 @@ protected:
     void init() override;
 private:
     bool m_state = false;
-    //Originale QScopedPointer<QMqttSubscription> m_subscription;
-    QMqttSubscription *m_subscription = nullptr;
 };
 
 class Number : public Entity
@@ -154,7 +148,6 @@ class Number : public Entity
     Q_OBJECT
 public:
     Number(QObject *parent = nullptr);
-    ~Number();
     void setValue(int value);
     int getValue();
 // Optional customization for integrations before init()
@@ -172,8 +165,6 @@ private:
     int m_max = 100;
     int m_step = 1;
     QString m_unit = "%";
-    //originale QScopedPointer<QMqttSubscription> m_subscription;
-    QMqttSubscription *m_subscription = nullptr;
 
 };
 
