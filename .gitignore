@@ -2,5 +2,6 @@ build/
 CMakeLists.txt.user
 backups/
 .cache/
+dependencies/
 builder.sh
 install_dependencies.sh
