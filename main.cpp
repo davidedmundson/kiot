@@ -5,12 +5,18 @@
 #include <KSharedConfig>
 #include <KConfigGroup>
 #include <KDBusService>
-
+#include <KSignalHandler>
 #include "core.h"
+#include <QObject>
+#include <csignal>
 
-int main(int argc, char ** argv)
+int main(int argc, char **argv)
 {
+
+
+    
     QApplication app(argc, argv);
+
     KAboutData aboutData(
         QStringLiteral("kiot"),
         "KDE IOT",
@@ -18,9 +24,18 @@ int main(int argc, char ** argv)
         "KDE Internet of Things Connection",
         KAboutLicense::GPL_V3,
         "© 2024");
+
     KDBusService service(KDBusService::Unique);
+
     HaControl appControl;
-    app.exec();
+    //To many or just right?
+    KSignalHandler::self()->watchSignal(SIGTERM);
+    QObject::connect(KSignalHandler::self(), &KSignalHandler::signalReceived,[](int sig){
+    if (sig == SIGTERM) {
+            QApplication::quit();
+        }
+    });
+    return app.exec();
 }
 // SPDX-FileCopyrightText: 2025 David Edmundson <davidedmundson@kde.org>
 // SPDX-License-Identifier: LGPL-2.1-or-later

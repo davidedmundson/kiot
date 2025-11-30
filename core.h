@@ -22,9 +22,9 @@ public:
     ~HaControl();
 
     static QMqttClient *mqttClient() { return s_self->m_client; }
-
-    static bool registerIntegrationFactory(const QString &name, std::function<void()> plugin, bool onByDefault = true);
     
+    static bool registerIntegrationFactory(const QString &name, std::function<void()> plugin, bool onByDefault = true);
+     
 private:
     void doConnect();
     void loadIntegrations(KSharedConfigPtr config);
@@ -50,7 +50,7 @@ public:
     QString name() const;
 
     void setDiscoveryConfig(const QString &key, const QVariant &value);
-
+    void safePublish(const QString &topic, const QByteArray &payload, quint8 qos, bool retain);
     Entity(QObject *parent);
     QString hostname() const;
     QString baseTopic() const;
@@ -126,8 +126,7 @@ Q_SIGNALS:
     void triggered();
 protected:
     void init() override;
-private:
-    QScopedPointer<QMqttSubscription> m_subscription;
+
 };
 
 class Switch : public Entity
@@ -142,7 +141,6 @@ protected:
     void init() override;
 private:
     bool m_state = false;
-    QScopedPointer<QMqttSubscription> m_subscription;
 };
 
 class Number : public Entity
@@ -168,6 +166,5 @@ private:
     int m_step = 1;
     QString m_unit = "%";
 
-    QScopedPointer<QMqttSubscription> m_subscription;
 };
 
