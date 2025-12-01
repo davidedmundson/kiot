@@ -21,14 +21,14 @@ class ActiveWindowWatcher : public QObject
 
 public:
     explicit ActiveWindowWatcher(QObject *parent = nullptr);
-
+    ~ActiveWindowWatcher();
 public slots:
     Q_SCRIPTABLE void UpdateAttributes(const QVariantMap &attributes);
 
 
 private:
     bool registerKWinScript();
-
+    void cleanup();
     Sensor *m_sensor;
     QDBusInterface *m_kwinIface = nullptr;
     QString m_lastTitle;
@@ -66,7 +66,15 @@ ActiveWindowWatcher::ActiveWindowWatcher(QObject *parent)
         return;
     }
 }
-
+ActiveWindowWatcher::~ActiveWindowWatcher(){
+    cleanup();
+}
+void ActiveWindowWatcher::cleanup(){
+    if (m_kwinIface->isValid()) { 
+        //added the isValid() check mostly because the coredumps earlier scared me and i hope this will make sure that does not happen
+        m_kwinIface->call("unloadScript", "kiot_activewindow"); 
+    }
+}
 bool ActiveWindowWatcher::registerKWinScript()
 {
     m_kwinIface = new QDBusInterface(
@@ -83,12 +91,7 @@ bool ActiveWindowWatcher::registerKWinScript()
     }
 
     // Clean up any existing instance
-    QDBusMessage isLoadedReply = m_kwinIface->call("isScriptLoaded", "kiot_activewindow");
-    if (isLoadedReply.type() != QDBusMessage::ErrorMessage && !isLoadedReply.arguments().isEmpty()) {
-        bool isLoaded = isLoadedReply.arguments().first().toBool();
-        if (isLoaded)
-            m_kwinIface->call("unloadScript", "kiot_activewindow");
-    }
+    cleanup();
 
     // Locate installed KWin script from KDE data dirs
     m_scriptPath = QStandardPaths::locate(QStandardPaths::GenericDataLocation,
