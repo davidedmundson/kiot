@@ -126,8 +126,7 @@ Q_SIGNALS:
     void triggered();
 protected:
     void init() override;
-private:
-    QScopedPointer<QMqttSubscription> m_subscription;
+
 };
 
 class Switch : public Entity
@@ -142,7 +141,6 @@ protected:
     void init() override;
 private:
     bool m_state = false;
-    QScopedPointer<QMqttSubscription> m_subscription;
 };
 
 class Number : public Entity
@@ -167,7 +165,5 @@ private:
     int m_max = 100;
     int m_step = 1;
     QString m_unit = "%";
-
-    QScopedPointer<QMqttSubscription> m_subscription;
 };
 
