@@ -242,7 +242,9 @@ ConnectedNode::ConnectedNode(QObject *parent):
 
 ConnectedNode::~ConnectedNode()
 {
-    HaControl::mqttClient()->publish(baseTopic(), "off", 0, false);
+    // TODO find a good way to let this entity publish before shutdown is done and not cause a coredump
+    //    HaControl::mqttClient()->publish(baseTopic(), "off", 0, false);
+    
 }
 
 Button::Button(QObject *parent)
