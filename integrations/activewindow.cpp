@@ -70,9 +70,7 @@ ActiveWindowWatcher::~ActiveWindowWatcher(){
     cleanup();
 }
 void ActiveWindowWatcher::cleanup(){
-    if (m_kwinIface->isValid()) { 
-        m_kwinIface->call("unloadScript", "kiot_activewindow"); 
-    }
+    m_kwinIface->call("unloadScript", "kiot_activewindow"); 
 }
 bool ActiveWindowWatcher::registerKWinScript()
 {
