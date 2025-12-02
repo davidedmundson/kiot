@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<kcfg xmlns="http://www.kde.org/standards/kcfg/1.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.kde.org/standards/kcfg/1.0 http://www.kde.org/standards/kcfg/1.0/kcfg.xsd">
+    <kcfgfile arg="true">kiotrc</kcfgfile>
+    <group name="general">
+        <entry name="host" type="String">
+            <label>MQTT host</label>
+            <default></default>
+        </entry>
+        <entry name="port" type="Int">
+            <label>MQTT port</label>
+            <default>1883</default>
+        </entry>
+        <entry name="user" type="String">
+            <label>MQTT username</label>
+            <default></default>
+        </entry>
+        <entry name="password" type="String">
+            <label>MQTT password</label>
+            <default></default>
+        </entry>
+    </group>
+</kcfg>
+
