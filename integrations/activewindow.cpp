@@ -71,7 +71,6 @@ ActiveWindowWatcher::~ActiveWindowWatcher(){
 }
 void ActiveWindowWatcher::cleanup(){
     if (m_kwinIface->isValid()) { 
-        //added the isValid() check mostly because the coredumps earlier scared me and i hope this will make sure that does not happen
         m_kwinIface->call("unloadScript", "kiot_activewindow"); 
     }
 }
