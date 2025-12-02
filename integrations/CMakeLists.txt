@@ -1,6 +1,10 @@
 # Prøv å finne PulseAudioQt uten REQUIRED
 find_package(KF6PulseAudioQt CONFIG)
 
+# Prøv å finne libudev via pkg-config, men uten å kreve at den finnes
+find_package(PkgConfig REQUIRED)
+pkg_check_modules(LIBUDEV libudev)
+
 include_directories(..)
 
 set(KIOT_INTEGRATIONS_SRC
@@ -18,7 +22,7 @@ set(KIOT_INTEGRATIONS_SRC
     activewindow.cpp
 )
 
-# Hvis PulseAudioQt ble funnet, ta med audio.cpp
+# Include audio.cpp only when PulseAudioQt library is found
 if(KF6PulseAudioQt_FOUND)
     message(STATUS "PulseAudioQt found, enabling volume integration")
     list(APPEND KIOT_INTEGRATIONS_SRC audio.cpp)
@@ -26,8 +30,18 @@ else()
     message(WARNING "PulseAudioQt not found, skipping volume integration")
 endif()
 
+# Include gamepad.cpp only when libudev library is found
+if(LIBUDEV_FOUND)
+    message(STATUS "libudev found, enabling gamepad integration")
+    list(APPEND KIOT_INTEGRATIONS_SRC gamepad.cpp)
+    include_directories(${LIBUDEV_INCLUDE_DIRS})
+else()
+    message(WARNING "libudev not found, skipping gamepad integration")
+endif()
+
 add_library(KIOTIntegrations OBJECT ${KIOT_INTEGRATIONS_SRC})
 
+# Always link main dependencies
 target_link_libraries(KIOTIntegrations
     KF6::IdleTime
     KF6::GlobalAccel
@@ -40,9 +54,16 @@ target_link_libraries(KIOTIntegrations
     Qt6::DBus
 )
 
-# Link PulseAudioQt kun hvis funnet
+# Link PulseAudioQt if library is found
 if(KF6PulseAudioQt_FOUND)
     target_link_libraries(KIOTIntegrations KF6::PulseAudioQt)
+endif()
+
+# Link libudev if found
+if(LIBUDEV_FOUND)
+    target_link_libraries(KIOTIntegrations ${LIBUDEV_LIBRARIES})
+    link_directories(${LIBUDEV_LIBRARY_DIRS})
+    add_definitions(${LIBUDEV_CFLAGS_OTHER})
 endif()
 
 # Install KWin script used by ActiveWindowWatcher
