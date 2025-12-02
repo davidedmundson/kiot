@@ -5,7 +5,8 @@
 #include <QCoreApplication>
 #include <QSocketNotifier>
 #include <QTimer>
-#include <SDL2/SDL.h>
+#include <libudev.h>
+#include <unistd.h>
 
 class GamepadWatcher : public QObject
 {
@@ -18,64 +19,79 @@ public:
         m_sensor->setId("gamepad_connected");
         m_sensor->setName("Gamepad Connected");
 
-        if (SDL_Init(SDL_INIT_GAMECONTROLLER | SDL_INIT_EVENTS) != 0) {
-            qWarning() << "SDL_Init failed:" << SDL_GetError();
+        // Sett opp udev
+        m_udev = udev_new();
+        if (!m_udev) {
+            qWarning() << "Failed to create udev context";
             m_sensor->setState(false);
             return;
         }
 
-        // Opprett en QSocketNotifier på SDL eventfd
-        int sdl_fd = SDL_GetEventState(SDL_CONTROLLERDEVICEADDED);
-        (void)sdl_fd; // SDL har ikke direkte fd, vi bruker poll via timer men med minimal CPU
-        startEventLoop();
+        m_monitor = udev_monitor_new_from_netlink(m_udev, "udev");
+        udev_monitor_filter_add_match_subsystem_devtype(m_monitor, "input", nullptr);
+        udev_monitor_enable_receiving(m_monitor);
+
+        int fd = udev_monitor_get_fd(m_monitor);
+        m_notifier = new QSocketNotifier(fd, QSocketNotifier::Read, this);
+        connect(m_notifier, &QSocketNotifier::activated, this, &GamepadWatcher::udevEvent);
+
+        // Init state
         updateState();
     }
 
     ~GamepadWatcher()
     {
-        SDL_QuitSubSystem(SDL_INIT_GAMECONTROLLER);
+        if (m_monitor) udev_monitor_unref(m_monitor);
+        if (m_udev) udev_unref(m_udev);
+    }
+
+private slots:
+    void udevEvent()
+    {
+        struct udev_device *dev = udev_monitor_receive_device(m_monitor);
+        if (dev) {
+            const char *action = udev_device_get_action(dev);
+            if (action && (strcmp(action, "add") == 0 || strcmp(action, "remove") == 0)) {
+                updateState();
+            }
+            udev_device_unref(dev);
+        }
     }
 
 private:
-    void startEventLoop()
-    {
-        m_timer = new QTimer(this);
-        m_timer->setInterval(50); // lavt intervall bare for å hente SDL events
-        connect(m_timer, &QTimer::timeout, this, [this]() {
-            SDL_Event e;
-            bool changed = false;
-            while (SDL_PollEvent(&e)) {
-                switch (e.type) {
-                case SDL_CONTROLLERDEVICEADDED:
-                case SDL_CONTROLLERDEVICEREMOVED:
-                    changed = true;
-                    break;
-                default:
-                    break;
-                }
-            }
-            if (changed)
-                updateState();
-        });
-        m_timer->start();
-    }
-
     void updateState()
     {
-        int num = SDL_NumJoysticks();
+        // Sjekk om vi har gamepad/joystick enheter
+        struct udev_enumerate *enumerate = udev_enumerate_new(m_udev);
+        udev_enumerate_add_match_subsystem(enumerate, "input");
+        udev_enumerate_scan_devices(enumerate);
+
+        struct udev_list_entry *devices = udev_enumerate_get_list_entry(enumerate);
         bool connected = false;
-        for (int i = 0; i < num; ++i) {
-            if (SDL_IsGameController(i)) {
-                connected = true;
-                break;
+        struct udev_list_entry *entry;
+        udev_list_entry_foreach(entry, devices) {
+            const char *path = udev_list_entry_get_name(entry);
+            struct udev_device *dev = udev_device_new_from_syspath(m_udev, path);
+            if (dev) {
+                const char *name = udev_device_get_sysname(dev);
+                if (name && strstr(name, "js") != nullptr) { // enkle js* devices
+                    connected = true;
+                    udev_device_unref(dev);
+                    break;
+                }
+                udev_device_unref(dev);
             }
         }
+        udev_enumerate_unref(enumerate);
+
         m_sensor->setState(connected);
     }
 
 private:
     BinarySensor *m_sensor;
-    QTimer *m_timer;
+    struct udev *m_udev = nullptr;
+    struct udev_monitor *m_monitor = nullptr;
+    QSocketNotifier *m_notifier = nullptr;
 };
 
 void setupGamepadWatcher()
