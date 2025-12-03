@@ -541,7 +541,7 @@ void Select::setState(const QString &state)
         qWarning() << "Select" << name() << "has no options defined, state changed from " << state << "to" << QString();
         m_state = QString(); 
     }
-    else if(!m_options.contains(m_state) && !state.isEmpty())
+    else if(!m_options.contains(state) && !state.isEmpty())
     {
         qWarning() << "Select" << name() << " can not be set to state: " << state << " as it is not in the options list" << m_options;
         return;
