@@ -497,6 +497,26 @@ Select::Select(QObject *parent, const QString &initialState, const QStringList &
     }
 }
 
+void Select::init()
+{
+    setHaConfig({
+        {"state_topic", baseTopic()},
+        {"command_topic", baseTopic() + "/set"},
+        {"options", QJsonArray::fromStringList(m_options)}
+    });
+
+    sendRegistration();
+   
+    auto subscription = HaControl::mqttClient()->subscribe(baseTopic() + "/set");
+    if (subscription) {
+        connect(subscription, &QMqttSubscription::messageReceived, this, [this](const QMqttMessage &message) {
+            const QString newValue = QString::fromUtf8(message.payload());
+            m_state = newValue;
+            emit optionSelected(newValue);
+        });
+    }
+}
+
 void Select::setOptions(const QStringList &opts)
 {
     m_options = opts;
@@ -519,7 +539,7 @@ void Select::setState(const QString &state)
     //Tries to make sure you can only set the state to valid options or empty
     if (m_options.isEmpty() && !state.isEmpty()) {
         qWarning() << "Select" << name() << "has no options defined, state changed from " << state << "to" << QString();
-        m_state = QString();
+        m_state = QString(); 
     }
     else if(!m_options.contains(m_state) && !state.isEmpty())
     {
@@ -541,30 +561,6 @@ QStringList Select::getOptions() const
 {
     return m_options;
 }
-void Select::init()
-{
-    // So would it be okay to bring the options and state as input variables while creating the select entity?
-    // something like this? m_select = new Select(this,state="option1", options={ "option1", "option2"});
-    // from what i can find it looks okay to do it like this and it would bake the select enity usable right from start
-    setHaConfig({
-        {"state_topic", baseTopic()},
-        {"command_topic", baseTopic() + "/set"},
-        {"options", QJsonArray::fromStringList(m_options)}
-    });
-
-    sendRegistration();
-
-    
-    auto subscription = HaControl::mqttClient()->subscribe(baseTopic() + "/set");
-    if (subscription) {
-        connect(subscription, &QMqttSubscription::messageReceived, this, [this](const QMqttMessage &message) {
-            const QString newValue = QString::fromUtf8(message.payload());
-            m_state = newValue;
-            emit optionSelected(newValue);
-        });
-    }
-}
-
 
 void Select::publishState()
 {
