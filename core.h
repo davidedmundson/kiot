@@ -176,8 +176,8 @@ public:
 
     void setOptions(const QStringList &opts);
     void setState(const QString &state);
-    QString getState() const;
-    QStringList getOptions() const;
+    QString state() { return  m_state;};
+    QStringList options()  { return  m_options;};
 
 protected:
     void init() override;

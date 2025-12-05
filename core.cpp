@@ -502,7 +502,7 @@ void Select::init()
     setHaConfig({
         {"state_topic", baseTopic()},
         {"command_topic", baseTopic() + "/set"},
-        {"options", QJsonArray::fromStringList(m_options)}
+        {"options",QJsonArray::fromStringList(m_options)}
     });
 
     sendRegistration();
@@ -552,15 +552,7 @@ void Select::setState(const QString &state)
     publishState();
 }
 
-QString Select::getState() const
-{
-    return m_state;
-}
 
-QStringList Select::getOptions() const
-{
-    return m_options;
-}
 
 void Select::publishState()
 {
