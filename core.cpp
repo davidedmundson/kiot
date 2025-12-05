@@ -490,10 +490,10 @@ Select::Select(QObject *parent, const QString &initialState, const QStringList &
 {
     setHaType("select");
     // Validate initial state
-    if (!m_options.isEmpty() && !m_state.isEmpty() && !m_options.contains(m_state)) {
-        qWarning() << "Select constructor: invalid initial state" << m_state << "not in options" << m_options;
-        m_state = m_options.first(); // Fallback til første option
-        qWarning() << "Select constructor: resetting state to" << m_state;
+    if (m_options.contains(initialState)) {
+        m_state = initialState;
+    } else if (!m_options.isEmpty()) {
+        m_state = m_options.first();
     }
 }
 
