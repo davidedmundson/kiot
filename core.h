@@ -12,7 +12,7 @@ class QMqttClient;
 struct IntegrationFactory {
     QString name;
     std::function<void()> factory;
-    bool onByDefault = true;  // ny flagg for default enabled
+    bool onByDefault = true;
 };
 
 class HaControl : public QObject {
@@ -33,7 +33,7 @@ private:
     QMqttClient *m_client;
 };
 
-// Macro for integrasjoner
+// Macro for integrations
 #define REGISTER_INTEGRATION(nameStr, func, onByDefault) \
 static bool dummy##func = HaControl::registerIntegrationFactory(nameStr, [](){ func(); }, onByDefault);
 /**

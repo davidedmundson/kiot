@@ -100,7 +100,7 @@ bool HaControl::registerIntegrationFactory(const QString &name, std::function<vo
     return true;
 }
 
-// Kjør integrasjoner
+// load integrations from config, if not found, use onByDefault from the integration fac
 void HaControl::loadIntegrations(KSharedConfigPtr config)
 {
     
@@ -111,7 +111,7 @@ void HaControl::loadIntegrations(KSharedConfigPtr config)
     }
 
     for (const auto &entry : s_integrations) {
-        // Bruk onByDefault hvis config ikke finnes
+       // if the key doesn't exist, write it to the config
         if(!integrationconfig.hasKey(entry.name)) {
             integrationconfig.writeEntry(entry.name, entry.onByDefault);
             config->sync();
@@ -525,6 +525,7 @@ void Select::setOptions(const QStringList &opts)
         qWarning() << "Select" << name() << "current state" << m_state << "no longer valid, resetting";
         m_state = m_options.isEmpty() ? QString() : m_options.first();
     }
+    
     setHaConfig({
         {"state_topic", baseTopic()},
         {"command_topic", baseTopic() + "/set"},
