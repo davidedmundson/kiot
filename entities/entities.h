@@ -2,7 +2,6 @@
 
 #include "entity.h"
 #include "binarysensor.h"
-#include "battery.h"
 #include "button.h"
 #include "event.h"
 #include "number.h"
