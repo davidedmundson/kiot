@@ -99,7 +99,7 @@ bool HaControl::registerIntegrationFactory(const QString &name, std::function<vo
     return true;
 }
 
-// Kjør integrasjoner
+// load integrations from config, if not found, use onByDefault from the integration fac
 void HaControl::loadIntegrations(KSharedConfigPtr config)
 {
     
@@ -110,7 +110,7 @@ void HaControl::loadIntegrations(KSharedConfigPtr config)
     }
 
     for (const auto &entry : s_integrations) {
-        // Bruk onByDefault hvis config ikke finnes
+       // if the key doesn't exist, write it to the config
         if(!integrationconfig.hasKey(entry.name)) {
             integrationconfig.writeEntry(entry.name, entry.onByDefault);
             config->sync();
@@ -424,6 +424,7 @@ void Event::trigger()
         HaControl::mqttClient()->publish(baseTopic(), "", 0, true);
     }
 }
+
 Number::Number(QObject *parent)
     : Entity(parent)
 {
@@ -480,5 +481,86 @@ int Number::getValue()
 {
     return m_value;
 }
+
+// ========== Select Entity Implementation ==========
+
+Select::Select(QObject *parent, const QString &initialState, const QStringList &options)
+    : Entity(parent), m_state(initialState), m_options(options)
+{
+    setHaType("select");
+    // Validate initial state
+    if (m_options.contains(initialState)) {
+        m_state = initialState;
+    } else if (!m_options.isEmpty()) {
+        m_state = m_options.first();
+    }
+}
+
+void Select::init()
+{
+    setHaConfig({
+        {"state_topic", baseTopic()},
+        {"command_topic", baseTopic() + "/set"},
+        {"options",m_options}
+    });
+
+    sendRegistration();
+   
+    auto subscription = HaControl::mqttClient()->subscribe(baseTopic() + "/set");
+    if (subscription) {
+        connect(subscription, &QMqttSubscription::messageReceived, this, [this](const QMqttMessage &message) {
+            const QString newValue = QString::fromUtf8(message.payload());
+            m_state = newValue;
+            emit optionSelected(newValue);
+        });
+    }
+}
+
+void Select::setOptions(const QStringList &opts)
+{
+    m_options = opts;
+    //Check that current state is valid with new options
+    if (!m_state.isEmpty() && !m_options.contains(m_state)) {
+        qWarning() << "Select" << name() << "current state" << m_state << "no longer valid, resetting";
+        m_state = m_options.isEmpty() ? QString() : m_options.first();
+    }
+    
+    setHaConfig({
+        {"state_topic", baseTopic()},
+        {"command_topic", baseTopic() + "/set"},
+        {"options",m_options}
+    });
+    sendRegistration();
+    publishState();
+}
+
+void Select::setState(const QString &state)
+{
+    //Tries to make sure you can only set the state to valid options or empty
+    if (m_options.isEmpty() && !state.isEmpty()) {
+        qWarning() << "Select" << name() << "has no options defined, state changed from " << state << "to" << QString();
+        m_state = QString(); 
+    }
+    else if(!m_options.contains(state) && !state.isEmpty())
+    {
+        qWarning() << "Select" << name() << " can not be set to state: " << state << " as it is not in the options list" << m_options;
+        return;
+    }
+    else {
+        m_state = state;
+    }
+    publishState();
+}
+
+
+
+void Select::publishState()
+{
+    if (HaControl::mqttClient()->state() != QMqttClient::Connected)
+        return;   
+    HaControl::mqttClient()->publish(baseTopic(), m_state.toUtf8(), 0, true);
+}
+
+
 #include "core.moc"
 
