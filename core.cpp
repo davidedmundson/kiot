@@ -209,7 +209,7 @@ void Entity::sendRegistration()
     // TODO learn more about the mqtt home assistant communication to figure out the best way to manage this so
     // we get a available entity the first time its registred by kiot without needing to restart the process
     if (id() != "connected") { //special case
-        HaControl::mqttClient()->publish(hostname() + "/connected", "on", 0, true);
+        HaControl::mqttClient()->publish(hostname() + "/connected", "on", 0, false);
     }
 }
 
