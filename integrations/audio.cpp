@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: LGPL-2.1-or-later
 
 #include "core.h"
+#include "entities/entities.h"
 
 #include <QCoreApplication>
 #include <QObject>
@@ -97,7 +98,7 @@ void Audio::onVolumeChanged()
     if (!m_sink) return;
 
     int percent = paToPercent(m_sink->volume());
-    if (percent ==  m_sinkVolume->getValue()) return;
+    if (percent ==  m_sinkVolume->value()) return;
 
     m_sinkVolume->setValue(percent);
 
@@ -107,7 +108,7 @@ void Audio::onVolumeChanged()
 void Audio::setVolume(int v)
 {
     if (!m_sink) return;
-    if (v == m_sinkVolume->getValue()) return;
+    if (v == m_sinkVolume->value()) return;
 
     qint64 paVol = percentToPa(v);
     m_sink->setVolume(paVol);
