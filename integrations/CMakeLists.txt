@@ -1,5 +1,3 @@
-# Prøv å finne PulseAudioQt uten REQUIRED
-find_package(KF6PulseAudioQt CONFIG)
 
 # Prøv å finne libudev via pkg-config, men uten å kreve at den finnes
 find_package(PkgConfig REQUIRED)
@@ -20,15 +18,8 @@ set(KIOT_INTEGRATIONS_SRC
     camera.cpp
     accentcolour.cpp
     activewindow.cpp
+    audio.cpp
 )
-
-# Include audio.cpp only when PulseAudioQt library is found
-if(KF6PulseAudioQt_FOUND)
-    message(STATUS "PulseAudioQt found, enabling volume integration")
-    list(APPEND KIOT_INTEGRATIONS_SRC audio.cpp)
-else()
-    message(WARNING "PulseAudioQt not found, skipping volume integration")
-endif()
 
 # Include gamepad.cpp only when libudev library is found
 if(LIBUDEV_FOUND)
@@ -48,16 +39,16 @@ target_link_libraries(KIOTIntegrations
     KF6::Notifications
     KF6::ConfigCore
     KF6::CoreAddons
+    KF6::Solid
+    KF6::BluezQt
+    KF6::PulseAudioQt
     Qt6::Gui
     Qt6::Widgets
     Qt6::Mqtt
     Qt6::DBus
+
 )
 
-# Link PulseAudioQt if library is found
-if(KF6PulseAudioQt_FOUND)
-    target_link_libraries(KIOTIntegrations KF6::PulseAudioQt)
-endif()
 
 # Link libudev if found
 if(LIBUDEV_FOUND)
