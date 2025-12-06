@@ -78,5 +78,5 @@ void registerLockedState()
     new LockedState(qApp);
 }
 
-REGISTER_INTEGRATION("LocedState",registerLockedState,true)
+REGISTER_INTEGRATION("LockedState",registerLockedState,true)
 #include "lockedstate.moc"
