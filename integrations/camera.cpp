@@ -6,6 +6,7 @@
    //          SPDX-FileCopyrightText: 2007 Flavio Castelli <flavio.castelli@gmail.com>
 
 #include "core.h"
+#include "entities/entities.h"
 #include <KIdleTime>
 #include <QCoreApplication>
 #include <QSocketNotifier>

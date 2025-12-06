@@ -43,10 +43,28 @@ find_package(KF6 ${KF6_MIN_VERSION} REQUIRED COMPONENTS
     IdleTime
     GlobalAccel
 )
-
+#Why is pusleaudioqt v 1.8.0 and not 5.X.X as the
+find_package(KF6 "1.7.0" REQUIRED COMPONENTS
+    PulseAudioQt
+)
 include_directories("${CMAKE_CURRENT_BINARY_DIR}")
 
-set(SOURCES main.cpp core.cpp dbusproperty.h dbusproperty.cpp)
+set(SOURCES
+    main.cpp
+    core.cpp
+    dbusproperty.cpp
+    dbusproperty.h
+    entities/entity.cpp
+    entities/battery.cpp
+    entities/binarysensor.cpp
+    entities/button.cpp
+    entities/number.cpp
+    entities/switch.cpp
+    entities/event.cpp
+    entities/select.cpp
+    entities/sensor.cpp
+    entities/textbox.cpp
+)
 
 add_subdirectory(integrations)
 

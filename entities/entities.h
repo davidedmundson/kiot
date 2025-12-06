@@ -1,0 +1,12 @@
+#pragma once
+
+#include "entity.h"
+#include "binarysensor.h"
+#include "battery.h"
+#include "button.h"
+#include "event.h"
+#include "number.h"
+#include "select.h"
+#include "sensor.h"
+#include "switch.h"
+#include "textbox.h"

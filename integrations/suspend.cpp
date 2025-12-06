@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: LGPL-2.1-or-later
 
 #include "core.h"
+#include "entities/entities.h"
 #include <QCoreApplication>
 #include <QDBusConnection>
 #include "login1_manager_interface.h"
