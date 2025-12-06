@@ -96,6 +96,6 @@ void Entity::sendRegistration()
     config["unique_id"] = "linux_ha_control_"+ hostname() + "_" + id();
     HaControl::mqttClient()->publish(s_discoveryPrefix + "/" + haType() + "/" + hostname() + "/" + id() + "/config", QJsonDocument(QJsonObject::fromVariantMap(config)).toJson(QJsonDocument::Compact), 0, true);
     if (id() != "connected") { //special case
-        HaControl::mqttClient()->publish(hostname() + "/connected", "on", 0, true);
+        HaControl::mqttClient()->publish(hostname() + "/connected", "on", 0, false);
     }
 }
