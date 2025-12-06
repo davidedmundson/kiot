@@ -33,7 +33,7 @@ void Select::setState(const QString &state)
     publishState();
 }
 
-QString Select::getState() const
+QString Select::state() const
 {
     return m_state;
 }

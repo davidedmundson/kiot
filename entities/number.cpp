@@ -56,7 +56,7 @@ void Number::setValue(int value)
     }
 }
 
-int Number::getValue()
+int Number::value()
 {
     return m_value;
 }

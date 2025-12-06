@@ -12,7 +12,7 @@ public:
 
     void setOptions(const QStringList &opts);
     void setState(const QString &state);
-    QString getState() const;
+    QString state() const;
     QStringList getOptions() const;
 
 protected:

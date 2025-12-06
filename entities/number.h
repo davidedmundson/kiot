@@ -11,7 +11,7 @@ class Number : public Entity
 public:
     Number(QObject *parent = nullptr);
     void setValue(int value);
-    int getValue();
+    int value();
 // Optional customization for integrations before init()
     void setRange(int min, int max, int step = 1, const QString &unit = "%");
 

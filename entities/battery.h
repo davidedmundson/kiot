@@ -14,9 +14,9 @@ public:
     Battery(QObject *parent = nullptr);
 
     void setState(const int &state);
-    int getState();
+    int state();
     void setAttributes(const QVariantMap &attrs);
-    QVariantMap getAttributes();
+    QVariantMap attributes();
 protected:
     void init() override;
 

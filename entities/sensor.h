@@ -15,8 +15,8 @@ public:
 
     void setState(const QString &state);
     void setAttributes(const QVariantMap &attrs);
-    QString getState(){return m_state;};
-    QVariantMap getAttributes(){return m_attributes;};
+    QString state(){return m_state;};
+    QVariantMap attributes(){return m_attributes;};
 protected:
     void init() override;
 

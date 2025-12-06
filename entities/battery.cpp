@@ -33,7 +33,7 @@ void Battery::setState(const int &state)
     m_state = state;
     publishState();
 }
-int Battery::getState()
+int Battery::state()
 {
     return  m_state;
 }
@@ -42,7 +42,7 @@ void Battery::setAttributes(const QVariantMap &attrs)
     m_attributes = attrs;
     publishAttributes();
 }
-QVariantMap Battery::getAttributes()
+QVariantMap Battery::attributes()
 {
     return m_attributes;
 }
