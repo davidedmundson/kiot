@@ -46,6 +46,19 @@ void setupSuspend()
             logind.PowerOff(false).waitForFinished();
         });
     }
+
+    {
+        Button *button = new Button(qApp);
+        button->setId("restart");
+        button->setName("Restart");
+
+        QObject::connect(button, &Button::triggered, qApp, []() {
+            OrgFreedesktopLogin1ManagerInterface logind(QStringLiteral("org.freedesktop.login1"),
+                                                        QStringLiteral("/org/freedesktop/login1"),
+                                                        QDBusConnection::systemBus());
+            logind.Reboot(false).waitForFinished();
+        });
+    }
 }
 
 REGISTER_INTEGRATION("PowerController",setupSuspend,true)
