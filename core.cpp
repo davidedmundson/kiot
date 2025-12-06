@@ -41,7 +41,7 @@ HaControl::HaControl() {
 
     new ConnectedNode(this);
     
-
+    loadIntegrations(config);
     QTimer *reconnectTimer = new QTimer(this);
     reconnectTimer->setInterval(1000);
 
@@ -69,7 +69,7 @@ HaControl::HaControl() {
     });
 
     doConnect();
-    loadIntegrations(config);
+   
 }
 
 HaControl::~HaControl()

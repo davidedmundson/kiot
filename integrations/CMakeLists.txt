@@ -39,8 +39,6 @@ target_link_libraries(KIOTIntegrations
     KF6::Notifications
     KF6::ConfigCore
     KF6::CoreAddons
-    KF6::Solid
-    KF6::BluezQt
     KF6::PulseAudioQt
     Qt6::Gui
     Qt6::Widgets
