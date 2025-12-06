@@ -206,6 +206,11 @@ void Entity::sendRegistration()
     config["unique_id"] = "linux_ha_control_"+ hostname() + "_" + id();
 
     HaControl::mqttClient()->publish(s_discoveryPrefix + "/" + haType() + "/" + hostname() + "/" + id() + "/config", QJsonDocument(QJsonObject::fromVariantMap(config)).toJson(QJsonDocument::Compact), 0, true);
+    // TODO learn more about the mqtt home assistant communication to figure out the best way to manage this so
+    // we get a available entity the first time its registred by kiot without needing to restart the process
+    if (id() != "connected") { //special case
+        HaControl::mqttClient()->publish(hostname() + "/connected", "on", 0, true);
+    }
 }
 
 
