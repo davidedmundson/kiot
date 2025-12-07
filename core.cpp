@@ -77,6 +77,8 @@ HaControl::HaControl() {
 
 HaControl::~HaControl()
 {
+    delete ConnectedNode::node();
+    m_client->disconnectFromHost();
 }
 
 void HaControl::doConnect()
@@ -126,7 +128,7 @@ void HaControl::loadIntegrations(KSharedConfigPtr config)
 
 
 
-
+ConnectedNode *ConnectedNode::s_self = nullptr;
 
 ConnectedNode::ConnectedNode(QObject *parent):
     Entity(parent)
@@ -161,9 +163,8 @@ ConnectedNode::ConnectedNode(QObject *parent):
 
 ConnectedNode::~ConnectedNode()
 {
-    // TODO find a good way to let this entity publish before shutdown is done and not cause a coredump
-    //    HaControl::mqttClient()->publish(baseTopic(), "off", 0, false);
-    
+    HaControl::mqttClient()->publish(baseTopic(), "off", 0, false);
+    s_self = nullptr;
 }
 
 
