@@ -131,19 +131,17 @@ ConnectedNode::ConnectedNode(QObject *parent):
     setId("connected");
     setName("Connected");
     setHaType("binary_sensor");
-    setHaConfig({
-        {"state_topic", baseTopic()},
-        {"payload_on", "on"},
-        {"payload_off", "off"},
-        {"device_class", "power"},
-        {"device", QVariantMap({
+    setDiscoveryConfig("state_topic", baseTopic());
+    setDiscoveryConfig("payload_on", "on");
+    setDiscoveryConfig("payload_off", "off");
+    setDiscoveryConfig("device_class", "power");
+    setDiscoveryConfig("device", QVariantMap({
                        {"name", hostname() },
                        {"identifiers", "linux_ha_bridge_" + hostname() },
                        {"sw_version", "0.1"},
                        {"manufacturer", "Linux HA Bridge"},
                        {"model", "Linux"}
-                   })}
-    });
+                   }));
 
     auto c = HaControl::mqttClient();
     c->setWillTopic(baseTopic());
@@ -172,4 +170,3 @@ ConnectedNode::~ConnectedNode()
 
 
 #include "core.moc"
-

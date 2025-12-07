@@ -16,10 +16,8 @@ void Sensor::init()
     setHaType("sensor");
 
     // Standard state topic
-    setHaConfig({
-        {"state_topic", baseTopic()},
-        {"json_attributes_topic", baseTopic() + "/attributes"} // ny topic for attributes
-    });
+    setDiscoveryConfig("state_topic", baseTopic());
+    setDiscoveryConfig("json_attributes_topic", baseTopic() + "/attributes"); // ny topic for attributes
 
     sendRegistration();
     publishState();

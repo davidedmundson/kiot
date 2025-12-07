@@ -13,9 +13,7 @@ Button::Button(QObject *parent)
 void Button::init()
 {
     setHaType("button");
-    setHaConfig({
-        {"command_topic", baseTopic()}
-    });
+    setDiscoveryConfig("command_topic", baseTopic());
     sendRegistration();
 
     auto subscription = HaControl::mqttClient()->subscribe(baseTopic());

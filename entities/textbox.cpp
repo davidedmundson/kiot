@@ -17,11 +17,9 @@ Textbox::Textbox(QObject *parent)
 
 void Textbox::init()
 {
-    setHaConfig({
-        {"state_topic", baseTopic()},
-        {"command_topic", baseTopic() + "/set"},
-        {"json_attributes_topic", baseTopic() + "/attributes"}
-    });
+    setDiscoveryConfig("state_topic", baseTopic());
+    setDiscoveryConfig("command_topic", baseTopic() + "/set");
+    setDiscoveryConfig("json_attributes_topic", baseTopic() + "/attributes");
 
     sendRegistration();
     setState(m_text);

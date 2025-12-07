@@ -23,11 +23,6 @@ QString Entity::baseTopic() const
     return hostname() + "/" + id();
 }
 
-void Entity::setHaConfig(const QVariantMap &newHaConfig)
-{
-    m_haConfig = newHaConfig;
-}
-
 QString Entity::haType() const
 {
     return m_haType;

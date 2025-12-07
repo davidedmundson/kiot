@@ -12,11 +12,9 @@ BinarySensor::BinarySensor(QObject *parent)
 void BinarySensor::init()
 {
     setHaType("binary_sensor");
-    setHaConfig({
-        {"state_topic", baseTopic()},
-        {"payload_on", "true"},
-        {"payload_off", "false"}
-    });
+    setDiscoveryConfig("state_topic", baseTopic());
+    setDiscoveryConfig("payload_on", "true");
+    setDiscoveryConfig("payload_off", "false");
     sendRegistration();
     publish();
 }

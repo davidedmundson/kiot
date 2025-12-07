@@ -12,12 +12,10 @@ Event::Event(QObject *parent)
 void Event::init()
 {
     setHaType("device_automation");
-    setHaConfig({
-        {"automation_type", "trigger"},
-        {"topic", baseTopic()},
-        {"type", {"button_short_press"}},
-        {"subtype", name()}
-    });
+    setDiscoveryConfig("automation_type", "trigger");
+    setDiscoveryConfig("topic", baseTopic());
+    setDiscoveryConfig("type", QStringLiteral("button_short_press"));
+    setDiscoveryConfig("subtype", name());
     sendRegistration();
 }
 

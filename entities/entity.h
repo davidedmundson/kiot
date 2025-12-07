@@ -32,7 +32,6 @@ protected:
      * Called on MQTT connect, it may be called more than once
      */
     virtual void init();
-    void setHaConfig(const QVariantMap &newHaConfig);
     void sendRegistration();
     void setHaType(const QString &newHaType);
     QString haType() const;

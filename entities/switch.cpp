@@ -16,13 +16,11 @@ Switch::Switch(QObject *parent)
 
 void Switch::init()
 {
-    setHaConfig({
-        {"state_topic", baseTopic()},
-        {"command_topic", baseTopic() + "/set"},
-        {"payload_on", "true"},
-        {"payload_off", "false"},
-         {"json_attributes_topic", baseTopic() + "/attributes"} 
-    });
+    setDiscoveryConfig("state_topic", baseTopic());
+    setDiscoveryConfig("command_topic", baseTopic() + "/set");
+    setDiscoveryConfig("payload_on", "true");
+    setDiscoveryConfig("payload_off", "false");
+    setDiscoveryConfig("json_attributes_topic", baseTopic() + "/attributes"); 
 
     sendRegistration();
     setState(m_state);
@@ -64,4 +62,3 @@ void Switch::publishAttributes()
     QJsonDocument doc(obj);
     HaControl::mqttClient()->publish(baseTopic() + "/attributes", doc.toJson(QJsonDocument::Compact), 0, true);
 }
-

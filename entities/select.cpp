@@ -19,11 +19,9 @@ void Select::setOptions(const QStringList &opts)
     m_options = opts;
 
     // Hvis HA er registrert, må config oppdateres
-    setHaConfig({
-        {"state_topic", baseTopic()},
-        {"command_topic", baseTopic() + "/set"},
-        {"options", QJsonArray::fromStringList(m_options)}
-    });
+    setDiscoveryConfig("state_topic", baseTopic());
+    setDiscoveryConfig("command_topic", baseTopic() + "/set");
+    setDiscoveryConfig("options", QJsonArray::fromStringList(m_options));
     sendRegistration();
 }
 
@@ -45,11 +43,9 @@ QStringList Select::getOptions() const
 void Select::init()
 {
     // Startkonfig for HA
-    setHaConfig({
-        {"state_topic", baseTopic()},
-        {"command_topic", baseTopic() + "/set"},
-        {"options", QJsonArray::fromStringList(m_options)}
-    });
+    setDiscoveryConfig("state_topic", baseTopic());
+    setDiscoveryConfig("command_topic", baseTopic() + "/set");
+    setDiscoveryConfig("options", QJsonArray::fromStringList(m_options));
 
     // Fortell HA at entiteten finnes
     sendRegistration();

@@ -20,13 +20,12 @@ void Number::setRange(int min, int max, int step, const QString &unit)
 
 void Number::init()
 {
-    setHaConfig({ {"state_topic", baseTopic()},
-            {"command_topic", baseTopic() + "/set"},
-            {"min", QString::number(m_min)},
-            {"max", QString::number(m_max)},
-            {"step", QString::number(m_step)},
-            {"unit_of_measurement", m_unit}
-    });
+    setDiscoveryConfig("state_topic", baseTopic());
+    setDiscoveryConfig("command_topic", baseTopic() + "/set");
+    setDiscoveryConfig("min", QString::number(m_min));
+    setDiscoveryConfig("max", QString::number(m_max));
+    setDiscoveryConfig("step", QString::number(m_step));
+    setDiscoveryConfig("unit_of_measurement", m_unit);
  
 
     sendRegistration();
