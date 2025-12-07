@@ -1,7 +1,7 @@
 id: org.davidedmundson.kiot
 branch: master
 runtime: org.kde.Platform
-runtime-version: "6.8" # don't forget to change QtMqtt
+runtime-version: "6.10" # don't forget to change QtMqtt
 sdk: org.kde.Sdk
 command: kiot
 tags:
@@ -29,7 +29,14 @@ modules:
     sources:
       - type: git
         url: https://github.com/qt/qtmqtt.git
-        tag: 6.8.2
+        tag: 6.10.0
+
+  - name: pulseaudio-qt
+    buildsystem: cmake-ninja
+    sources:
+      - type: git
+        url: https://invent.kde.org/libraries/pulseaudio-qt
+        tag: v1.7.0
 
   - name: kiot
     buildsystem: cmake-ninja
