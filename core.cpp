@@ -21,6 +21,7 @@ class ConnectedNode: public Entity
 public:
     ConnectedNode(QObject *parent);
     ~ConnectedNode();
+    void init() override;
 };
 
 HaControl::HaControl() {
@@ -148,20 +149,18 @@ ConnectedNode::ConnectedNode(QObject *parent):
     c->setWillTopic(baseTopic());
     c->setWillMessage("off");
     c->setWillRetain(true);
-
-    connect(HaControl::mqttClient(), &QMqttClient::connected, this, [this]() {
-        sendRegistration();
-         HaControl::mqttClient()->publish(baseTopic(), "on", 0, false);
-   
-    });
 }
 
 ConnectedNode::~ConnectedNode()
 {
-    // TODO find a good way to let this entity publish before shutdown is done and not cause a coredump
-    HaControl::mqttClient()->publish(baseTopic(), "off", 0, false);
+    HaControl::mqttClient()->publish(baseTopic(), "off", 0, true);
 }
 
+void ConnectedNode::init()
+{
+    sendRegistration();
+    HaControl::mqttClient()->publish(baseTopic(), "on", 0, true);
+}
 
 
 
