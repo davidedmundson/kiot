@@ -11,6 +11,7 @@
 #include <KSharedConfig>
 
 class QMqttClient;
+class ConnectedNode;
 
 struct IntegrationFactory {
     QString name;
@@ -34,6 +35,7 @@ private:
     static QList<IntegrationFactory> s_integrations;
     static HaControl *s_self;
     QMqttClient *m_client;
+    ConnectedNode *m_connectedNode;
 };
 
 // Macro for integrasjoner
