@@ -77,7 +77,9 @@ HaControl::HaControl() {
 
 HaControl::~HaControl()
 {
-    delete ConnectedNode::node();
+    if (auto node = ConnectedNode::node()) {
+        delete node;
+    }
     // This is probably not needed, but was added to make sure the client disconnects
     m_client->disconnectFromHost();
 }
