@@ -49,6 +49,10 @@ find_package(KF6 "1.7.0" REQUIRED COMPONENTS
 )
 include_directories("${CMAKE_CURRENT_BINARY_DIR}")
 
+include(KDEClangFormat)
+file(GLOB_RECURSE ALL_CLANG_FORMAT_SOURCE_FILES *.cpp *.h *.hpp *.c)
+kde_clang_format(${ALL_CLANG_FORMAT_SOURCE_FILES})
+
 set(SOURCES
     main.cpp
     core.cpp

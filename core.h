@@ -38,11 +38,10 @@ private:
     ConnectedNode *m_connectedNode;
 };
 
-// Macro for integrasjoner
+// clang-format off
+
+// Macro for integrations
 #define REGISTER_INTEGRATION(nameStr, func, onByDefault) \
 static bool dummy##func = HaControl::registerIntegrationFactory(nameStr, [](){ func(); }, onByDefault);
-/**
- * @brief The Entity class is a base class for types (binary sensor, sensor, etc)
- */
 
-
+// clang-format on
