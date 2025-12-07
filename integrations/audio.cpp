@@ -71,7 +71,16 @@ Audio::Audio(QObject *parent)
         qWarning() << "Audio: PulseAudio context not valid";
         return;
     }
-
+    //Connect to the events for sink added/removed
+    connect(m_ctx, &PulseAudioQt::Context::sinkAdded,
+        this, &Audio::updateSinks);
+    connect(m_ctx, &PulseAudioQt::Context::sinkRemoved,
+        this, &Audio::updateSinks);
+    //Connect to the events for source added/removed
+    connect(m_ctx, &PulseAudioQt::Context::sourceAdded,
+            this, &Audio::updateSources);
+    connect(m_ctx, &PulseAudioQt::Context::sourceRemoved,
+            this, &Audio::updateSources);
     auto *server = m_ctx->server();
     if (!server) {
         qWarning() << "Audio: No PulseAudio server";
