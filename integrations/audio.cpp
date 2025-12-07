@@ -100,7 +100,7 @@ Audio::Audio(QObject *parent)
     // Connect to signal when default source changes
     connect(server, &PulseAudioQt::Server::defaultSourceChanged,
             this, &Audio::updateSources);
-    // Hvis default sink allerede finnes, oppdater
+    // Update if default sink/source is found
     if (auto *initial = server->defaultSink())
         updateSinks(initial);
     if (auto *initial = server->defaultSource())
@@ -111,23 +111,23 @@ void Audio::updateSinks(PulseAudioQt::Sink *sink)
 {
     if (!sink || !sink->isDefault()) return;
 
-    // Fyll options basert på tilgjengelige sinks
+   // Fill the options of the select entity based on available sinks
     QStringList options;
     for (auto s : m_ctx->sinks())
         options.append(s->description());
 
     m_sinkSelector->setOptions(options);
 
-    // Sett initial state
+    // Set initial state
     m_sinkSelector->setState(sink->description());
 
-    // Lagre aktiv sink
+    // Disconnet from previous sink if any
     if (m_sink)
         disconnect(m_sink, nullptr, this, nullptr);
 
     m_sink = sink;
 
-    // Lytt på volumendringer
+    // Connect to the volume changed events
     connect(m_sink, &PulseAudioQt::VolumeObject::volumeChanged,
             this, &Audio::onSinkVolumeChanged);
 
@@ -138,23 +138,23 @@ void Audio::updateSources(PulseAudioQt::Source *source)
 {
     if (!source || !source->isDefault()) return;
 
-    // Fyll options basert på tilgjengelige sinks
+    // Fill the options of the select entity based on available sources
     QStringList options;
     for (auto s : m_ctx->sources())
         options.append(s->description());
 
     m_sourceSelector->setOptions(options);
 
-    // Sett initial state
+    // set initial state
     m_sourceSelector->setState(source->description());
 
-    // Lagre aktiv sink
+    // disconnect from previous sink
     if (m_source)
         disconnect(m_source, nullptr, this, nullptr);
 
     m_source = source;
 
-    // Lytt på volumendringer
+    // Connect to the volume changed event
     connect(m_source, &PulseAudioQt::VolumeObject::volumeChanged,
             this, &Audio::onSourceVolumeChanged);
 
@@ -224,7 +224,7 @@ void Audio::setSinkVolume(int v)
 
 void Audio::setSourceVolume(int v)
 {
-    if (!m_sink) return;
+    if (!m_source) return;
     if (v == m_sourceVolume->value()) return;
 
     qint64 paVol = percentToPa(v);
@@ -243,7 +243,7 @@ qint64 Audio::percentToPa(int percent) const
     return qRound(PulseAudioQt::normalVolume() * (percent / 100.0));
 }
 
-// Setup integrasjon
+// Setup 
 void setupAudio()
 {
     new Audio(qApp);
