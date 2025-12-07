@@ -1,0 +1,43 @@
+name: CI
+
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+
+jobs:
+  flatpak-build:
+    name: Flatpak Build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install Flatpak tooling
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y flatpak flatpak-builder
+
+      - name: Add Flathub remote
+        run: |
+          flatpak --version
+          flatpak remote-add --if-not-exists --user flathub https://flathub.org/repo/flathub.flatpakrepo
+
+      - name: Build (resolve SDK/Platform deps from Flathub)
+        run: |
+          flatpak-builder --user --install-deps-from=flathub --force-clean build-dir .flatpak-manifest.yaml
+
+      - name: Create Flatpak bundle
+        run: |
+          rm -rf repo
+          flatpak-builder --user --repo=repo --force-clean build-dir .flatpak-manifest.yaml
+          flatpak build-bundle repo kiot-nightly.flatpak org.davidedmundson.kiot master
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: kiot-nightly.flatpak
+          path: kiot-nightly.flatpak
+          if-no-files-found: error
+
