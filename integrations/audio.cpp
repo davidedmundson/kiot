@@ -21,8 +21,8 @@ public:
 private slots:
     void updateSinks(PulseAudioQt::Sink *sink);
     void updateSources(PulseAudioQt::Source *source);
-    void onSinkSelected(QString newOption);
-    void onSourceSelected(QString newOption);
+    void onSinkSelected(const  QString &newOption);
+    void onSourceSelected(const  QString &newOption);
     void onSourceVolumeChanged();
     void onSinkVolumeChanged();
 
@@ -124,12 +124,15 @@ void Audio::updateSinks(PulseAudioQt::Sink *sink)
 
    // Fill the options of the select entity based on available sinks
     QStringList options;
-    for (auto s : m_ctx->sinks())
+    for (const auto *s : m_ctx->sinks())
         options.append(s->description());
     if (options != m_sinkSelector->options())
         m_sinkSelector->setOptions(options);
 
-    if (!sink || !sink->isDefault()) return;
+    if (!sink || !sink->isDefault())
+    {
+         return; //early return because we don't want to set the state or update m_sink if the sink is not default
+    }
     // Set state
     if(m_sinkSelector->state() != sink->description())
         m_sinkSelector->setState(sink->description());
@@ -152,13 +155,16 @@ void Audio::updateSources(PulseAudioQt::Source *source)
 {
     // Fill the options of the select entity based on available sources
     QStringList options;
-    for (auto s : m_ctx->sources())
+    for (const auto *s : m_ctx->sources())
         options.append(s->description());
 
     if (options != m_sourceSelector->options())
         m_sourceSelector->setOptions(options);
 
-    if (!source || !source->isDefault()) return;
+    if (!source || !source->isDefault())
+    {
+         return; //early return because we don't want to set the state or update m_source if the source is not default
+    }
     // set state
     if(m_sourceSelector->state() != source->description())
         m_sourceSelector->setState(source->description());
@@ -176,9 +182,9 @@ void Audio::updateSources(PulseAudioQt::Source *source)
 
     onSourceVolumeChanged();
 }
-void Audio::onSinkSelected(QString newOption)
+void Audio::onSinkSelected(const QString &newOption)
 {
-    qDebug() << "Sink selected:" << newOption;
+    
 
     if (!m_ctx) return;
 
@@ -186,25 +192,25 @@ void Audio::onSinkSelected(QString newOption)
         if (sink->description() == newOption) {
             qDebug() << "Setting sink to" << sink->description();
             sink->setDefault(true);
-            break;
+            qDebug() << "Sink selected:" << newOption;
+            return;;
         }
     }
-    
+    qWarning() << "Audio: Sink not found:" << newOption;
 }
 
-void Audio::onSourceSelected(QString newOption)
+void Audio::onSourceSelected(const QString &newOption)
 {
-    qDebug() << "Source selected:" << newOption;
-
     if (!m_ctx) return;
 
     for (PulseAudioQt::Source *source : m_ctx->sources()) {
         if (source->description() == newOption) {
             qDebug() << "Setting source to" << source->description();
             source->setDefault(true);
-            break;
+            return;
         }
     }
+    qWarning() << "Audio: Source not found:" << newOption;
 }
 
 void Audio::onSinkVolumeChanged()
@@ -223,7 +229,7 @@ void Audio::onSourceVolumeChanged()
     if (!m_source) return;
 
     int percent = paToPercent(m_source->volume());
-    if (percent == m_sinkVolume->value()) return;
+    if (percent == m_sourceVolume->value()) return;
 
     m_sourceVolume->setValue(percent);
     qDebug() << "Microphone: Updated volume from system:" << percent << "%";
