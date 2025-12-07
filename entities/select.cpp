@@ -36,7 +36,7 @@ QString Select::state() const
     return m_state;
 }
 
-QStringList Select::getOptions() const
+QStringList Select::options() const
 {
     return m_options;
 }

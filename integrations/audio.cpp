@@ -81,6 +81,7 @@ Audio::Audio(QObject *parent)
             this, &Audio::updateSources);
     connect(m_ctx, &PulseAudioQt::Context::sourceRemoved,
             this, &Audio::updateSources);
+
     auto *server = m_ctx->server();
     if (!server) {
         qWarning() << "Audio: No PulseAudio server";
@@ -94,6 +95,7 @@ Audio::Audio(QObject *parent)
     m_sinkSelector->setName("Output Device");
     connect(m_sinkSelector, &Select::optionSelected,
             this, &Audio::onSinkSelected);
+
     //Microphone selector and signal connection
     m_sourceSelector = new Select(this);
     m_sourceSelector->setId("volume_input_selector");
@@ -118,18 +120,21 @@ Audio::Audio(QObject *parent)
 
 void Audio::updateSinks(PulseAudioQt::Sink *sink)
 {
-    if (!sink || !sink->isDefault()) return;
+   
 
    // Fill the options of the select entity based on available sinks
     QStringList options;
     for (auto s : m_ctx->sinks())
         options.append(s->description());
+    if (options != m_sinkSelector->options())
+        m_sinkSelector->setOptions(options);
 
-    m_sinkSelector->setOptions(options);
+    if (!sink || !sink->isDefault()) return;
+    // Set state
+    if(m_sinkSelector->state() != sink->description())
+        m_sinkSelector->setState(sink->description());
 
-    // Set initial state
-    m_sinkSelector->setState(sink->description());
-
+    
     // Disconnet from previous sink if any
     if (m_sink)
         disconnect(m_sink, nullptr, this, nullptr);
@@ -145,18 +150,20 @@ void Audio::updateSinks(PulseAudioQt::Sink *sink)
 
 void Audio::updateSources(PulseAudioQt::Source *source)
 {
-    if (!source || !source->isDefault()) return;
-
     // Fill the options of the select entity based on available sources
     QStringList options;
     for (auto s : m_ctx->sources())
         options.append(s->description());
 
-    m_sourceSelector->setOptions(options);
+    if (options != m_sourceSelector->options())
+        m_sourceSelector->setOptions(options);
 
-    // set initial state
-    m_sourceSelector->setState(source->description());
-
+    if (!source || !source->isDefault()) return;
+    // set state
+    if(m_sourceSelector->state() != source->description())
+        m_sourceSelector->setState(source->description());
+    
+    
     // disconnect from previous sink
     if (m_source)
         disconnect(m_source, nullptr, this, nullptr);
