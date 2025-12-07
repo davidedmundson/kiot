@@ -65,7 +65,6 @@ Audio::Audio(QObject *parent)
     connect(m_sourceVolume, &Number::valueChangeRequested,
             this, &Audio::setSourceVolume);
 
-
     m_ctx = PulseAudioQt::Context::instance();
     if (!m_ctx || !m_ctx->isValid()) {
         qWarning() << "Audio: PulseAudio context not valid";
@@ -120,8 +119,6 @@ Audio::Audio(QObject *parent)
 
 void Audio::updateSinks(PulseAudioQt::Sink *sink)
 {
-   
-
    // Fill the options of the select entity based on available sinks
     QStringList options;
     for (const auto *s : m_ctx->sinks())
@@ -169,7 +166,6 @@ void Audio::updateSources(PulseAudioQt::Source *source)
     if(m_sourceSelector->state() != source->description())
         m_sourceSelector->setState(source->description());
     
-    
     // disconnect from previous sink
     if (m_source)
         disconnect(m_source, nullptr, this, nullptr);
@@ -184,8 +180,6 @@ void Audio::updateSources(PulseAudioQt::Source *source)
 }
 void Audio::onSinkSelected(const QString &newOption)
 {
-    
-
     if (!m_ctx) return;
 
     for (PulseAudioQt::Sink *sink : m_ctx->sinks()) {
