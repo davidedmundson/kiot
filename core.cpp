@@ -15,14 +15,17 @@ HaControl *HaControl::s_self = nullptr;
 QList<IntegrationFactory> HaControl::s_integrations;
 
 // core internal sensor
-class ConnectedNode: public Entity
-{
+class ConnectedNode: public Entity {
     Q_OBJECT
 public:
     ConnectedNode(QObject *parent);
     ~ConnectedNode();
-};
 
+    static ConnectedNode *node(){return s_self;}
+private:
+    static ConnectedNode *s_self;
+
+};
 HaControl::HaControl() {
     s_self = this;
     auto config = KSharedConfig::openConfig();
@@ -128,6 +131,7 @@ void HaControl::loadIntegrations(KSharedConfigPtr config)
 ConnectedNode::ConnectedNode(QObject *parent):
     Entity(parent)
 {
+    s_self = this;
     setId("connected");
     setName("Connected");
     setHaType("binary_sensor");
