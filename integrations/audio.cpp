@@ -19,10 +19,10 @@ public:
     explicit Audio(QObject *parent = nullptr);
 
 private slots:
-    void updateSinks(PulseAudioQt::Sink *sink);
-    void updateSources(PulseAudioQt::Source *source);
-    void onSinkSelected(const  QString &newOption);
-    void onSourceSelected(const  QString &newOption);
+    void updateSinks();
+    void updateSources();
+    void onSinkSelected(const QString &newOption);
+    void onSourceSelected(const QString &newOption);
     void onSourceVolumeChanged();
     void onSinkVolumeChanged();
 
@@ -110,15 +110,14 @@ Audio::Audio(QObject *parent)
     // Connect to signal when default source changes
     connect(server, &PulseAudioQt::Server::defaultSourceChanged,
             this, &Audio::updateSources);
-    // Update if default sink/source is found
-    if (auto *initial = server->defaultSink())
-        updateSinks(initial);
-    if (auto *initial = server->defaultSource())
-        updateSources(initial);
+
+    updateSinks();
+    updateSources();
 }
 
-void Audio::updateSinks(PulseAudioQt::Sink *sink)
+void Audio::updateSinks()
 {
+    auto sink = m_ctx->server()->defaultSink();
    // Fill the options of the select entity based on available sinks
     QStringList options;
     for (const auto *s : m_ctx->sinks())
@@ -126,56 +125,44 @@ void Audio::updateSinks(PulseAudioQt::Sink *sink)
     if (options != m_sinkSelector->options())
         m_sinkSelector->setOptions(options);
 
-    if (!sink || !sink->isDefault())
-    {
-         return; //early return because we don't want to set the state or update m_sink if the sink is not default
-    }
-    // Set state
-    if(m_sinkSelector->state() != sink->description())
-        m_sinkSelector->setState(sink->description());
-
-    
-    // Disconnet from previous sink if any
-    if (m_sink)
+        // Disconnect from previous sink if any
+    if (m_sink) {
         disconnect(m_sink, nullptr, this, nullptr);
+    }
 
     m_sink = sink;
 
-    // Connect to the volume changed events
-    connect(m_sink, &PulseAudioQt::VolumeObject::volumeChanged,
-            this, &Audio::onSinkVolumeChanged);
-
+    if (m_sink) {
+        m_sinkSelector->setState(m_sink->description());
+        connect(m_sink, &PulseAudioQt::VolumeObject::volumeChanged,
+                this, &Audio::onSinkVolumeChanged);
+    }
     onSinkVolumeChanged();
 }
 
-void Audio::updateSources(PulseAudioQt::Source *source)
+void Audio::updateSources()
 {
-    // Fill the options of the select entity based on available sources
+    auto source = m_ctx->server()->defaultSource();
+
+   // Fill the options of the select entity based on available sinks
     QStringList options;
     for (const auto *s : m_ctx->sources())
         options.append(s->description());
-
     if (options != m_sourceSelector->options())
         m_sourceSelector->setOptions(options);
 
-    if (!source || !source->isDefault())
-    {
-         return; //early return because we don't want to set the state or update m_source if the source is not default
-    }
-    // set state
-    if(m_sourceSelector->state() != source->description())
-        m_sourceSelector->setState(source->description());
-    
-    // disconnect from previous sink
-    if (m_source)
+    // Disconnect from previous sink if any
+    if (m_source) {
         disconnect(m_source, nullptr, this, nullptr);
+    }
 
     m_source = source;
 
-    // Connect to the volume changed event
-    connect(m_source, &PulseAudioQt::VolumeObject::volumeChanged,
-            this, &Audio::onSourceVolumeChanged);
-
+    if (m_source) {
+        m_sourceSelector->setState(m_source->description());
+        connect(m_source, &PulseAudioQt::VolumeObject::volumeChanged,
+                this, &Audio::onSinkVolumeChanged);
+    }
     onSourceVolumeChanged();
 }
 void Audio::onSinkSelected(const QString &newOption)
