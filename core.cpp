@@ -164,7 +164,8 @@ ConnectedNode::ConnectedNode(QObject *parent):
 
 ConnectedNode::~ConnectedNode()
 {
-    HaControl::mqttClient()->publish(baseTopic(), "off", 0, false);
+    if (HaControl::mqttClient()->state() == QMqttClient::Connected)
+        HaControl::mqttClient()->publish(baseTopic(), "off", 0, false);
     s_self = nullptr;
 }
 
