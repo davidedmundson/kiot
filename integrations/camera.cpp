@@ -85,21 +85,41 @@ CameraWatcher::~CameraWatcher()
 
 void CameraWatcher::onInotifyCallback()
 {
-    int pending = 0;
+    int pending = -1;
+    int offsetStartRead = 0; // where we read into buffer
+    char buf[8192];
     ioctl(m_inotifyFd, FIONREAD, &pending);
-    if (pending <= 0)
-        return;
 
-    QByteArray buffer(pending, 0);
-    int bytesRead = read(m_inotifyFd, buffer.data(), pending);
-    int offset = 0;
+    // copied from KDirWatchPrivate::processInotifyEvents
+    while (pending > 0) {
+        const int bytesToRead = qMin<int>(pending, sizeof(buf) - offsetStartRead);
 
-    while (offset < bytesRead) {
-        const struct inotify_event *event = reinterpret_cast<const struct inotify_event*>(buffer.constData() + offset);
-        QString name = QString::fromLatin1(event->name);
-        onInotifyEvent(event, name);
-        offset += sizeof(struct inotify_event) + event->len;
+        int bytesAvailable = read(m_inotifyFd, &buf[offsetStartRead], bytesToRead);
+        pending -= bytesAvailable;
+        bytesAvailable += offsetStartRead;
+        offsetStartRead = 0;
+
+        int offsetCurrent = 0;
+        while (bytesAvailable >= int(sizeof(struct inotify_event))) {
+            const struct inotify_event *const event = reinterpret_cast<inotify_event *>(&buf[offsetCurrent]);
+
+            const int eventSize = sizeof(struct inotify_event) + event->len;
+            if (bytesAvailable < eventSize) {
+                break;
+            }
+
+            bytesAvailable -= eventSize;
+            offsetCurrent += eventSize;
+            QString name = QString::fromLatin1(event->name);
+            onInotifyEvent(event,name);
+        }
+        if (bytesAvailable > 0) {
+            // copy partial event to beginning of buffer
+            memmove(buf, &buf[offsetCurrent], bytesAvailable);
+            offsetStartRead = bytesAvailable;
+        }
     }
+
 }
 
 void CameraWatcher::onInotifyEvent(const struct inotify_event *event, const QString &deviceName)
