@@ -13,7 +13,7 @@ public:
     void setOptions(const QStringList &opts);
     void setState(const QString &state);
     QString state() const;
-    QStringList getOptions() const;
+    QStringList options() const;
 
 protected:
     void init() override;
