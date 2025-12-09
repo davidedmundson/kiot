@@ -191,7 +191,7 @@ void CameraWatcher::onVideoDeviceAdded(const QString &devicePath)
 void CameraWatcher::onVideoDeviceRemoved(const QString &devicePath)
 {
     int fd = m_watchFds.take(devicePath);
-    if (fd != -1) {
+    if (fd >= 1) {
         inotify_rm_watch(m_inotifyFd, fd);
     }
     m_deviceOpenCounts.remove(devicePath);
