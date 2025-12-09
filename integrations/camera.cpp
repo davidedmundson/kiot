@@ -27,7 +27,7 @@ public:
 private:
     BinarySensor *m_sensor;
     void onInotifyCallback();
-    void onInotifyEvent(const inotify_event *event, const QString &deviceName);
+    void onInotifyEvent(const inotify_event *event);
     void onVideoDeviceAdded(const QString &devicePath);
     void onVideoDeviceRemoved(const QString &devicePath);
 
@@ -110,8 +110,8 @@ void CameraWatcher::onInotifyCallback()
 
             bytesAvailable -= eventSize;
             offsetCurrent += eventSize;
-            QString name = QString::fromLatin1(event->name);
-            onInotifyEvent(event,name);
+            
+            onInotifyEvent(event);
         }
         if (bytesAvailable > 0) {
             // copy partial event to beginning of buffer
@@ -122,8 +122,9 @@ void CameraWatcher::onInotifyCallback()
 
 }
 
-void CameraWatcher::onInotifyEvent(const struct inotify_event *event, const QString &deviceName)
+void CameraWatcher::onInotifyEvent(const struct inotify_event *event)
 {
+    QString deviceName = QString::fromLatin1(event->name);
     if (event->mask & IN_CREATE) {
         if (deviceName.startsWith("video")) {
             QTimer::singleShot(5000, this, [this, deviceName]() {
