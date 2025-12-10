@@ -31,8 +31,7 @@ LockedState::LockedState(QObject *parent)
 {
     m_locked.setId("locked");
     m_locked.setName("Locked");
-    //This was the problem line that made the switch not show up
-    //m_locked.setDiscoveryConfig("device_class", "lock");
+
 
            // why am I used freedesktop here, and logind later.... I don't know
     QDBusConnection::sessionBus().connect(QStringLiteral("org.freedesktop.ScreenSaver"),
