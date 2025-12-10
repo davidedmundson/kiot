@@ -67,6 +67,7 @@ set(SOURCES
     entities/select.cpp
     entities/sensor.cpp
     entities/textbox.cpp
+    entities/lock.cpp
 )
 
 add_subdirectory(integrations)
