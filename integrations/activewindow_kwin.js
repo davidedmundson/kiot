@@ -34,18 +34,27 @@ function onCaptionChanged() {
 function onGeometryChanged() {
     updateActiveWindow(currentWindow);
 }
-
+function onFullScreenChanged() {
+    updateActiveWindow(currentWindow);
+}
+function onOutputChanged(){
+    updateActiveWindow(currentWindow);
+}
 function watchWindow(w) {
     if (!w) return;
 
     if (currentWindow) {
         currentWindow.captionChanged.disconnect(onCaptionChanged);
         currentWindow.frameGeometryChanged.disconnect(onGeometryChanged);
+        currentWindow.fullScreenChanged.disconnect(onFullScreenChanged);
+        currentWindow.outputChanged.disconnect(onOutputChanged);
     }
 
     currentWindow = w;
     currentWindow.captionChanged.connect(onCaptionChanged);
     currentWindow.frameGeometryChanged.connect(onGeometryChanged);
+    currentWindow.fullScreenChanged.connect(onFullScreenChanged);
+    currentWindow.outputChanged.connect(onOutputChanged);
 
     updateActiveWindow(w);
 }
