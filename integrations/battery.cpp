@@ -9,6 +9,54 @@
 #include <Solid/Battery>
 #include <Solid/DeviceInterface>
 
+
+//Helper functions to map the types to human strings
+static QString mapBatteryTechnology(Solid::Battery::Technology tech)
+{
+    switch (tech) {
+    case Solid::Battery::LithiumIon: return "Lithium Ion";
+    case Solid::Battery::LithiumPolymer: return "Lithium Polymer";
+    case Solid::Battery::LithiumIronPhosphate: return "Lithium Iron Phosphate";
+    case Solid::Battery::LeadAcid: return "Lead Acid";
+    case Solid::Battery::NickelCadmium: return "Nickel Cadmium";
+    case Solid::Battery::NickelMetalHydride: return "Nickel Metal Hydride";
+    default: return "Unknown";
+    }
+}
+
+static QString mapBatteryType(Solid::Battery::BatteryType type)
+{
+    switch (type) {
+    case Solid::Battery::PrimaryBattery: return "Primary Battery";
+    case Solid::Battery::UpsBattery: return "UPS Battery";
+    case Solid::Battery::MonitorBattery: return "Monitor Battery";
+    case Solid::Battery::MouseBattery: return "Mouse Battery";
+    case Solid::Battery::KeyboardBattery: return "Keyboard Battery";
+    case Solid::Battery::KeyboardMouseBattery: return "Keyboard/Mouse Battery";
+    case Solid::Battery::GamingInputBattery: return "Gamepad Battery";
+    case Solid::Battery::BluetoothBattery: return "Bluetooth Battery";
+    case Solid::Battery::HeadsetBattery: return "Headset Battery";
+    case Solid::Battery::HeadphoneBattery: return "Headphone Battery";
+    case Solid::Battery::CameraBattery: return "Camera Battery";
+    case Solid::Battery::PhoneBattery: return "Phone Battery";
+    case Solid::Battery::TabletBattery: return "Tablet Battery";
+    case Solid::Battery::TouchpadBattery: return "Touchpad Battery";
+    case Solid::Battery::PdaBattery: return "PDA Battery";
+    default: return "Unknown";
+    }
+}
+
+static QString mapChargeState(Solid::Battery::ChargeState state)
+{
+    switch (state) {
+    case Solid::Battery::Charging: return "Charging";
+    case Solid::Battery::Discharging: return "Discharging";
+    case Solid::Battery::FullyCharged: return "Fully Charged";
+    case Solid::Battery::NoCharge: return "No Charge";
+    default: return "Unknown";
+    }
+}
+
 class BatteryWatcher : public QObject
 {
     Q_OBJECT
@@ -200,108 +248,19 @@ void BatteryWatcher::updateBatteryAttributes(const QString &udi)
     Solid::Battery *battery = device.as<Solid::Battery>();
     if (!battery) return;
 
-    // Map Solid::Battery::ChargeState enum to readable strings
-    QString chargeStateString;
-    switch (battery->chargeState()) {
-        case Solid::Battery::Charging:
-            chargeStateString = "Charging";
-            break;
-        case Solid::Battery::Discharging:
-            chargeStateString = "Discharging";
-            break;
-        case Solid::Battery::FullyCharged:
-            chargeStateString = "Fully Charged";
-            break;
-        case Solid::Battery::NoCharge:
-            chargeStateString = "No Charge";
-            break;       
-        default:
-            chargeStateString = "Unknown";
-            break;
-    }
-
-    // Map Solid::Battery::BatteryType enum to readable strings
-    QString batteryTypeString;
-    switch (battery->type()) {
-        case Solid::Battery::PrimaryBattery:
-            batteryTypeString = "Primary Battery";
-            break;
-        case Solid::Battery::UpsBattery:
-            batteryTypeString = "UPS Battery";
-            break;
-        case Solid::Battery::MonitorBattery:
-            batteryTypeString = "Monitor Battery";
-            break;
-        case Solid::Battery::MouseBattery:
-            batteryTypeString = "Mouse Battery";
-            break;
-        case Solid::Battery::KeyboardBattery:
-            batteryTypeString = "Keyboard Battery";
-            break;
-        case Solid::Battery::KeyboardMouseBattery:
-            batteryTypeString = "Keyboard/Mouse Battery";
-            break;
-        case Solid::Battery::GamingInputBattery:
-            batteryTypeString = "Gamepad Battery";
-            break;
-        case Solid::Battery::BluetoothBattery:
-            batteryTypeString = "Bluetooth Battery";
-            break;
-        case Solid::Battery::HeadsetBattery:
-            batteryTypeString = "Headset Battery";
-            break;
-        case Solid::Battery::HeadphoneBattery:
-            batteryTypeString = "Headphone Battery";
-            break;
-        case Solid::Battery::CameraBattery:
-            batteryTypeString = "Camera Battery";
-            break;
-        case Solid::Battery::PhoneBattery:
-            batteryTypeString = "Phone Battery";
-            break;
-        case Solid::Battery::TabletBattery:
-            batteryTypeString = "Tablet Battery";
-            break;
-        case Solid::Battery::TouchpadBattery:
-            batteryTypeString = "Touchpad Battery";
-            break;
-        case Solid::Battery::PdaBattery:
-            batteryTypeString = "PDA Battery";
-            break;
-        default:
-            batteryTypeString = "Unknown";
-            break;
-    }
-    QString technologyString;
-    switch (battery->technology()) {
-        case  Solid::Battery::LithiumIon:
-            technologyString = "Lithium Ion";
-            break;
-        case Solid::Battery::LithiumPolymer:
-            technologyString = "Lithium Polymer";
-            break;
-        case Solid::Battery::LithiumIronPhosphate:
-            technologyString = "Lithium Iron Phosphate";
-            break;
-        case Solid::Battery::LeadAcid:
-            technologyString = "Lead Acid";
-            break;
-        case Solid::Battery::NickelCadmium:
-            technologyString = "Nickel cadmium";
-            break;
-        case Solid::Battery::NickelMetalHydride:
-            technologyString = "Nickel metal hydride";
-            break;
-        default:
-            technologyString = "Unknown";
-            break;
-    }
+    QString chargeStateString = mapChargeState(battery->chargeState());
+    QString batteryTypeString = mapBatteryType(battery->type());
+    QString technologyString = mapBatteryTechnology(battery->technology());
     QVariantMap attributes = QVariantMap();
-    attributes["charge_state"] = chargeStateString;
-    attributes["battery_type"] = batteryTypeString;
+    if(chargeStateString != "Unknown")
+        attributes["charge_state"] = chargeStateString;
+    if(batteryTypeString != "Unknown")
+        attributes["battery_type"] = batteryTypeString;
+    if(technologyString != "Unknown")
+        attributes["technology"] = technologyString;
+
     attributes["rechargeable"] = battery->isRechargeable();
     attributes["udi"] = udi;
-    attributes["technology"] = technologyString;
   
     if(battery->energy() > 0)
         attributes["energy"] = battery->energy();
