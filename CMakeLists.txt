@@ -44,6 +44,7 @@ find_package(KF6 ${KF6_MIN_VERSION} REQUIRED COMPONENTS
     GlobalAccel
     KCMUtils
     I18n
+    Solid
 )
 #Why is pusleaudioqt v 1.8.0 and not 5.X.X as the
 find_package(KF6 "1.7.0" REQUIRED COMPONENTS
