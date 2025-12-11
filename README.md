@@ -90,7 +90,8 @@ The other focus is on ensuring that device triggers and actions appear in an int
  - Shortcuts (device_trigger)
  - Nightmode status (binary sensor)
  - Active window status (sensor)
- - Volume controller (number based slider)
+ - Audio (nubmer and select)
+ - Battery (sensor)
   
 # Additional Config
 
