@@ -66,15 +66,12 @@ public:
 private slots:
     void deviceAdded(const QString &udi);
     void deviceRemoved(const QString &udi);
-    void batteryChargeChanged(int chargePercent, const QString &udi);
-    void batteryStateChanged(int state, const QString &udi);
-    void batteryDoubleChanged(double value, const QString &udi);
-    void batteryLongLongChanged(qlonglong value, const QString &udi);
+
 private:
     void setupSolidWatching();
     void registerBattery(const QString &udi);
     void updateBatteryAttributes(const QString &udi);
-    QMap<QString, Sensor *> m_udiToSensor;
+    QHash<QString, Sensor *> m_udiToSensor;
 };
 
 BatteryWatcher::BatteryWatcher(QObject *parent)
@@ -95,8 +92,7 @@ void BatteryWatcher::setupSolidWatching()
     const QList<Solid::Device> batteries = Solid::Device::listFromType(Solid::DeviceInterface::Battery);
     for (const Solid::Device &device : batteries) {
         registerBattery(device.udi());
-    }
-    
+    }    
     qDebug() << "BatteryWatcher: Found" << batteries.count() << "battery devices";
 }
 
@@ -111,7 +107,6 @@ void BatteryWatcher::deviceAdded(const QString &udi)
 
 void BatteryWatcher::deviceRemoved(const QString &udi)
 {
-    //Do i need to disconnec the battery that was used in "connect" or will this be enough?
     auto it = m_udiToSensor.find(udi);
     if (it != m_udiToSensor.end()) {
         qDebug() << "Battery removed:" << udi;
@@ -137,14 +132,14 @@ void BatteryWatcher::registerBattery(const QString &udi)
         name = device.vendor() + " " + device.product();
     }
     if (name.trimmed().isEmpty()) {
-        name = "Battery " + udi.split("/").last();
+        name = "Battery " + udi.split('/').last();
     }
 
     // Create sensor
     Sensor *sensor = new Sensor(this);
     sensor->setDiscoveryConfig("device_class", "battery");
-    sensor->setDiscoveryConfig("unit_of_measurement", "%");
-    sensor->setId("battery_" + udi_e.replace("/", "_").replace(":", "_"));
+    sensor->setDiscoveryConfig("unit_of_measurement", '%');
+    sensor->setId("battery_" + udi_e.replace('/', '_').replace(':', '_'));
     sensor->setName(name);
  
     
@@ -154,90 +149,41 @@ void BatteryWatcher::registerBattery(const QString &udi)
     
     // Connect to battery signals
     connect(battery, &Solid::Battery::chargePercentChanged,
-            this, [this, udi](int chargePercent) {
-                batteryChargeChanged(chargePercent, udi);
+        this, [this, udi](int) {
+            updateBatteryAttributes(udi);
     });
-            
     connect(battery, &Solid::Battery::chargeStateChanged,
-            this, [this, udi](int state) {
-                batteryStateChanged(state, udi);
+        this, [this, udi](int) {
+            updateBatteryAttributes(udi);
     });
-
-    if (battery->energy() > 0) {
-        connect(battery, &Solid::Battery::energyChanged,
-            this, [this, udi](double value) {
-                batteryDoubleChanged(value, udi);
-        });
-    }
-    if (battery->energyRate() > 0) {
-        connect(battery, &Solid::Battery::energyRateChanged,
-            this, [this, udi](double value) {
-                batteryDoubleChanged(value, udi);
-        });
-    }
-    if (battery->voltage() > 0) {
-        connect(battery, &Solid::Battery::voltageChanged,
-            this, [this, udi](double value) {
-                batteryDoubleChanged(value, udi);
-        });
-    }
-    if (battery->temperature() > 0) {
-        connect(battery, &Solid::Battery::temperatureChanged,
-            this, [this, udi](double value) {
-                batteryDoubleChanged(value, udi);
-        });
-    }
-    
-    if (battery->timeToEmpty() > 0) {
-        connect(battery, &Solid::Battery::timeToEmptyChanged,
-            this, [this, udi](qlonglong value) {
-                batteryLongLongChanged(value, udi);
-        });
-    }
-    
-    if (battery->timeToFull() > 0) {
-        connect(battery, &Solid::Battery::timeToFullChanged,
-            this, [this, udi](qlonglong value) {
-                batteryLongLongChanged(value, udi);
-        });
-    }
+    connect(battery, &Solid::Battery::energyChanged,
+        this, [this, udi](double) {
+            updateBatteryAttributes(udi);
+    });
+    connect(battery, &Solid::Battery::energyRateChanged,
+        this, [this, udi](double) {
+            updateBatteryAttributes(udi);
+    });
+    connect(battery, &Solid::Battery::voltageChanged,
+        this, [this, udi](double) {
+            updateBatteryAttributes(udi);
+    });
+    connect(battery, &Solid::Battery::temperatureChanged,
+        this, [this, udi](double) {
+            updateBatteryAttributes(udi);
+    });
+    connect(battery, &Solid::Battery::timeToEmptyChanged,
+        this, [this, udi](qlonglong) {
+            updateBatteryAttributes(udi);
+    });
+    connect(battery, &Solid::Battery::timeToFullChanged,
+        this, [this, udi](qlonglong) {
+            updateBatteryAttributes(udi);
+    });
     
     m_udiToSensor[udi] = sensor;
     updateBatteryAttributes(udi);
     qDebug() << "Registered battery:" << name << "at" << battery->chargePercent() << "%";
-}
-
-void BatteryWatcher::batteryDoubleChanged(double value, const QString &udi)
-{
-    Q_UNUSED(value);
-    auto it = m_udiToSensor.find(udi);
-    if (it != m_udiToSensor.end()) {
-        updateBatteryAttributes(udi);
-    }
-}
-
-
-void BatteryWatcher::batteryLongLongChanged(qlonglong value, const QString &udi)
-{
-    Q_UNUSED(value);
-    auto it = m_udiToSensor.find(udi);
-    if (it != m_udiToSensor.end()) {
-        updateBatteryAttributes(udi);
-    }
-} 
-void BatteryWatcher::batteryChargeChanged(int chargePercent, const QString &udi)
-{
-    auto it = m_udiToSensor.find(udi);
-    if (it != m_udiToSensor.end()) {
-        it.value()->setState(QString::number(chargePercent));
-        updateBatteryAttributes(udi);
-    }
-}
-
-void BatteryWatcher::batteryStateChanged(int state, const QString &udi)
-{
-    Q_UNUSED(state)
-    updateBatteryAttributes(udi);
 }
 
 void BatteryWatcher::updateBatteryAttributes(const QString &udi)
