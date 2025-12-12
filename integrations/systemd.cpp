@@ -126,11 +126,14 @@ bool SystemDWatcher::init()
 
     return true;
 }
+namespace {
+    static const QRegularExpression invalidCharRegex("[^a-zA-Z0-9]");
+}
 
 QString SystemDWatcher::sanitizeServiceId(const QString &svc)
 {
     QString id = svc;
-    id.replace(QRegularExpression("[^a-zA-Z0-9]"), '_');
+    id.replace(invalidCharRegex, QStringLiteral("_"));
     return id;
 }
 
