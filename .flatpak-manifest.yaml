@@ -43,7 +43,7 @@ modules:
     sources:
       - type: git
         url: https://github.com/KDE/bluez-qt
-        tag: v6.21.0
+        tag: v6.20.0
 
   - name: kiot
     buildsystem: cmake-ninja
