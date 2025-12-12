@@ -104,6 +104,7 @@ public:
     explicit BluetoothAdapterWatcher(QObject *parent = nullptr);
     
 private:
+    void update();
     Switch *m_switch = nullptr;
     BluezQt::Manager *m_manager = nullptr;
     BluezQt::AdapterPtr m_adapter;
@@ -134,26 +135,16 @@ BluetoothAdapterWatcher::BluetoothAdapterWatcher(QObject *parent)
         if (!adapters.isEmpty()) {
             m_adapter = adapters.first(); // Use first adapter, could probaby be customized from config but who has more than 1 bt adapter?
             m_initialized = true;
-            bool power_state =  m_adapter->isPowered();  
-            qDebug() << "Adapter:" << m_adapter->name() << "Powered:" << power_state;
-            //set icon 
-            if (power_state){
-                m_switch->setHaIcon("mdi:bluetooth");
-            } else {
-                m_switch->setHaIcon("mdi:bluetooth-off");
-            }
-            m_switch->setState(power_state);
+            update();
+            // connect to adapter signals for updates
+            connect(m_adapter.data(), &BluezQt::Adapter::poweredChanged, this, &BluetoothAdapterWatcher::update);
+            connect(m_adapter.data(), &BluezQt::Adapter::discoverableChanged, this, &BluetoothAdapterWatcher::update);
+            connect(m_adapter.data(), &BluezQt::Adapter::discoveringChanged, this, &BluetoothAdapterWatcher::update);
+            connect(m_adapter.data(), &BluezQt::Adapter::nameChanged, this, &BluetoothAdapterWatcher::update);
+            connect(m_adapter.data(), &BluezQt::Adapter::systemNameChanged, this, &BluetoothAdapterWatcher::update);
+            connect(m_adapter.data(), &BluezQt::Adapter::uuidsChanged, this, &BluetoothAdapterWatcher::update);
 
-            connect(m_adapter.data(), &BluezQt::Adapter::poweredChanged, this, [this](bool powered){
-                //Only change icon if state is actually not matching HA
-                if (powered && !m_switch->state()){
-                    m_switch->setHaIcon("mdi:bluetooth");
-                } else if (!powered && m_switch->state()) {    
-                    m_switch->setHaIcon("mdi:bluetooth-off");
-                }
-                if(m_switch->state() != powered)
-                    m_switch->setState(powered);
-            });
+              
             // TODO figure out if its a better way to do this check for new/removed paired devices. 
             // I tested deviceAdded and deviceRemoved but was not what i expected
             connect(m_adapter.data(), &BluezQt::Adapter::pairableChanged, this, [this]() {
@@ -174,7 +165,10 @@ BluetoothAdapterWatcher::BluetoothAdapterWatcher(QObject *parent)
                         }
                     }
                 }
+                update();
             });
+
+            
             // Add all paired devices 
             for (const auto &dev : m_adapter->devices()) {
                 if (dev->isPaired()) {
@@ -204,7 +198,35 @@ BluetoothAdapterWatcher::BluetoothAdapterWatcher(QObject *parent)
         qDebug() << "Set adapter powered to" << requestedState;
     });
 }
+void BluetoothAdapterWatcher::update(){
+    if(!m_adapter || !m_switch)
+    {
 
+    qDebug() << "No adapter or switch found"; //Deb
+    return;
+    }
+
+    //Adapter state
+    //Only change icon and state if its actually not matching HA
+    bool powered =  m_adapter->isPowered();  
+    if (powered && !m_switch->state()){
+        m_switch->setHaIcon("mdi:bluetooth");
+    } else if (!powered && m_switch->state()) {    
+        m_switch->setHaIcon("mdi:bluetooth-off");
+    }
+    if(m_switch->state() != powered)
+        m_switch->setState(powered);
+    QVariantMap attrs;
+    attrs["mac"] = m_adapter->address();
+    attrs["name"] = m_adapter->name();
+    attrs["system_name"] = m_adapter->systemName();
+    attrs["discovering"] = m_adapter->isDiscovering();
+    attrs["discoverable"] = m_adapter->isDiscoverable();
+    attrs["pairable"] = m_adapter->isPairable();
+    attrs["uuids"] = m_adapter->uuids(); //["0000110a-0000-1000-8000-00805f9b34fb
+    m_switch->setAttributes(attrs);
+
+}
 // setup function
 void setupBluetoothAdapter()
 {
