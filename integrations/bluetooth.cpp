@@ -3,11 +3,12 @@
 #include "core.h"
 #include "entities/entities.h"
 
-#include <BluezQt/Manager>
 #include <BluezQt/Adapter>
-#include <BluezQt/Device>
 #include <BluezQt/Battery>
+#include <BluezQt/Device>
 #include <BluezQt/InitManagerJob>
+#include <BluezQt/Manager>
+
 
 
 // ==== Bluetooth devices code ==========
@@ -24,11 +25,10 @@ public:
         m_switch->setDiscoveryConfig("icon","mdi:bluetooth");  
         update();
 
-        // Lytt til endringer
+        // Connect signals
         connect(device.data(), &BluezQt::Device::connectedChanged, this, [this](bool){
             update();
         });
-
         connect(device.data(), &BluezQt::Device::batteryChanged, this, [this](QSharedPointer<BluezQt::Battery>){            
             update();
         });
@@ -38,12 +38,10 @@ public:
         connect(device.data(), &BluezQt::Device::blockedChanged, this, [this](bool){
             update();
         });
-        
         connect(device.data(), &BluezQt::Device::trustedChanged, this, [this](bool){
             update();
         });
-
-        
+        // connec to signal from switch in HA        
         connect(m_switch, &Switch::stateChangeRequested, this, [this](bool requestedState){
             if (!m_device)
                 return;
@@ -69,6 +67,7 @@ private:
             qDebug() << m_device->name() << " is not paired anymore";
             m_switch->setState(false);
         }
+        //Only update state and icon if actually changed to avoid unnecessary re registreations with mqtt
         if(m_device->isConnected() && !m_switch->state())
         {
             m_switch->setHaIcon("mdi:bluetooth");
@@ -79,7 +78,7 @@ private:
             m_switch->setHaIcon("mdi:bluetooth-off");
             m_switch->setState(false);
         }
-    
+        //Update attributes
         QVariantMap attrs;
         attrs["MAC"] = m_device->address();
         attrs["RSSI"] = m_device->rssi();
@@ -90,7 +89,8 @@ private:
         attrs["Paired"] = m_device->isPaired();
         attrs["Trusted"] = m_device->isTrusted();
         attrs["Blocked"] = m_device->isBlocked();
-        m_switch->setAttributes(attrs);
+        if (m_switch->attributes() != attrs)
+            m_switch->setAttributes(attrs);
     }
     
 };
@@ -119,10 +119,10 @@ BluetoothAdapterWatcher::BluetoothAdapterWatcher(QObject *parent)
     m_switch = new Switch(this);
     m_switch->setId("bluetooth_adapter");
     m_switch->setName("Bluetooth Adapter");
-    m_switch->setHaIcon("mdi:bluetooth");
+    m_switch->setDiscoveryConfig("icon", "mdi:bluetooth");
     m_manager = new BluezQt::Manager(this);
 
-    // Lag init-jobben
+    // create the init job
     BluezQt::InitManagerJob *job = m_manager->init();
 
     connect(job, &BluezQt::InitManagerJob::result, this, [this, job]() {
@@ -134,21 +134,30 @@ BluetoothAdapterWatcher::BluetoothAdapterWatcher(QObject *parent)
 
         auto adapters = job->manager()->adapters();
         if (!adapters.isEmpty()) {
-            m_adapter = adapters.first(); // Første adapter
+            m_adapter = adapters.first(); // Use first adapter, could probaby be customized from config but who has more than 1 bt adapter?
             m_initialized = true;
-
-            qDebug() << "Adapter:" << m_adapter->name() << "Powered:" << m_adapter->isPowered();
-            m_switch->setState(m_adapter->isPowered());
+            bool power_state =  m_adapter->isPowered();  
+            qDebug() << "Adapter:" << m_adapter->name() << "Powered:" << power_state;
+            //set icon 
+            if (power_state){
+                m_switch->setHaIcon("mdi:bluetooth");
+            } else {
+                m_switch->setHaIcon("mdi:bluetooth-off");
+            }
+            m_switch->setState(power_state);
 
             connect(m_adapter.data(), &BluezQt::Adapter::poweredChanged, this, [this](bool powered){
-                if (powered){
+                //Only change icon if state is actually not matching HA
+                if (powered && !m_switch->state()){
                     m_switch->setHaIcon("mdi:bluetooth");
-                } else {    
+                } else if (!powered && m_switch->state()) {    
                     m_switch->setHaIcon("mdi:bluetooth-off");
                 }
-                m_switch->setState(powered);
+                if(m_switch->state() != powered)
+                    m_switch->setState(powered);
             });
-            // TODO figure out if its a better way to do this. I tested deviceAdded and deviceRemoved but was not what i expected
+            // TODO figure out if its a better way to do this check for new/removed paired devices. 
+            // I tested deviceAdded and deviceRemoved but was not what i expected
             connect(m_adapter.data(), &BluezQt::Adapter::pairableChanged, this, [this]() {
                 for (const auto &dev : m_adapter->devices()) {
                     const auto key = dev->address();
@@ -159,7 +168,8 @@ BluetoothAdapterWatcher::BluetoothAdapterWatcher(QObject *parent)
                        }
                     }
                      else {
-                        // device er unpaired, fjern switch
+                        // device is no longer paired, remove the switch if it exists
+                        //Does anyone know how to actually unpair? i cant find anythhing making paired state change, forget from settings does not work
                         if (m_btSwitches.contains(key)) {
                             auto *sw = m_btSwitches.take(key);
                             sw->deleteLater();
@@ -167,6 +177,7 @@ BluetoothAdapterWatcher::BluetoothAdapterWatcher(QObject *parent)
                     }
                 }
             });
+            // Add all paired devices 
             for (const auto &dev : m_adapter->devices()) {
                 if (dev->isPaired()) {
                     const auto key = dev->address();
@@ -186,7 +197,7 @@ BluetoothAdapterWatcher::BluetoothAdapterWatcher(QObject *parent)
 
     job->start();
 
-    // Koble til stateChangeRequested for HA
+    // Connect to signal from switch to adapter, so we can turn on/off bluetooth fro
     connect(m_switch, &Switch::stateChangeRequested, this, [this](bool requestedState){
         if (!m_initialized || !m_adapter)
             return;
@@ -196,7 +207,7 @@ BluetoothAdapterWatcher::BluetoothAdapterWatcher(QObject *parent)
     });
 }
 
-// Setup-funksjon som registreres i Kiot
+// setup function
 void setupBluetoothAdapter()
 {
     new BluetoothAdapterWatcher(qApp);
