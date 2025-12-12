@@ -22,30 +22,25 @@ public:
         m_switch->setId("bluetooth_device_" + device->address().replace(":", ""));
         m_switch->setName(device->name());
         m_switch->setDiscoveryConfig("icon","mdi:bluetooth");  
-        updateState();
-        updateAttributes();
+        update();
 
         // Lytt til endringer
         connect(device.data(), &BluezQt::Device::connectedChanged, this, [this](bool){
-            updateState();
-            updateAttributes();
+            update();
         });
 
-        connect(device.data(), &BluezQt::Device::batteryChanged, this, [this](QSharedPointer<BluezQt::Battery>){            updateState();
-            updateAttributes();
+        connect(device.data(), &BluezQt::Device::batteryChanged, this, [this](QSharedPointer<BluezQt::Battery>){            
+            update();
         });
         connect(device.data(), &BluezQt::Device::pairedChanged, this, [this](bool){
-            updateState();
-            updateAttributes();
+            update();
         });
         connect(device.data(), &BluezQt::Device::blockedChanged, this, [this](bool){
-            updateState();
-            updateAttributes();
+            update();
         });
         
         connect(device.data(), &BluezQt::Device::trustedChanged, this, [this](bool){
-            updateState();
-            updateAttributes();
+            update();
         });
 
         
@@ -65,20 +60,8 @@ private:
     BluezQt::DevicePtr m_device;
     Switch *m_switch = nullptr;
 
-    void updateState()
-    {
-        if (!m_device) return;
-        if(m_device->isConnected()){
-            m_switch->setHaIcon("mdi:bluetooth");
-            m_switch->setState(true);
-        }
-        else {
-            m_switch->setHaIcon("mdi:bluetooth-off");
-            m_switch->setState(false);
-        }
-    }
 
-    void updateAttributes()
+    void update()
     {
         if (!m_device) return;
         if(!m_device->isPaired()){
@@ -86,6 +69,17 @@ private:
             qDebug() << m_device->name() << " is not paired anymore";
             m_switch->setState(false);
         }
+        if(m_device->isConnected() && !m_switch->state())
+        {
+            m_switch->setHaIcon("mdi:bluetooth");
+            m_switch->setState(true);
+        }
+        else if(!m_device->isConnected() && m_switch->state()) 
+        {
+            m_switch->setHaIcon("mdi:bluetooth-off");
+            m_switch->setState(false);
+        }
+    
         QVariantMap attrs;
         attrs["MAC"] = m_device->address();
         attrs["RSSI"] = m_device->rssi();
@@ -98,6 +92,7 @@ private:
         attrs["Blocked"] = m_device->isBlocked();
         m_switch->setAttributes(attrs);
     }
+    
 };
 
 
