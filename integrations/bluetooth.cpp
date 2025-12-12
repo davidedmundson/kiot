@@ -4,7 +4,8 @@
 #include "entities/entities.h"
 
 #include <BluezQt/Adapter>
-#include <BluezQt/Battery>
+// Re add after bluez-qt works on new version via flatpak manifest
+//#include <BluezQt/Battery>
 #include <BluezQt/Device>
 #include <BluezQt/InitManagerJob>
 #include <BluezQt/Manager>
@@ -81,9 +82,10 @@ private:
         QVariantMap attrs;
         attrs["mac"] = m_device->address();
         attrs["rssi"] = m_device->rssi();
-        auto battery = m_device->battery();
-        if (battery)
-            attrs["battery"] = battery->percentage(); 
+        // Re add after bluez-qt works on new version via flatpak manifest
+        //auto battery = m_device->battery();
+        //if (battery)
+        //    attrs["battery"] = battery->percentage(); 
 
         attrs["paired"] = m_device->isPaired();
         attrs["trusted"] = m_device->isTrusted();
@@ -105,6 +107,7 @@ public:
     
 private:
     void update();
+    void CheckPairedState();
     Switch *m_switch = nullptr;
     BluezQt::Manager *m_manager = nullptr;
     BluezQt::AdapterPtr m_adapter;
@@ -147,29 +150,17 @@ BluetoothAdapterWatcher::BluetoothAdapterWatcher(QObject *parent)
               
             // TODO figure out if its a better way to do this check for new/removed paired devices. 
             // I tested deviceAdded and deviceRemoved but was not what i expected
-            connect(m_adapter.data(), &BluezQt::Adapter::pairableChanged, this, [this]() {
-                for (const auto &dev : m_adapter->devices()) {
-                    const auto key = dev->address();
-                    if (dev->isPaired()) {
-                        if (!m_btSwitches.contains(key)) {
-                            auto sw = new BluetoothDeviceSwitch(dev, this);
-                            m_btSwitches.insert(key, sw);
-                       }
-                    }
-                     else {
-                        // device is no longer paired, remove the switch if it exists
-                        //Does anyone know how to actually unpair? i cant find anythhing making paired state change, forget from settings does not work
-                        if (m_btSwitches.contains(key)) {
-                            auto *sw = m_btSwitches.take(key);
-                            sw->deleteLater();
-                        }
-                    }
-                }
+            connect(m_adapter.data(), &BluezQt::Adapter::deviceAdded, this, [this]() {
+                CheckPairedState();
                 update();
             });
-
+            connect(m_adapter.data(), &BluezQt::Adapter::deviceRemoved, this, [this]() {
+                CheckPairedState();
+                update();
+            });
             
             // Add all paired devices 
+            // could probably use the CheckPairedState function here now
             for (const auto &dev : m_adapter->devices()) {
                 if (dev->isPaired()) {
                     const auto key = dev->address();
@@ -197,6 +188,28 @@ BluetoothAdapterWatcher::BluetoothAdapterWatcher(QObject *parent)
         m_adapter->setPowered(requestedState);
         qDebug() << "Set adapter powered to" << requestedState;
     });
+}
+void BluetoothAdapterWatcher::CheckPairedState()
+{
+    if(!m_adapter) return;
+
+    for (const auto &dev : m_adapter->devices()) {
+        const auto key = dev->address();
+            if (dev->isPaired()) {
+                if (!m_btSwitches.contains(key)) {
+                    auto sw = new BluetoothDeviceSwitch(dev, this);
+                    m_btSwitches.insert(key, sw);
+                    }
+            }
+            else {
+            // device is no longer paired, remove the switch if it exists
+            //Does anyone know how to actually unpair? i cant find anythhing making paired state change, forget from settings does not work
+                if (m_btSwitches.contains(key)) {
+                    auto *sw = m_btSwitches.take(key);
+                    sw->deleteLater();
+                }
+            }
+    }
 }
 void BluetoothAdapterWatcher::update(){
     if(!m_adapter || !m_switch)
