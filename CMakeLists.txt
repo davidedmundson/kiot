@@ -1,12 +1,11 @@
 cmake_minimum_required(VERSION 3.16)
 
 project(kiot)
-set(PROJECT_VERSION "6.0.80")
-set(PROJECT_VERSION_MAJOR 6)
+set(PROJECT_VERSION "0.1")
+set(PROJECT_VERSION_MAJOR 0)
 
-set(PROJECT_DEP_VERSION "6.0.80")
 set(QT_MIN_VERSION "6.6.0")
-set(KF6_MIN_VERSION "5.240.0")
+set(KF6_MIN_VERSION "6.15")
 set(KDE_COMPILERSETTINGS_LEVEL "5.82")
 
 set(CMAKE_CXX_STANDARD 17)
@@ -34,7 +33,6 @@ find_package(Qt6 ${QT_MIN_VERSION} CONFIG REQUIRED COMPONENTS
     Mqtt
 )
 
-set(KF6_MIN_VERSION "5.240.0")
 find_package(KF6 ${KF6_MIN_VERSION} REQUIRED COMPONENTS
     Config
     CoreAddons
@@ -46,7 +44,7 @@ find_package(KF6 ${KF6_MIN_VERSION} REQUIRED COMPONENTS
     I18n
     Solid
 )
-#Why is pusleaudioqt v 1.8.0 and not 5.X.X as the
+
 find_package(KF6 "1.7.0" REQUIRED COMPONENTS
     PulseAudioQt
 )
