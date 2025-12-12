@@ -79,7 +79,7 @@ bool SystemDWatcher::ensureConfig()
         qWarning() << "Aborting: SystemD integration disabled, should not be running";
         return false;
     }
-
+    // TODO clean up in services no longer available to make sure config is clean
     KConfigGroup grp(cfg, "systemd");
     if (!grp.exists()) {
         for (const QString &svc : listUserServices()) {
