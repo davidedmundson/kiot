@@ -20,6 +20,7 @@ set(KIOT_INTEGRATIONS_SRC
     activewindow.cpp
     audio.cpp
     battery.cpp
+    systemd.cpp
 )
 
 # Include gamepad.cpp only when libudev library is found
