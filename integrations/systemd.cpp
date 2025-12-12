@@ -25,7 +25,10 @@ public:
     bool init();
 
 private slots:
-    void onPropertiesChanged(const QString &interface, const QVariantMap &changedProps, const QStringList &invalidatedProps, const QDBusMessage &msg);
+    void onUnitPropertiesChanged(const QString &interface,
+                                 const QVariantMap &changedProps,
+                                 const QStringList &invalidatedProps,
+                                 const QDBusMessage &msg);
 
 private:
     KSharedConfig::Ptr cfg;
@@ -33,18 +36,19 @@ private:
     QDBusInterface *m_systemdUser = nullptr;
     QString sanitizeServiceId(const QString &svc);
     QStringList listUserServices() const;
+    QString pathToUnitName(const QString &path) const;
 };
+
+namespace {
+    static const QRegularExpression invalidCharRegex("[^a-zA-Z0-9]");
+}
 
 SystemDWatcher::SystemDWatcher(QObject *parent)
     : QObject(parent)
 {
     cfg = KSharedConfig::openConfig("kiotrc");
     if (!ensureConfig()) {
-        qWarning() << "SystemD: Failed to ensure config";
-        return;
-    }
-    if (!init()) {
-        qWarning() << "SystemD: Initialization failed due to config errors, aborting";
+        qWarning() << "SystemD: Failed to ensure config, aborting";
         return;
     }
 
@@ -61,19 +65,13 @@ SystemDWatcher::SystemDWatcher(QObject *parent)
         return;
     }
 
-    // Listen for PropertiesChanged signals from systemd units
-    QDBusConnection::sessionBus().connect(
-        "org.freedesktop.systemd1",
-        "/org/freedesktop/systemd1",
-        "org.freedesktop.DBus.Properties",
-        "PropertiesChanged",
-        this,
-        SLOT(onPropertiesChanged(QString,QVariantMap,QStringList,QDBusMessage))
-    );
+    if (!init()) {
+        qWarning() << "SystemD: Initialization failed";
+        return;
+    }
 }
 
-// Create config entries for all available user services
-// TODO: Remove services from config that are no longer available, while keeping state of existing services
+// Ensure SystemD integration is enabled and create config entries
 bool SystemDWatcher::ensureConfig()
 {
     KConfigGroup intgrp(cfg, "Integrations");
@@ -92,32 +90,55 @@ bool SystemDWatcher::ensureConfig()
     return true;
 }
 
+// Initialize switches and query initial state
 bool SystemDWatcher::init()
 {
     KConfigGroup grp(cfg, "systemd");
     if (!grp.exists()) 
-        return false; // Early return if config is missing, should not happen though
+        return false;
 
-    // Create switches for all enabled services
-    auto services = listUserServices();
-    for (const QString &svc : services) {
+    for (const QString &svc : listUserServices()) {
         if (!grp.hasKey(svc) || !grp.readEntry(svc, false))
-            continue; // skip disabled services
+            continue; // skip disabled
 
-        qDebug() << "SystemDWatcher: Adding service" << svc;
         auto *sw = new Switch(this);
-        QString id = sanitizeServiceId(svc);
-        sw->setId("systemd_" + id);
+        sw->setId("systemd_" + sanitizeServiceId(svc));
         sw->setName(svc);
-        // TODO: Choose a suitable icon for systemd services
-        sw->setState(false); // initial state; will be updated via D-Bus
 
-        connect(sw, &Switch::stateChangeRequested, this, [this, svc](bool state) {
-            QString cmd = state ? "start" : "stop";
+        // Query initial state from D-Bus
+        QDBusReply<QDBusObjectPath> unitPathReply = m_systemdUser->call("GetUnit", svc);
+        if (unitPathReply.isValid()) {
+            QDBusObjectPath unitPath = unitPathReply.value();
 
-            KProcess *p = new KProcess();
-            p->setShellCommand("systemctl --user " + cmd + " " + svc);
-            p->startDetached();
+            QDBusInterface unitIface(
+                "org.freedesktop.systemd1",
+                unitPath.path(),
+                "org.freedesktop.DBus.Properties",
+                QDBusConnection::sessionBus()
+            );
+
+            QDBusReply<QVariant> stateReply = unitIface.call("Get", "org.freedesktop.systemd1.Unit", "ActiveState");
+            if (stateReply.isValid()) {
+                sw->setState(stateReply.value().toString() == "active");
+            }
+
+            // Listen for live property changes
+            QDBusConnection::sessionBus().connect(
+                "org.freedesktop.systemd1",
+                unitPath.path(),
+                "org.freedesktop.DBus.Properties",
+                "PropertiesChanged",
+                this,
+                SLOT(onUnitPropertiesChanged(QString,QVariantMap,QStringList,QDBusMessage))
+            );
+        }
+
+        // Connect switch to systemctl for toggling service
+        connect(sw, &Switch::stateChangeRequested, this, [svc](bool state) {
+            QString cmd = state ? "start" : "stop"; 
+            KProcess *p = new KProcess(); 
+            p->setShellCommand("systemctl --user " + cmd + " " + svc); 
+            p->startDetached(); 
             qDebug() << "Toggled service" << svc << "to" << (state ? "start" : "stop");
         });
 
@@ -125,9 +146,6 @@ bool SystemDWatcher::init()
     }
 
     return true;
-}
-namespace {
-    static const QRegularExpression invalidCharRegex("[^a-zA-Z0-9]");
 }
 
 QString SystemDWatcher::sanitizeServiceId(const QString &svc)
@@ -137,9 +155,9 @@ QString SystemDWatcher::sanitizeServiceId(const QString &svc)
     return id;
 }
 
+// List all user services (*.service)
 QStringList SystemDWatcher::listUserServices() const
 {
-    // Only list *.service under --user
     QStringList services;
     QProcess p;
     p.start("systemctl", {"--user", "list-unit-files", "--type=service", "--no-pager", "--no-legend"});
@@ -153,25 +171,39 @@ QStringList SystemDWatcher::listUserServices() const
     return services;
 }
 
-void SystemDWatcher::onPropertiesChanged(const QString &interface, const QVariantMap &changedProps, const QStringList &invalidatedProps, const QDBusMessage &msg)
+// Convert D-Bus path to proper unit name
+QString SystemDWatcher::pathToUnitName(const QString &path) const
 {
-    Q_UNUSED(invalidatedProps)
+    QString name = path.section('/', -1);
+    name.replace("_2e", ".");
+    name.replace("_2d", "-");
+    return name;
+}
 
+// Slot for handling live updates from systemd units
+void SystemDWatcher::onUnitPropertiesChanged(const QString &interface,
+                                             const QVariantMap &changedProps,
+                                             const QStringList &invalidatedProps,
+                                             const QDBusMessage &msg)
+{
+    Q_UNUSED(invalidatedProps);
     if (interface != "org.freedesktop.systemd1.Unit")
         return;
 
-    QString path = msg.path();
-    QString name = path.section('/', -1);
-
-    if (!m_serviceSwitches.contains(name))
+    QString unitName = pathToUnitName(msg.path());
+    if (!m_serviceSwitches.contains(unitName))
         return;
 
     if (changedProps.contains("ActiveState")) {
         QString state = changedProps["ActiveState"].toString();
-        m_serviceSwitches[name]->setState(state == "active");
+        if (m_serviceSwitches[unitName]->state() != (state == "active")) {
+            m_serviceSwitches[unitName]->setState(state == "active");
+            qDebug() << "Updated state for" << unitName << "to" << state;
+        }
     }
 }
 
+// Setup function
 void setupSystemDWatcher()
 {
     new SystemDWatcher(qApp);
