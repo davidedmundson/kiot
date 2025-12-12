@@ -10,7 +10,6 @@
 #include <BluezQt/Manager>
 
 
-
 // ==== Bluetooth devices code ==========
 class BluetoothDeviceSwitch : public QObject
 {
@@ -20,7 +19,7 @@ public:
     : QObject(parent), m_device(device)
     {
         m_switch = new Switch(this);
-        m_switch->setId("bluetooth_device_" + device->address().replace(":", ""));
+        m_switch->setId("bluetooth_device_" + device->address().replace(':', '_'));
         m_switch->setName(device->name());
         m_switch->setDiscoveryConfig("icon","mdi:bluetooth");  
         update();
@@ -94,7 +93,6 @@ private:
     }
     
 };
-
 
 
 // ====== Bluetooth Adapter code ======
