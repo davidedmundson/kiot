@@ -79,15 +79,15 @@ private:
         }
         //Update attributes
         QVariantMap attrs;
-        attrs["MAC"] = m_device->address();
-        attrs["RSSI"] = m_device->rssi();
+        attrs["mac"] = m_device->address();
+        attrs["rssi"] = m_device->rssi();
         auto battery = m_device->battery();
         if (battery)
-            attrs["Battery"] = battery->percentage(); 
+            attrs["battery"] = battery->percentage(); 
 
-        attrs["Paired"] = m_device->isPaired();
-        attrs["Trusted"] = m_device->isTrusted();
-        attrs["Blocked"] = m_device->isBlocked();
+        attrs["paired"] = m_device->isPaired();
+        attrs["trusted"] = m_device->isTrusted();
+        attrs["blocked"] = m_device->isBlocked();
         if (m_switch->attributes() != attrs)
             m_switch->setAttributes(attrs);
     }
@@ -223,8 +223,12 @@ void BluetoothAdapterWatcher::update(){
     attrs["discovering"] = m_adapter->isDiscovering();
     attrs["discoverable"] = m_adapter->isDiscoverable();
     attrs["pairable"] = m_adapter->isPairable();
-    attrs["uuids"] = m_adapter->uuids(); //["0000110a-0000-1000-8000-00805f9b34fb
-    m_switch->setAttributes(attrs);
+    QVariantList uuidList;
+    for (const auto &u : m_adapter->uuids())
+        uuidList.append(u);
+    attrs["uuids"] = uuidList;
+    if (m_switch->attributes() != attrs)
+        m_switch->setAttributes(attrs);
 
 }
 // setup function
