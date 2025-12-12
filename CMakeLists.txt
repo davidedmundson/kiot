@@ -43,6 +43,8 @@ find_package(KF6 ${KF6_MIN_VERSION} REQUIRED COMPONENTS
     IdleTime
     GlobalAccel
     Solid
+    KCMUtils
+    I18n
 )
 #Why is pusleaudioqt v 1.8.0 and not 5.X.X as the
 find_package(KF6 "1.7.0" REQUIRED COMPONENTS
@@ -72,6 +74,7 @@ set(SOURCES
 )
 
 add_subdirectory(integrations)
+add_subdirectory(ui)
 
 add_executable(kiot ${SOURCES})
 
