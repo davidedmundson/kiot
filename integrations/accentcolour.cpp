@@ -5,12 +5,12 @@
 #include "entities/entities.h"
 #include <QCoreApplication>
 
-#include <KSharedConfig>
 #include <KConfigGroup>
 #include <KConfigWatcher>
+#include <KSharedConfig>
 
-
-class AccentColourWatcher: public QObject {
+class AccentColourWatcher : public QObject
+{
     Q_OBJECT
 public:
     AccentColourWatcher(QObject *parent = nullptr)
@@ -20,7 +20,7 @@ public:
         sensor->setId("accentcolor");
         sensor->setName("Accent Color");
 
-               // it's in kdeglobals
+        // it's in kdeglobals
         KConfigGroup config(KSharedConfig::openConfig()->group("General"));
         sensor->setState(config.readEntry("AccentColor")); // if not custom, then we should find out the default from the theme?
 
@@ -44,6 +44,6 @@ void setupAccentColour()
     new AccentColourWatcher(qApp);
 }
 
-REGISTER_INTEGRATION("AccentColour",setupAccentColour,true)
+REGISTER_INTEGRATION("AccentColour", setupAccentColour, true)
 
 #include "accentcolour.moc"

@@ -7,13 +7,13 @@
 #include <QDBusConnection>
 #include <QDBusInterface>
 #include <QDBusReply>
-#include <QFile>
-#include <QTimer>
 #include <QDebug>
-#include <QStandardPaths>
+#include <QFile>
 #include <QJsonDocument>
 #include <QJsonObject>
 #include <QJsonValue>
+#include <QStandardPaths>
+#include <QTimer>
 
 class ActiveWindowWatcher : public QObject
 {
@@ -26,7 +26,6 @@ public:
 public slots:
     Q_SCRIPTABLE void UpdateAttributes(const QVariantMap &attributes);
 
-
 private:
     bool registerKWinScript();
     void cleanup();
@@ -36,7 +35,6 @@ private:
     QString m_scriptPath;
     bool m_connected = false;
 };
-
 
 ActiveWindowWatcher::ActiveWindowWatcher(QObject *parent)
     : QObject(parent)
@@ -52,10 +50,7 @@ ActiveWindowWatcher::ActiveWindowWatcher(QObject *parent)
         return;
     }
 
-    if (!QDBusConnection::sessionBus().registerObject("/ActiveWindow",
-            "org.davidedmundson.kiot.ActiveWindow",
-            this,
-            QDBusConnection::ExportAllSlots)) {
+    if (!QDBusConnection::sessionBus().registerObject("/ActiveWindow", "org.davidedmundson.kiot.ActiveWindow", this, QDBusConnection::ExportAllSlots)) {
         qWarning() << "ActiveWindowWatcher: Failed to register DBus object";
         m_sensor->setState("Unavailable");
         return;
@@ -68,22 +63,18 @@ ActiveWindowWatcher::ActiveWindowWatcher(QObject *parent)
     }
 }
 
-ActiveWindowWatcher::~ActiveWindowWatcher(){
+ActiveWindowWatcher::~ActiveWindowWatcher()
+{
     cleanup();
 }
- 
-void ActiveWindowWatcher::cleanup(){
+
+void ActiveWindowWatcher::cleanup()
+{
     m_kwinIface->call("unloadScript", "kiot_activewindow");
 }
 bool ActiveWindowWatcher::registerKWinScript()
 {
-    m_kwinIface = new QDBusInterface(
-        "org.kde.KWin",
-        "/Scripting",
-        "org.kde.kwin.Scripting",
-        QDBusConnection::sessionBus(),
-        this
-    );
+    m_kwinIface = new QDBusInterface("org.kde.KWin", "/Scripting", "org.kde.kwin.Scripting", QDBusConnection::sessionBus(), this);
 
     if (!m_kwinIface->isValid()) {
         qWarning() << "ActiveWindowWatcher: KWin scripting interface not available";
@@ -94,8 +85,7 @@ bool ActiveWindowWatcher::registerKWinScript()
     cleanup();
 
     // Locate installed KWin script from KDE data dirs
-    m_scriptPath = QStandardPaths::locate(QStandardPaths::GenericDataLocation,
-                                          QStringLiteral("kiot/activewindow_kwin.js"));
+    m_scriptPath = QStandardPaths::locate(QStandardPaths::GenericDataLocation, QStringLiteral("kiot/activewindow_kwin.js"));
     if (m_scriptPath.isEmpty()) {
         qWarning() << "ActiveWindowWatcher: installed KWin script not found in data dirs";
         return false;
@@ -140,7 +130,6 @@ bool ActiveWindowWatcher::registerKWinScript()
     return true;
 }
 
-
 void ActiveWindowWatcher::UpdateAttributes(const QVariantMap &attributes)
 {
     QString title = attributes["title"].toString();
@@ -151,13 +140,10 @@ void ActiveWindowWatcher::UpdateAttributes(const QVariantMap &attributes)
     m_sensor->setAttributes(attributes);
 }
 
-
-
-
 void setupActiveWindow()
 {
     new ActiveWindowWatcher(qApp);
 }
 
-REGISTER_INTEGRATION("ActiveWindow",setupActiveWindow,true)
+REGISTER_INTEGRATION("ActiveWindow", setupActiveWindow, true)
 #include "activewindow.moc"

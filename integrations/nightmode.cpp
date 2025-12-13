@@ -2,12 +2,12 @@
 // SPDX-License-Identifier: LGPL-2.1-or-later
 
 #include "core.h"
-#include "entities/entities.h"
 #include "dbusproperty.h"
+#include "entities/entities.h"
 #include <QCoreApplication>
 
-#include <QDBusMessage>
 #include <QDBusConnection>
+#include <QDBusMessage>
 #include <QDBusReply>
 
 class NightMode : public QObject
@@ -15,6 +15,7 @@ class NightMode : public QObject
     Q_OBJECT
 public:
     NightMode(QObject *parent);
+
 private:
     BinarySensor *m_sensor;
     Switch *m_switch;
@@ -50,11 +51,11 @@ NightMode::NightMode(QObject *parent)
                 return;
             }
             m_inhibitCookie = reply.value();
-        } else if (m_inhibitCookie.has_value()){
+        } else if (m_inhibitCookie.has_value()) {
             QDBusMessage uninhibitCall = QDBusMessage::createMethodCall(QStringLiteral("org.kde.KWin.NightLight"),
-                                                                      QStringLiteral("/org/kde/KWin/NightLight"),
-                                                                      QStringLiteral("org.kde.KWin.NightLight"),
-                                                                      QStringLiteral("uninhibit"));
+                                                                        QStringLiteral("/org/kde/KWin/NightLight"),
+                                                                        QStringLiteral("org.kde.KWin.NightLight"),
+                                                                        QStringLiteral("uninhibit"));
             uninhibitCall << m_inhibitCookie.value();
             QDBusConnection::sessionBus().call(uninhibitCall);
         }
@@ -67,6 +68,6 @@ void setupNightmode()
     new NightMode(qApp);
 }
 
-REGISTER_INTEGRATION("Nightmode",setupNightmode,true)
+REGISTER_INTEGRATION("Nightmode", setupNightmode, true)
 
 #include "nightmode.moc"

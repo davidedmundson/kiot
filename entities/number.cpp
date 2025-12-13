@@ -26,7 +26,6 @@ void Number::init()
     setDiscoveryConfig("max", QString::number(m_max));
     setDiscoveryConfig("step", QString::number(m_step));
     setDiscoveryConfig("unit_of_measurement", m_unit);
- 
 
     sendRegistration();
 
@@ -34,16 +33,15 @@ void Number::init()
 
     auto subscription = HaControl::mqttClient()->subscribe(baseTopic() + "/set");
     if (subscription) {
-        connect(subscription, &QMqttSubscription::messageReceived, this,
-            [this](const QMqttMessage &message) {
-                bool ok = false;
-                int newValue = message.payload().toInt(&ok);
-                if (ok) {
-                    Q_EMIT valueChangeRequested(newValue);
-                } else {
-                    qWarning() << "Invalid payload for number entity:" << message.payload();
-                }
-            });
+        connect(subscription, &QMqttSubscription::messageReceived, this, [this](const QMqttMessage &message) {
+            bool ok = false;
+            int newValue = message.payload().toInt(&ok);
+            if (ok) {
+                Q_EMIT valueChangeRequested(newValue);
+            } else {
+                qWarning() << "Invalid payload for number entity:" << message.payload();
+            }
+        });
     }
 }
 

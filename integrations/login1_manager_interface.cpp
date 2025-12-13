@@ -32,7 +32,6 @@ static LogindProvider getLogindMode()
     return s_mode;
 }
 
-
 OrgFreedesktopLogin1ManagerInterface::OrgFreedesktopLogin1ManagerInterface(const QString &, const QString &, const QDBusConnection &connection, QObject *parent)
     : QDBusAbstractInterface(getLogindMode() == Logind1 ? QStringLiteral("org.freedesktop.login1") : QStringLiteral("org.freedesktop.ConsoleKit"),
                              getLogindMode() == Logind1 ? QStringLiteral("/org/freedesktop/login1") : QStringLiteral("/org/freedesktop/ConsoleKit/Manager"),

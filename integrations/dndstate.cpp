@@ -2,8 +2,8 @@
 // SPDX-License-Identifier: LGPL-2.1-or-later
 
 #include "core.h"
-#include "entities/entities.h"
 #include "dbusproperty.h"
+#include "entities/entities.h"
 #include <QCoreApplication>
 
 void setupDndSensor()
@@ -21,4 +21,4 @@ void setupDndSensor()
     // copy switch from nightmode
 }
 
-REGISTER_INTEGRATION("DnD",setupDndSensor,true)
+REGISTER_INTEGRATION("DnD", setupDndSensor, true)

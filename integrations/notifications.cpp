@@ -12,7 +12,7 @@
 
 #include <KNotification>
 
-class Notifications: public Entity
+class Notifications : public Entity
 {
     Q_OBJECT
 public:
@@ -21,8 +21,8 @@ public:
     void notificationCallback(const QMqttMessage &message);
 };
 
-Notifications::Notifications(QObject *parent):
-    Entity(parent)
+Notifications::Notifications(QObject *parent)
+    : Entity(parent)
 {
     setId("notifications");
     setName("Notifications");
@@ -47,5 +47,5 @@ void setupNotifications()
     new Notifications(qApp);
 }
 
-REGISTER_INTEGRATION("Notifications",setupNotifications,true)
+REGISTER_INTEGRATION("Notifications", setupNotifications, true)
 #include "notifications.moc"

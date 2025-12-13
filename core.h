@@ -3,12 +3,12 @@
 
 #pragma once
 
+#include <KSharedConfig>
 #include <QCoreApplication>
 #include <QDebug>
+#include <QMqttSubscription>
 #include <QObject>
 #include <QVariantMap>
-#include <QMqttSubscription>
-#include <KSharedConfig>
 
 class QMqttClient;
 class ConnectedNode;
@@ -16,19 +16,23 @@ class ConnectedNode;
 struct IntegrationFactory {
     QString name;
     std::function<void()> factory;
-    bool onByDefault = true;  // ny flagg for default enabled
+    bool onByDefault = true; // ny flagg for default enabled
 };
 
-class HaControl : public QObject {
+class HaControl : public QObject
+{
     Q_OBJECT
 public:
     HaControl();
     ~HaControl();
 
-    static QMqttClient *mqttClient() { return s_self->m_client; }
+    static QMqttClient *mqttClient()
+    {
+        return s_self->m_client;
+    }
 
     static bool registerIntegrationFactory(const QString &name, std::function<void()> plugin, bool onByDefault = true);
-    
+
 private:
     void doConnect();
     void loadIntegrations(KSharedConfigPtr config);

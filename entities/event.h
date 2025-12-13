@@ -4,13 +4,13 @@
 #pragma once
 #include "entity.h"
 
-
 class Event : public Entity
 {
     Q_OBJECT
 public:
     Event(QObject *parent = nullptr);
     void trigger();
+
 protected:
     void init() override;
 };

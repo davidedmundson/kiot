@@ -3,10 +3,10 @@
 
 #include "lock.h"
 #include "core.h"
-#include <QMqttSubscription>
-#include <QMqttClient>
 #include <QJsonDocument>
 #include <QJsonObject>
+#include <QMqttClient>
+#include <QMqttSubscription>
 
 Lock::Lock(QObject *parent)
     : Entity(parent)
@@ -23,8 +23,7 @@ void Lock::init()
     setDiscoveryConfig("state_locked", "true");
     setDiscoveryConfig("state_unlocked", "false");
     setDiscoveryConfig("device_class", "lock");
-    setDiscoveryConfig("json_attributes_topic", baseTopic() + "/attributes"); 
-
+    setDiscoveryConfig("json_attributes_topic", baseTopic() + "/attributes");
 
     sendRegistration();
     setState(m_state);
@@ -66,4 +65,3 @@ void Lock::publishAttributes()
     QJsonDocument doc(obj);
     HaControl::mqttClient()->publish(baseTopic() + "/attributes", doc.toJson(QJsonDocument::Compact), 0, true);
 }
-

@@ -3,10 +3,10 @@
 
 #include "switch.h"
 #include "core.h"
-#include <QMqttSubscription>
-#include <QMqttClient>
 #include <QJsonDocument>
 #include <QJsonObject>
+#include <QMqttClient>
+#include <QMqttSubscription>
 
 Switch::Switch(QObject *parent)
     : Entity(parent)
@@ -20,7 +20,7 @@ void Switch::init()
     setDiscoveryConfig("command_topic", baseTopic() + "/set");
     setDiscoveryConfig("payload_on", "true");
     setDiscoveryConfig("payload_off", "false");
-    setDiscoveryConfig("json_attributes_topic", baseTopic() + "/attributes"); 
+    setDiscoveryConfig("json_attributes_topic", baseTopic() + "/attributes");
 
     sendRegistration();
     setState(m_state);

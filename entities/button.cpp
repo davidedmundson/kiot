@@ -2,8 +2,8 @@
 // SPDX-License-Identifier: LGPL-2.1-or-later
 #include "button.h"
 #include "core.h"
-#include <QMqttSubscription>
 #include <QMqttClient>
+#include <QMqttSubscription>
 
 Button::Button(QObject *parent)
     : Entity(parent)
@@ -18,7 +18,7 @@ void Button::init()
 
     auto subscription = HaControl::mqttClient()->subscribe(baseTopic());
     if (subscription) {
-        connect(subscription, &QMqttSubscription::messageReceived, this, [this](const QMqttMessage &){
+        connect(subscription, &QMqttSubscription::messageReceived, this, [this](const QMqttMessage &) {
             Q_EMIT triggered();
         });
     }

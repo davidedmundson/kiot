@@ -3,12 +3,12 @@
 
 #include "core.h"
 #include "entities/entities.h"
-#include <KSharedConfig>
 #include <KConfigGroup>
-#include <QAction>
-#include <QDebug>
-#include <QCoreApplication>
 #include <KProcess>
+#include <KSharedConfig>
+#include <QAction>
+#include <QCoreApplication>
+#include <QDebug>
 
 void registerScripts()
 {
@@ -40,4 +40,4 @@ void registerScripts()
         });
     }
 }
-REGISTER_INTEGRATION("Scripts",registerScripts,true)
+REGISTER_INTEGRATION("Scripts", registerScripts, true)

@@ -4,7 +4,6 @@
 #pragma once
 #include "entity.h"
 
-
 class Number : public Entity
 {
     Q_OBJECT
@@ -12,12 +11,12 @@ public:
     Number(QObject *parent = nullptr);
     void setValue(int value);
     int value();
-// Optional customization for integrations before init()
+    // Optional customization for integrations before init()
     void setRange(int min, int max, int step = 1, const QString &unit = "%");
 
 protected:
     void init() override;
-    
+
 Q_SIGNALS:
     void valueChangeRequested(int value);
 
@@ -28,4 +27,3 @@ private:
     int m_step = 1;
     QString m_unit = "%";
 };
-

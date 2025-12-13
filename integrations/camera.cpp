@@ -1,21 +1,21 @@
 // SPDX-FileCopyrightText: 2025 David Edmundson <davidedmundson@kde.org>
 // SPDX-License-Identifier: LGPL-2.1-or-later
 
-   // SPDX-FileCopyrightText: 1998 Sven Radej <sven@lisa.exp.univie.ac.at>
-   //      SPDX-FileCopyrightText: 2006 Dirk Mueller <mueller@kde.org>
-   //          SPDX-FileCopyrightText: 2007 Flavio Castelli <flavio.castelli@gmail.com>
+// SPDX-FileCopyrightText: 1998 Sven Radej <sven@lisa.exp.univie.ac.at>
+//      SPDX-FileCopyrightText: 2006 Dirk Mueller <mueller@kde.org>
+//          SPDX-FileCopyrightText: 2007 Flavio Castelli <flavio.castelli@gmail.com>
 
 #include "core.h"
 #include "entities/entities.h"
 #include <KIdleTime>
 
-#include <QSocketNotifier>
 #include <QDir>
+#include <QSocketNotifier>
 #include <QTimer>
 #include <fcntl.h>
 #include <sys/inotify.h>
-#include <unistd.h>
 #include <sys/ioctl.h>
+#include <unistd.h>
 
 class CameraWatcher : public QObject
 {
@@ -110,7 +110,7 @@ void CameraWatcher::onInotifyCallback()
 
             bytesAvailable -= eventSize;
             offsetCurrent += eventSize;
-            
+
             onInotifyEvent(event);
         }
         if (bytesAvailable > 0) {
@@ -119,7 +119,6 @@ void CameraWatcher::onInotifyCallback()
             offsetStartRead = bytesAvailable;
         }
     }
-
 }
 
 void CameraWatcher::onInotifyEvent(const struct inotify_event *event)
@@ -179,8 +178,7 @@ void CameraWatcher::updateSensorState()
 
 void CameraWatcher::onVideoDeviceAdded(const QString &devicePath)
 {
-    int wd = inotify_add_watch(m_inotifyFd, devicePath.toUtf8().constData(),
-                               IN_OPEN | IN_CLOSE_WRITE | IN_CLOSE_NOWRITE | IN_DELETE_SELF);
+    int wd = inotify_add_watch(m_inotifyFd, devicePath.toUtf8().constData(), IN_OPEN | IN_CLOSE_WRITE | IN_CLOSE_NOWRITE | IN_DELETE_SELF);
     if (wd == -1) {
         qWarning() << "Failed to watch" << devicePath;
         return;

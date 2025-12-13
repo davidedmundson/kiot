@@ -4,18 +4,16 @@
 #include "core.h"
 #include "entities/entities.h"
 #include <KConfigGroup>
-#include <QMqttClient>
 #include <QJsonDocument>
 #include <QJsonObject>
+#include <QMqttClient>
 #include <QTimer>
-
-
 
 HaControl *HaControl::s_self = nullptr;
 QList<IntegrationFactory> HaControl::s_integrations;
 
 // core internal sensor
-class ConnectedNode: public Entity
+class ConnectedNode : public Entity
 {
     Q_OBJECT
 public:
@@ -24,7 +22,8 @@ public:
     void init() override;
 };
 
-HaControl::HaControl() {
+HaControl::HaControl()
+{
     s_self = this;
     auto config = KSharedConfig::openConfig();
     auto group = config->group("general");
@@ -41,18 +40,17 @@ HaControl::HaControl() {
     }
 
     m_connectedNode = new ConnectedNode(this);
-    
+
     loadIntegrations(config);
     QTimer *reconnectTimer = new QTimer(this);
     reconnectTimer->setInterval(1000);
 
     connect(reconnectTimer, &QTimer::timeout, this, &HaControl::doConnect);
-           //
-           // connect(&m_networkConfigurationManager, &QNetworkConfigurationManager::configurationChanged, this, connectToHost);
-           //
+    //
+    // connect(&m_networkConfigurationManager, &QNetworkConfigurationManager::configurationChanged, this, connectToHost);
+    //
 
     connect(m_client, &QMqttClient::stateChanged, this, [reconnectTimer, this](QMqttClient::ClientState state) {
-
         switch (state) {
         case QMqttClient::Connected:
             qDebug() << "connected";
@@ -64,13 +62,12 @@ HaControl::HaControl() {
             qDebug() << m_client->error();
             qDebug() << "disconnected";
             reconnectTimer->start();
-            //do I need to reconnect?
+            // do I need to reconnect?
             break;
         }
     });
 
     doConnect();
-   
 }
 
 HaControl::~HaControl()
@@ -84,7 +81,7 @@ void HaControl::doConnect()
     auto group = config->group("general");
     if (group.readEntry("useSSL", false)) {
         QSslConfiguration sslConfig = QSslConfiguration::defaultConfiguration();
-        m_client ->connectToHostEncrypted(sslConfig);
+        m_client->connectToHostEncrypted(sslConfig);
     } else {
         m_client->connectToHost();
     }
@@ -99,22 +96,21 @@ bool HaControl::registerIntegrationFactory(const QString &name, std::function<vo
 // Kjør integrasjoner
 void HaControl::loadIntegrations(KSharedConfigPtr config)
 {
-    
     auto integrationconfig = config->group("Integrations");
 
-    if(!integrationconfig.exists()){
+    if (!integrationconfig.exists()) {
         qWarning() << "Integration group not found in config, defaulting to onByDefault values";
     }
 
     for (const auto &entry : s_integrations) {
         // Bruk onByDefault hvis config ikke finnes
-        if(!integrationconfig.hasKey(entry.name)) {
+        if (!integrationconfig.hasKey(entry.name)) {
             integrationconfig.writeEntry(entry.name, entry.onByDefault);
             config->sync();
         }
         bool enabled = integrationconfig.readEntry(entry.name, entry.onByDefault);
 
-        if(enabled){
+        if (enabled) {
             entry.factory();
             qDebug() << "Started integration:" << entry.name;
         } else {
@@ -123,12 +119,8 @@ void HaControl::loadIntegrations(KSharedConfigPtr config)
     }
 }
 
-
-
-
-
-ConnectedNode::ConnectedNode(QObject *parent):
-    Entity(parent)
+ConnectedNode::ConnectedNode(QObject *parent)
+    : Entity(parent)
 {
     setId("connected");
     setName("Connected");
@@ -137,13 +129,12 @@ ConnectedNode::ConnectedNode(QObject *parent):
     setDiscoveryConfig("payload_on", "on");
     setDiscoveryConfig("payload_off", "off");
     setDiscoveryConfig("device_class", "power");
-    setDiscoveryConfig("device", QVariantMap({
-                       {"name", hostname() },
-                       {"identifiers", "linux_ha_bridge_" + hostname() },
-                       {"sw_version", "0.1"},
-                       {"manufacturer", "Linux HA Bridge"},
-                       {"model", "Linux"}
-                   }));
+    setDiscoveryConfig("device",
+                       QVariantMap({{"name", hostname()},
+                                    {"identifiers", "linux_ha_bridge_" + hostname()},
+                                    {"sw_version", "0.1"},
+                                    {"manufacturer", "Linux HA Bridge"},
+                                    {"model", "Linux"}}));
 
     auto c = HaControl::mqttClient();
     c->setWillTopic(baseTopic());
@@ -161,11 +152,5 @@ void ConnectedNode::init()
     sendRegistration();
     HaControl::mqttClient()->publish(baseTopic(), "on", 0, true);
 }
-
-
-
-
-
-
 
 #include "core.moc"

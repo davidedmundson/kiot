@@ -3,10 +3,10 @@
 
 #include "select.h"
 #include "core.h"
+#include <QJsonArray>
+#include <QJsonDocument>
 #include <QMqttClient>
 #include <QMqttSubscription>
-#include <QJsonDocument>
-#include <QJsonArray>
 
 Select::Select(QObject *parent)
     : Entity(parent)
@@ -55,7 +55,6 @@ void Select::init()
 
     // Unsubscribe først for å unngå delte subscriptions
 
-
     // Opprett lokal subscription
     auto subscription = HaControl::mqttClient()->subscribe(baseTopic() + "/set");
     if (subscription) {
@@ -71,7 +70,6 @@ void Select::init()
         });
     }
 }
-
 
 void Select::publishState()
 {

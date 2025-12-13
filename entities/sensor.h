@@ -4,9 +4,6 @@
 #pragma once
 #include "entity.h"
 
-
-
-
 class Sensor : public Entity
 {
     Q_OBJECT
@@ -15,8 +12,15 @@ public:
 
     void setState(const QString &state);
     void setAttributes(const QVariantMap &attrs);
-    QString state(){return m_state;};
-    QVariantMap attributes(){return m_attributes;};
+    QString state()
+    {
+        return m_state;
+    };
+    QVariantMap attributes()
+    {
+        return m_attributes;
+    };
+
 protected:
     void init() override;
 

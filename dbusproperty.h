@@ -14,16 +14,13 @@ class DBusProperty : public QObject
 {
     Q_OBJECT
 public:
-    explicit DBusProperty(const QString &service,
-                          const QString &path,
-                          const QString &interface,
-                          const QString &property,
-                          QObject *parent = nullptr);
+    explicit DBusProperty(const QString &service, const QString &path, const QString &interface, const QString &property, QObject *parent = nullptr);
     QVariant value() const;
 Q_SIGNALS:
     void valueChanged(const QVariant &value);
 private Q_SLOTS:
     void onFdoPropertiesChanged(const QString &interface, const QVariantMap &changed, const QStringList &invalidated);
+
 private:
     QString m_service;
     QString m_path;

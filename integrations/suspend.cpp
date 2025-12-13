@@ -3,9 +3,9 @@
 
 #include "core.h"
 #include "entities/entities.h"
+#include "login1_manager_interface.h"
 #include <QCoreApplication>
 #include <QDBusConnection>
-#include "login1_manager_interface.h"
 
 void setupSuspend()
 {
@@ -62,4 +62,4 @@ void setupSuspend()
     }
 }
 
-REGISTER_INTEGRATION("PowerController",setupSuspend,true)
+REGISTER_INTEGRATION("PowerController", setupSuspend, true)

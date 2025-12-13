@@ -6,10 +6,10 @@
 #include <QObject>
 
 #include <QDBusConnection>
+#include <QDBusInterface>
 #include <QDBusMessage>
 #include <QDBusPendingCall>
 #include <QDBusPendingReply>
-#include <QDBusInterface>
 
 #include <QCoreApplication>
 
@@ -22,6 +22,7 @@ public:
 private Q_SLOTS:
     void screenLockedChanged(bool active);
     void stateChangeRequested(bool state);
+
 private:
     Lock m_locked;
 };
@@ -32,20 +33,17 @@ LockedState::LockedState(QObject *parent)
     m_locked.setId("locked");
     m_locked.setName("Locked");
 
-
-           // why am I used freedesktop here, and logind later.... I don't know
+    // why am I used freedesktop here, and logind later.... I don't know
     QDBusConnection::sessionBus().connect(QStringLiteral("org.freedesktop.ScreenSaver"),
                                           QStringLiteral("/ScreenSaver"),
                                           QStringLiteral("org.freedesktop.ScreenSaver"),
                                           QStringLiteral("ActiveChanged"),
-                                          this, SLOT(screenLockedChanged(bool)));
+                                          this,
+                                          SLOT(screenLockedChanged(bool)));
 
     connect(&m_locked, &Lock::stateChangeRequested, this, &LockedState::stateChangeRequested);
 
-    auto isLocked = QDBusMessage::createMethodCall("org.freedesktop.ScreenSaver",
-                                                   "/ScreenSaver",
-                                                   "org.freedesktop.ScreenSaver",
-                                                   "GetActive");
+    auto isLocked = QDBusMessage::createMethodCall("org.freedesktop.ScreenSaver", "/ScreenSaver", "org.freedesktop.ScreenSaver", "GetActive");
     auto pendingCall = QDBusConnection::sessionBus().asyncCall(isLocked);
     pendingCall.waitForFinished();
     const bool locked = pendingCall.reply().arguments().at(0).toBool();
@@ -60,16 +58,12 @@ void LockedState::screenLockedChanged(bool active)
 void LockedState::stateChangeRequested(bool state)
 {
     if (state) {
-        QDBusMessage lock = QDBusMessage::createMethodCall("org.freedesktop.login1",
-                                                           "/org/freedesktop/login1/session/auto",
-                                                           "org.freedesktop.login1.Session",
-                                                           "Lock");
+        QDBusMessage lock =
+            QDBusMessage::createMethodCall("org.freedesktop.login1", "/org/freedesktop/login1/session/auto", "org.freedesktop.login1.Session", "Lock");
         QDBusConnection::systemBus().asyncCall(lock);
     } else {
-        QDBusMessage unlock = QDBusMessage::createMethodCall("org.freedesktop.login1",
-                                                             "/org/freedesktop/login1/session/auto",
-                                                             "org.freedesktop.login1.Session",
-                                                             "Unlock");
+        QDBusMessage unlock =
+            QDBusMessage::createMethodCall("org.freedesktop.login1", "/org/freedesktop/login1/session/auto", "org.freedesktop.login1.Session", "Unlock");
         QDBusConnection::systemBus().asyncCall(unlock);
     }
 }
@@ -79,5 +73,5 @@ void registerLockedState()
     new LockedState(qApp);
 }
 
-REGISTER_INTEGRATION("LockedState",registerLockedState,true)
+REGISTER_INTEGRATION("LockedState", registerLockedState, true)
 #include "lockedstate.moc"

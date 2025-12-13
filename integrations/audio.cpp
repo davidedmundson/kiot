@@ -37,7 +37,7 @@ private:
     Number *m_sourceVolume = nullptr;
     Select *m_sinkSelector = nullptr;
     Select *m_sourceSelector = nullptr;
-    
+
     PulseAudioQt::Sink *m_sink = nullptr;
     PulseAudioQt::Source *m_source = nullptr;
     PulseAudioQt::Context *m_ctx = nullptr;
@@ -53,33 +53,27 @@ Audio::Audio(QObject *parent)
     m_sinkVolume->setDiscoveryConfig("icon", "mdi:knob");
     m_sinkVolume->setRange(0, 100, 1, "%");
 
-    connect(m_sinkVolume, &Number::valueChangeRequested,
-            this, &Audio::setSinkVolume);
+    connect(m_sinkVolume, &Number::valueChangeRequested, this, &Audio::setSinkVolume);
 
     m_sourceVolume = new Number(this);
     m_sourceVolume->setId("input_volume");
     m_sourceVolume->setName("Input Volume");
-    m_sourceVolume->setDiscoveryConfig("icon","mdi:microphone");
+    m_sourceVolume->setDiscoveryConfig("icon", "mdi:microphone");
     m_sourceVolume->setRange(0, 100, 1, "%");
 
-    connect(m_sourceVolume, &Number::valueChangeRequested,
-            this, &Audio::setSourceVolume);
+    connect(m_sourceVolume, &Number::valueChangeRequested, this, &Audio::setSourceVolume);
 
     m_ctx = PulseAudioQt::Context::instance();
     if (!m_ctx || !m_ctx->isValid()) {
         qWarning() << "Audio: PulseAudio context not valid";
         return;
     }
-    //Connect to the events for sink added/removed
-    connect(m_ctx, &PulseAudioQt::Context::sinkAdded,
-        this, &Audio::updateSinks);
-    connect(m_ctx, &PulseAudioQt::Context::sinkRemoved,
-        this, &Audio::updateSinks);
-    //Connect to the events for source added/removed
-    connect(m_ctx, &PulseAudioQt::Context::sourceAdded,
-            this, &Audio::updateSources);
-    connect(m_ctx, &PulseAudioQt::Context::sourceRemoved,
-            this, &Audio::updateSources);
+    // Connect to the events for sink added/removed
+    connect(m_ctx, &PulseAudioQt::Context::sinkAdded, this, &Audio::updateSinks);
+    connect(m_ctx, &PulseAudioQt::Context::sinkRemoved, this, &Audio::updateSinks);
+    // Connect to the events for source added/removed
+    connect(m_ctx, &PulseAudioQt::Context::sourceAdded, this, &Audio::updateSources);
+    connect(m_ctx, &PulseAudioQt::Context::sourceRemoved, this, &Audio::updateSources);
 
     auto *server = m_ctx->server();
     if (!server) {
@@ -90,26 +84,22 @@ Audio::Audio(QObject *parent)
     // Sink selctor and signal connection
     m_sinkSelector = new Select(this);
     m_sinkSelector->setId("volume_output_selector");
-    m_sinkSelector->setDiscoveryConfig("icon","mdi:volume-source");
+    m_sinkSelector->setDiscoveryConfig("icon", "mdi:volume-source");
     m_sinkSelector->setName("Output Device");
-    connect(m_sinkSelector, &Select::optionSelected,
-            this, &Audio::onSinkSelected);
+    connect(m_sinkSelector, &Select::optionSelected, this, &Audio::onSinkSelected);
 
-    //Microphone selector and signal connection
+    // Microphone selector and signal connection
     m_sourceSelector = new Select(this);
     m_sourceSelector->setId("volume_input_selector");
-    m_sourceSelector->setDiscoveryConfig("icon","mdi:microphone-settings");
+    m_sourceSelector->setDiscoveryConfig("icon", "mdi:microphone-settings");
     m_sourceSelector->setName("Input Device");
-    connect(m_sourceSelector, &Select::optionSelected,
-            this, &Audio::onSourceSelected);
+    connect(m_sourceSelector, &Select::optionSelected, this, &Audio::onSourceSelected);
 
     // Connect to signal when default sink changes
-    connect(server, &PulseAudioQt::Server::defaultSinkChanged,
-            this, &Audio::updateSinks);
+    connect(server, &PulseAudioQt::Server::defaultSinkChanged, this, &Audio::updateSinks);
 
     // Connect to signal when default source changes
-    connect(server, &PulseAudioQt::Server::defaultSourceChanged,
-            this, &Audio::updateSources);
+    connect(server, &PulseAudioQt::Server::defaultSourceChanged, this, &Audio::updateSources);
 
     updateSinks();
     updateSources();
@@ -118,14 +108,14 @@ Audio::Audio(QObject *parent)
 void Audio::updateSinks()
 {
     auto sink = m_ctx->server()->defaultSink();
-   // Fill the options of the select entity based on available sinks
+    // Fill the options of the select entity based on available sinks
     QStringList options;
     for (const auto *s : m_ctx->sinks())
         options.append(s->description());
     if (options != m_sinkSelector->options())
         m_sinkSelector->setOptions(options);
 
-        // Disconnect from previous sink if any
+    // Disconnect from previous sink if any
     if (m_sink) {
         disconnect(m_sink, nullptr, this, nullptr);
     }
@@ -134,8 +124,7 @@ void Audio::updateSinks()
 
     if (m_sink) {
         m_sinkSelector->setState(m_sink->description());
-        connect(m_sink, &PulseAudioQt::VolumeObject::volumeChanged,
-                this, &Audio::onSinkVolumeChanged);
+        connect(m_sink, &PulseAudioQt::VolumeObject::volumeChanged, this, &Audio::onSinkVolumeChanged);
     }
     onSinkVolumeChanged();
 }
@@ -144,7 +133,7 @@ void Audio::updateSources()
 {
     auto source = m_ctx->server()->defaultSource();
 
-   // Fill the options of the select entity based on available sinks
+    // Fill the options of the select entity based on available sinks
     QStringList options;
     for (const auto *s : m_ctx->sources())
         options.append(s->description());
@@ -160,21 +149,22 @@ void Audio::updateSources()
 
     if (m_source) {
         m_sourceSelector->setState(m_source->description());
-        connect(m_source, &PulseAudioQt::VolumeObject::volumeChanged,
-                this, &Audio::onSourceVolumeChanged);
+        connect(m_source, &PulseAudioQt::VolumeObject::volumeChanged, this, &Audio::onSourceVolumeChanged);
     }
     onSourceVolumeChanged();
 }
 void Audio::onSinkSelected(const QString &newOption)
 {
-    if (!m_ctx) return;
+    if (!m_ctx)
+        return;
 
     for (PulseAudioQt::Sink *sink : m_ctx->sinks()) {
         if (sink->description() == newOption) {
             qDebug() << "Setting sink to" << sink->description();
             sink->setDefault(true);
             qDebug() << "Sink selected:" << newOption;
-            return;;
+            return;
+            ;
         }
     }
     qWarning() << "Audio: Sink not found:" << newOption;
@@ -182,7 +172,8 @@ void Audio::onSinkSelected(const QString &newOption)
 
 void Audio::onSourceSelected(const QString &newOption)
 {
-    if (!m_ctx) return;
+    if (!m_ctx)
+        return;
 
     for (PulseAudioQt::Source *source : m_ctx->sources()) {
         if (source->description() == newOption) {
@@ -196,10 +187,12 @@ void Audio::onSourceSelected(const QString &newOption)
 
 void Audio::onSinkVolumeChanged()
 {
-    if (!m_sink) return;
+    if (!m_sink)
+        return;
 
     int percent = paToPercent(m_sink->volume());
-    if (percent == m_sinkVolume->value()) return;
+    if (percent == m_sinkVolume->value())
+        return;
 
     m_sinkVolume->setValue(percent);
     qDebug() << "Audio: Updated volume from system:" << percent << "%";
@@ -207,18 +200,22 @@ void Audio::onSinkVolumeChanged()
 
 void Audio::onSourceVolumeChanged()
 {
-    if (!m_source) return;
+    if (!m_source)
+        return;
 
     int percent = paToPercent(m_source->volume());
-    if (percent == m_sourceVolume->value()) return;
+    if (percent == m_sourceVolume->value())
+        return;
 
     m_sourceVolume->setValue(percent);
     qDebug() << "Microphone: Updated volume from system:" << percent << "%";
 }
 void Audio::setSinkVolume(int v)
 {
-    if (!m_sink) return;
-    if (v == m_sinkVolume->value()) return;
+    if (!m_sink)
+        return;
+    if (v == m_sinkVolume->value())
+        return;
 
     qint64 paVol = percentToPa(v);
     m_sink->setVolume(paVol);
@@ -227,8 +224,10 @@ void Audio::setSinkVolume(int v)
 
 void Audio::setSourceVolume(int v)
 {
-    if (!m_source) return;
-    if (v == m_sourceVolume->value()) return;
+    if (!m_source)
+        return;
+    if (v == m_sourceVolume->value())
+        return;
 
     qint64 paVol = percentToPa(v);
     m_source->setVolume(paVol);
@@ -246,7 +245,7 @@ qint64 Audio::percentToPa(int percent) const
     return qRound(PulseAudioQt::normalVolume() * (percent / 100.0));
 }
 
-// Setup 
+// Setup
 void setupAudio()
 {
     new Audio(qApp);

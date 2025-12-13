@@ -20,7 +20,10 @@ public:
         qDebug() << m_settings->host() << m_settings->config()->name();
     }
 
-    KiotSettings *settings() const { return m_settings; }
+    KiotSettings *settings() const
+    {
+        return m_settings;
+    }
 
 private:
     KiotSettings *m_settings;
@@ -29,4 +32,3 @@ private:
 K_PLUGIN_CLASS_WITH_JSON(KCMKiot, "kcm_kiot.json")
 
 #include "kcm_kiot.moc"
-

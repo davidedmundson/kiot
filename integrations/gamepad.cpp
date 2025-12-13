@@ -18,6 +18,7 @@ public:
 
 private slots:
     void udevEvent();
+
 private:
     void updateState();
     BinarySensor *m_sensor;
@@ -53,10 +54,11 @@ Gamepad::Gamepad(QObject *parent)
 }
 Gamepad::~Gamepad()
 {
-    if (m_monitor) udev_monitor_unref(m_monitor);
-    if (m_udev) udev_unref(m_udev);
+    if (m_monitor)
+        udev_monitor_unref(m_monitor);
+    if (m_udev)
+        udev_unref(m_udev);
 }
-
 
 void Gamepad::udevEvent()
 {
@@ -70,7 +72,6 @@ void Gamepad::udevEvent()
     }
 }
 
-
 void Gamepad::updateState()
 {
     // Sjekk om vi har Gamepadd/joystick enheter
@@ -81,7 +82,8 @@ void Gamepad::updateState()
     struct udev_list_entry *devices = udev_enumerate_get_list_entry(enumerate);
     bool connected = false;
     struct udev_list_entry *entry;
-    udev_list_entry_foreach(entry, devices) {
+    udev_list_entry_foreach(entry, devices)
+    {
         const char *path = udev_list_entry_get_name(entry);
         struct udev_device *dev = udev_device_new_from_syspath(m_udev, path);
         if (dev) {

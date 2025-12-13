@@ -3,12 +3,12 @@
 
 #include "core.h"
 #include "entities/entities.h"
-#include <KSharedConfig>
 #include <KConfigGroup>
-#include <QAction>
-#include <QDebug>
-#include <QCoreApplication>
 #include <KGlobalAccel>
+#include <KSharedConfig>
+#include <QAction>
+#include <QCoreApplication>
+#include <QDebug>
 
 void registerShortcuts()
 {
@@ -26,8 +26,7 @@ void registerShortcuts()
 
         KGlobalAccel::self()->setShortcut(action, {});
         QObject::connect(action, &QAction::triggered, event, &Event::trigger);
-
     }
 }
 
-REGISTER_INTEGRATION("Shortcuts",registerShortcuts,true)
+REGISTER_INTEGRATION("Shortcuts", registerShortcuts, true)

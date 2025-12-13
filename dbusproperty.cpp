@@ -15,7 +15,12 @@ DBusProperty::DBusProperty(const QString &service, const QString &path, const QS
     , m_interface(interface)
     , m_property(property)
 {
-    QDBusConnection::sessionBus().connect(m_service, m_path, "org.freedesktop.DBus.Properties", "PropertiesChanged", this, SLOT(onFdoPropertiesChanged(QString,QVariantMap,QStringList)));
+    QDBusConnection::sessionBus().connect(m_service,
+                                          m_path,
+                                          "org.freedesktop.DBus.Properties",
+                                          "PropertiesChanged",
+                                          this,
+                                          SLOT(onFdoPropertiesChanged(QString, QVariantMap, QStringList)));
 
     auto message = QDBusMessage::createMethodCall(m_service, m_path, "org.freedesktop.DBus.Properties", "Get");
     message << m_interface << m_property;
