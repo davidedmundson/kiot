@@ -87,9 +87,9 @@ private:
         //if (battery)
         //    attrs["battery"] = battery->percentage(); 
 
-        attrs["paired"] = m_device->isPaired();
-        attrs["trusted"] = m_device->isTrusted();
-        attrs["blocked"] = m_device->isBlocked();
+        attrs["paired"] = QVariant(m_device->isPaired()).toString();
+        attrs["trusted"] = QVariant(m_device->isTrusted()).toString();
+        attrs["blocked"] = QVariant(m_device->isBlocked()).toString();
         if (m_switch->attributes() != attrs)
             m_switch->setAttributes(attrs);
     }
@@ -233,9 +233,9 @@ void BluetoothAdapterWatcher::update(){
     attrs["mac"] = m_adapter->address();
     attrs["name"] = m_adapter->name();
     attrs["system_name"] = m_adapter->systemName();
-    attrs["discovering"] = m_adapter->isDiscovering();
-    attrs["discoverable"] = m_adapter->isDiscoverable();
-    attrs["pairable"] = m_adapter->isPairable();
+    attrs["discovering"] = QVariant(m_adapter->isDiscovering()).toString();
+    attrs["discoverable"] = QVariant(m_adapter->isDiscoverable()).toString();
+    attrs["pairable"] = QVariant(m_adapter->isPairable()).toString();
     QVariantList uuidList;
     for (const auto &u : m_adapter->uuids())
         uuidList.append(u);
