@@ -495,7 +495,7 @@ private:
         QVariantMap attributes;
         attributes["image"] = config["Image"].toString();
         attributes["status"] = state["Status"].toString();
-        attributes["running"] = state["Running"].toBool();
+        attributes["running"] = QVariant(state["Running"].toBool()).toString(); 
         attributes["created"] = containerObj["Created"].toString();
         attributes["ports"] = networkSettings["Ports"].toVariant();
         
