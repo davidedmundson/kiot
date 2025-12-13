@@ -1,6 +1,14 @@
 // SPDX-FileCopyrightText: 2025 Odd Østlie <theoddpirate@gmail.com>
 // SPDX-License-Identifier: LGPL-2.1-or-later
 
+/**
+ * @file docker.cpp
+ * @brief Docker integration for Home Assistant control
+ * 
+ * Provides real-time monitoring and control of Docker containers
+ * through Home Assistant switches and event listening.
+ */
+ 
 #include "core.h"
 #include "entities/entities.h"
 
@@ -18,8 +26,10 @@
 #include <atomic>
 
 /**
- * Listens for Docker container events via Unix socket
- * Runs in a separate thread to avoid blocking the main thread
+ * Manages Docker container events by listening to Docker socket
+ * 
+ * @details Runs in a separate thread to capture container state changes
+ *          without blocking the main application thread
  */
 class DockerEventListener : public QThread
 {
@@ -47,7 +57,7 @@ protected:
             return;
         }
 
-        const QByteArray request = "GET /events HTTP/1.1\r\nHost: localhost\r\n\r\n";
+        const QByteArray request = "GET /events HTTP/1.0\r\nHost: localhost\r\n\r\n";
         if (socket.write(request) != request.size()) {
             qWarning() << "[docker] Failed to write request to socket";
             return;
@@ -107,8 +117,10 @@ private:
 
 
 /**
- * Main Docker integration class that manages container switches
- * Creates Home Assistant switches for enabled Docker containers
+ * Main Docker integration class for Home Assistant
+ * 
+ * @details Creates switches for Docker containers and provides
+ *          real-time state management and event handling
  */
 class DockerSwitch : public QObject
 {
@@ -147,9 +159,14 @@ private:
     DockerEventListener *m_listener = nullptr;
     
     static constexpr int SOCKET_TIMEOUT_MS = 5000;
-    //Should this be made part of the config or is this universal on every linux? the path failed first time for me on manjaro but worked after a reboot
     static constexpr const char* DOCKER_SOCKET_PATH = "/var/run/docker.sock";
     
+    /**
+     * Checks if Docker socket is accessible
+     * 
+     * @return bool True if Docker socket can be connected, false otherwise
+     * @brief Verifies Docker daemon connectivity
+     */
     bool isDockerAvailable() const {
         QLocalSocket testSocket;
         testSocket.connectToServer(DOCKER_SOCKET_PATH, QIODevice::ReadWrite);
@@ -160,7 +177,16 @@ private:
         return available;
     }
     
-
+    /**
+     * Initializes switches for Docker containers based on configuration
+     * 
+     * Process:
+     * 1. Retrieves Docker group from configuration
+     * 2. Creates switch for each enabled container
+     * 3. Sets initial state and attributes for each switch
+     * 
+     * @brief Sets up Home Assistant switches for manageable Docker containers
+     */
     void initializeSwitches() {
         const auto cfg = KSharedConfig::openConfig();
         const KConfigGroup grp = cfg->group("docker");
@@ -174,6 +200,13 @@ private:
         }
     }
     
+    /**
+     * Creates a single switch for a specific Docker container
+     * 
+     * @param name - Name of the Docker container
+     * @brief Configures a switch with Docker-specific ID and icon
+     * @note Connects switch to container start/stop functionality
+     */
     void createContainerSwitch(const QString &name) {
         auto *sw = new Switch(this);
         sw->setId("docker_" + name);
@@ -189,7 +222,15 @@ private:
 
         m_containers.append({name, sw});
     }
-    
+
+    /**
+    * Starts event listener for Docker container events
+    * 
+    * Sets up a separate thread that listens to Docker socket
+    * for real-time container status updates
+    * 
+    * @brief Enables live monitoring of container state changes
+    */
     void startEventListener() {
         m_listener = new DockerEventListener(this);
         connect(m_listener, &DockerEventListener::containerEvent,
@@ -203,10 +244,21 @@ private:
         m_listener->stop();
         if (!m_listener->wait(3000)) {
             qWarning() << "[docker] Event listener did not stop gracefully, terminating";
-            m_listener->terminate();
+            m_listener->terminate(); // terminate() is a last resort to avoid hanging shutdown
             m_listener->wait(1000);
         }
     }
+    
+    /**
+     * Synchronizes configuration with current Docker containers
+     * 
+     * @details 
+     * - Adds new containers to configuration
+     * - Removes containers no longer existing
+     * - Ensures configuration reflects current system state
+     * 
+     * @return bool True if configuration was successfully updated
+    */
     bool ensureConfigDefaults() {
         const auto cfg = KSharedConfig::openConfig();
         KConfigGroup grp = cfg->group("docker");
@@ -246,7 +298,17 @@ private:
         
         return true;
     }
-    //Helper function to let us make calls to the docker socket for needed info
+   
+    /**
+    * Performs a call to Docker socket to retrieve information
+    * 
+    * @param request - HTTP request to Docker API
+    * @param response - Reference where response is stored
+    * @return bool - true if call was successful
+    *   
+    * @brief Handles socket connection, request sending, and response receiving
+    * @note Includes timeout mechanism for robustness
+    */
     bool callDockerSocket(const QByteArray &request, QByteArray &response) {
         QLocalSocket socket;
         socket.connectToServer(DOCKER_SOCKET_PATH, QIODevice::ReadWrite);
@@ -270,7 +332,13 @@ private:
         socket.disconnectFromServer();
         return true;
     }
-
+    
+    /**
+     * Retrieves list of all Docker containers on the system
+     * 
+     * @return QStringList Container names, including stopped containers
+     * @brief Discovers all available Docker containers
+     */
     QStringList listAllContainers() {
         QStringList names;
         QByteArray response;
@@ -306,7 +374,13 @@ private:
         }
         return names;
     }
-
+    
+    /**
+     * Checks if a specific container is currently running
+     * 
+     * @param name Name of the container to check
+     * @return bool True if container is running, false otherwise
+     */
     bool isRunning(const QString &name) {
         QByteArray response;
         const QByteArray request = "GET /containers/json?all=0 HTTP/1.0\r\n\r\n";
@@ -338,6 +412,13 @@ private:
         return false;
     }
     
+    /**
+     * Extracts HTTP response body from Docker socket response
+     * 
+     * @param response Full HTTP response
+     * @return QByteArray Extracted response body
+     * @brief Parses HTTP responses from Docker API
+     */
     QByteArray extractHttpBody(const QByteArray &response) {
         const int headerEnd = response.indexOf("\r\n\r\n");
         if (headerEnd == -1) {
@@ -346,7 +427,14 @@ private:
         }
         return response.mid(headerEnd + 4);
     }
-
+    
+    /**
+     * Starts or stops a specific Docker container
+     * 
+     * @param name Name of the container to toggle
+     * @param start True to start, false to stop the container
+     * @brief Provides start/stop functionality for Docker containers
+     */
     void toggleContainer(const QString &name, bool start) {
         const QString action = start ? "start" : "stop";
         const QByteArray request = QString("POST /containers/%1/%2 HTTP/1.0\r\n\r\n")
@@ -368,7 +456,14 @@ private:
             }
         }
     }
-
+    
+    /**
+     * Updates Home Assistant switch with current container state and attributes
+     * 
+     * @param name Container name
+     * @param sw Pointer to Switch entity to update
+     * @brief Synchronizes switch state with actual container status
+     */
     void updateSwitch(const QString &name, Switch *sw) {
         const bool running = isRunning(name);
         sw->setState(running);
@@ -420,7 +515,11 @@ private slots:
         }
     }
 };
-
+/**
+ * Initializes Docker integration for Home Assistant
+ * 
+ * @brief Creates DockerSwitch instance to manage Docker container switches
+ */
 void setupDockerSwitch() {
     new DockerSwitch(qApp);
 }
