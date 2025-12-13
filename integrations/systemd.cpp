@@ -71,22 +71,50 @@ SystemDWatcher::SystemDWatcher(QObject *parent)
     }
 }
 
-// Ensure SystemD integration is enabled and create config entries
+// Ensure SystemD integration is enabled and sync config with available services
 bool SystemDWatcher::ensureConfig()
 {
     KConfigGroup intgrp(cfg, "Integrations");
     if (!intgrp.readEntry("SystemD", false)) {
-        qWarning() << "Aborting: SystemD integration disabled, should not be running";
+        qWarning() << "[systemd] Integration disabled, should not be running";
         return false;
     }
-    // TODO clean up in services no longer available to make sure config is clean
+    
     KConfigGroup grp(cfg, "systemd");
-    if (!grp.exists()) {
-        for (const QString &svc : listUserServices()) {
-            grp.writeEntry(svc, false); // default: disabled
-        }
-        cfg->sync();
+    
+    const QStringList currentServices = listUserServices();
+    if (currentServices.isEmpty()) {
+        qWarning() << "[systemd] No user services found";
+        return false;
     }
+    
+    // Get existing config entries
+    const QStringList configServices = grp.keyList();
+    bool configChanged = false;
+    
+    // Add new services that aren't in config yet (default to false)
+    for (const QString &serviceName : currentServices) {
+        if (!grp.hasKey(serviceName)) {
+            grp.writeEntry(serviceName, false);
+            configChanged = true;
+            qDebug() << "[systemd] Added new service to config:" << serviceName;
+        }
+    }
+    
+    // Remove services from config that no longer exist
+    for (const QString &configService : configServices) {
+        if (!currentServices.contains(configService)) {
+            grp.deleteEntry(configService);
+            configChanged = true;
+            qDebug() << "[systemd] Removed unavailable service from config:" << configService;
+        }
+    }
+    
+    if (configChanged) {
+        cfg->sync();
+        qDebug() << "[systemd] Configuration updated with current services";
+    }
+    
     return true;
 }
 
