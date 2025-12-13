@@ -354,6 +354,9 @@ private:
         const QJsonDocument doc = QJsonDocument::fromJson(body);
         if (!doc.isArray()) {
             qWarning() << "[docker] Unexpected response format for container list";
+            qDebug() << "Response:" << body;
+            qDebug() << "Jsondoc:" << doc;
+            
             return names;
         }
 
