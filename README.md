@@ -1,135 +1,208 @@
-# About
+# Kiot - KDE Internet Of Things
 
-Kiot (KDE Internet Of Things) is a background daemon that exposes useful information and actions for your local desktop session to a home automation controller like Home Assistant.
+## About
 
-This does not control smart home devices directly. i.e:
-If you want a light to turn on when the PC is set to "Do not Disturb" mode, this app will not directly control the light. This app exposes the "Do not distrub" state to your controller (Home Assistant) so that you can create an automation there.
+Kiot (KDE Internet Of Things) is a background daemon that exposes useful information and actions from your local desktop session to a home automation controller like Home Assistant.
 
-# Current State
+**Important:** Kiot does not directly control smart home devices. Instead, it exposes desktop state information to your home automation controller, allowing you to create automations there. For example:
+- If you want a light to turn on when your PC enters "Do Not Disturb" mode, Kiot exposes the "Do Not Disturb" state to Home Assistant, where you can create the automation to control the light.
 
-This is pre-alpha software a level where if you're ok compiling things from source and meddling with config files by hand.
+## Current State
 
-# Setup
+This is pre-alpha software suitable for users comfortable with:
+- Compiling software from source
+- Editing configuration files manually
+- Testing early-stage software
 
-## Dependencies
+## Setup
 
-Make sure you have these packages installed:
+### Dependencies
+
+Ensure you have these packages installed:
 - `cmake`
 - `extra-cmake-modules`
-- `qt6-base`/`qt6-base-dev`
-- `qt6-mqtt`/`qt6-mqtt-dev`
+- `qt6-base` or `qt6-base-dev`
+- `qt6-mqtt` or `qt6-mqtt-dev`
+- `bluez-qt` or `libkf6bluezqt-dev`
+- `pulseaudio-qt` or `libkf6pulseaudioqt-dev`
 
-Beware that depending on your distribution, these package names may vary slightly. If they simply don't exist, you will have to install them manually. 
+**Note:** Package names may vary slightly depending on your Linux distribution. If packages aren't available through your package manager, you may need to install them manually.
 
-## Download and install
+### Download and Install
 
-Download this repo, for example, by cloning it: 
-```sh
-git clone https://github.com/davidedmundson/kiot.git  # downloads the repo to your system
-cd kiot  # switches directory to the newly downloaded folder
-```
-Now, launch the following commands to proceed with installation:
-```sh
-mkdir build
-cd build
-cmake ..
-make
-make install  # might require `sudo`
-```
-Some dependencies might be missing, make sure you have 
+1. Clone the repository:
+   ```sh
+   git clone https://github.com/davidedmundson/kiot.git
+   cd kiot
+   ```
 
-# MQTT
+2. Build and install:
+   ```sh
+   mkdir build
+   cd build
+   cmake ..
+   make
+   sudo make install  # May require sudo privileges
+   ```
 
-In home assistant MQTT server must be enabled.
-See https://www.home-assistant.io/integrations/mqtt/
+3. If you encounter missing dependencies during the build process, install them using your distribution's package manager.
 
-The following configuration needs to be placed in `~/.config/kiotrc`,
+## MQTT Configuration
 
-```
- [general]
- host=some.host
- port=1883
- user=myUsername
- password=myPassword
- ```
+Home Assistant must have MQTT server enabled. See the [Home Assistant MQTT documentation](https://www.home-assistant.io/integrations/mqtt/).
 
-> [!NOTE]
-> If Kiot is running and you change the configuration, you will need to restart Kiot for the changes to take effect.
+Create a configuration file at `~/.config/kiotrc` with the following content:
 
-## Home Assistant Managed
-
-- `host` should be your Home Assistant local address,
-- `port` is correct at 1883 by default,
-- `user` and `password` should be the username and password of a Home Assistant user (**recommended to create a specific user for MQTT connection**)
-
-## Home Assistant Container
-
-If running Home Assistant in a container:
-
-- `host` should be the IP address where the MQTT broker is available
-- `port` is correct at 1883 by default
-- `user` and `password` should be a username and password setup for the MQTT broker
-
-On the home assistant side everything should then work out-the-box with MQTT discovery.
-Try rebooting Home Assistant, and then launch the `kiot` program and see it things go well. 
-
-# Goals
-
-Compared to other similar projects, I want to avoid exposing pointless system statistic information that's not useful in a HA context. There's no point having a sensor for "kernel version" for example. Instead the focus is towards tighter desktop integration with things that are practical and useful. This includes, but is not exclusive too some Plasma specific properties.
-
-The other focus is on ensuring that device triggers and actions appear in an intuitive easy-to-use way in Home Assistant's configuration. 
-
-# Supported Features (so far)
-
- - User activity (binary sensor)
- - Locked state (switch)
- - Suspend (button)
- - Camera in use (binary sensor)
- - Accent Colour (sensor)
- - Arbitrary Scripts (buttons)
- - Shortcuts (device_trigger)
- - Nightmode status (binary sensor)
- - Active window status (sensor)
- - Audio (nubmer and select)
- - Battery (sensor)
-  
-# Additional Config
-
-```
+```ini
 [general]
 host=some.host
 port=1883
 user=myUsername
 password=myPassword
-useSSL=false
-
-[Scripts][myScript1]
-Name=Launch chrome
-Exec=google-chrome
-
-[Scripts][myScript2]
-...
-
-[Shortcuts][myShortcut1]
-Name=Do a thing
-# This then becomes available in global shortcuts KCM for assignment and will appear as a trigger in HA, so keys can be bound to HA actions
-
-
 ```
 
-# Flatpak build
+> [!NOTE]
+> If Kiot is running and you change the configuration, you must restart Kiot for changes to take effect.
 
-Installing by flatpak is also possible
+### Home Assistant Managed MQTT
+- `host`: Your Home Assistant local address
+- `port`: 1883 (default)
+- `user` and `password`: Credentials of a Home Assistant user (**recommended to create a dedicated MQTT user**)
 
- - Clone this repo
- - `flatpak-builder build .flatpak-manifest.yaml --user --install --force-clean`
- - This will build and install kiot as a flatpak fetching all dependencies
+### Home Assistant Container
+- `host`: IP address where the MQTT broker is accessible
+- `port`: 1883 (default)
+- `user` and `password`: Credentials configured for your MQTT broker
 
-## Notes:
+On the Home Assistant side, everything should work automatically with MQTT discovery. After configuring Kiot, try rebooting Home Assistant, then launch the `kiot` program to see if everything connects properly.
 
-The flatpak will not autostart.
+## Project Goals
 
-## Future
+Compared to similar projects, Kiot focuses on practical desktop integration rather than exposing unnecessary system statistics. There's no value in exposing "kernel version" in a home automation context. Instead, Kiot emphasizes:
 
-Long term, flatpak is the only thing that matters, I'll push to Flathub once we have a have UI
- 
+1. **Practical desktop integration** with features that are genuinely useful for home automation
+2. **Plasma-specific properties** (while not exclusive to Plasma)
+3. **Intuitive Home Assistant integration** with device triggers and actions that appear in an easy to use way
+
+## Supported Features
+
+### Stable Integrations
+
+| Feature | Entity Type | Description |
+|---------|-------------|-------------|
+| User Activity | Binary Sensor | Detects when user is active/inactive |
+| Locked State | Lock | Screen lock state monitoring and control |
+| Power Control | Button | Suspend, hibernate, power off, and restart |
+| Camera Activity | Binary Sensor | Detects when camera is in use |
+| Accent Colour | Sensor | Current desktop accent color |
+| Shortcuts | Device Trigger | Global keyboard shortcuts for HA automations |
+| Night Mode | Binary Sensor | Night mode/blue light filter status |
+| Active Window | Sensor | Currently focused application window |
+| Audio Controller | Number + Select | Volume control and device selection |
+| Battery Status | Sensor | Battery charge level and attributes |
+| Do Not Disturb | Binary Sensor | DnD mode status |
+| Gamepad Connected | Binary Sensor | Gamepad/joystick connection detection |
+| Scripts | Button | Execute custom scripts |
+
+
+
+## Configuration Examples
+
+### Basic Configuration
+```ini
+[general]
+host=192.168.1.100
+port=1883
+user=mqtt_user
+password=secure_password
+useSSL=false
+```
+
+### Scripts Configuration
+```ini
+[Scripts][launch_chrome]
+Name=Launch Chrome
+Exec=google-chrome
+
+[Scripts][steam_bigpicture]
+Exec=steam steam://open/bigpicture
+Name=Launch steam bigpicture
+```
+
+
+### Shortcuts Configuration
+```ini
+[Shortcuts][myShortcut1]
+Name=Do a thing
+# Becomes available in KDE's Global Shortcuts KCM for key assignment
+# Appears as a trigger in Home Assistant for keyboard-driven automations
+```
+
+### Integration Management
+```ini
+[Integrations]
+# This section is auto-generated and lets you enable/disable integrations
+AccentColour=true
+Active=true
+ActiveWindow=true
+Audio=true
+Battery=true
+Bluetooth=true
+CameraWatcher=true
+DnD=true
+Gamepad=true
+LockedState=true
+Nightmode=true
+Notifications=true
+PowerController=true
+Scripts=true
+Shortcuts=true
+```
+
+## Flatpak Build
+
+Flatpak installation is also supported:
+
+1. Clone this repository
+2. Run:
+   ```sh
+   flatpak-builder build .flatpak-manifest.yaml --user --install --force-clean
+   ```
+   This builds and installs Kiot as a Flatpak, automatically fetching all dependencies.
+
+### Flatpak Notes
+- The Flatpak version does not autostart automatically
+- Some integrations may have limited functionality due to Flatpak sandboxing
+
+## Future Development
+
+Long-term, Flatpak distribution is the primary focus. The goal is to publish to Flathub once a user interface is implemented.
+
+### Planned Improvements
+1. **Graphical Configuration UI** - Simplify setup without manual config file editing
+2. **Enhanced Integration** - More desktop environment features and system monitoring
+3. **Better Documentation** - Comprehensive guides and examples
+4. **Extensibility / Plugin System** – Explore ways to allow community developed integrations
+
+
+## Contributing
+
+Contributions are welcome!
+1. Test thoroughly
+2. Document new integrations
+3. Follow existing entity patterns
+
+## Troubleshooting
+
+### Common Issues
+1. **MQTT Connection Failed**: Verify credentials and network connectivity
+2. **Missing Entities in Home Assistant**: Check MQTT discovery is enabled in HA
+3. **Permission Errors**: Some integrations may require additional permissions
+4. **Flatpak Limitations**: Some system integrations may not work in sandboxed environment
+
+### Getting Help
+- Check the configuration examples above
+- Review the Home Assistant MQTT documentation
+- Examine system logs for error messages
+
+---
