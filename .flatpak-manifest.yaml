@@ -15,12 +15,13 @@ finish-args:
   - "--socket=fallback-x11"
   - "--socket=session-bus"
   - "--socket=system-bus"
-
+  - "--socket=pulseaudio"
   - "--filesystem=home:ro"
   - "--filesystem=xdg-config/kiotrc"
   - "--talk-name=org.kde.StatusNotifierWatcher"
   - "--own-name=org.kde.StatusNotifierItem-2-2"
   - "--talk-name=org.kde.KWin"
+  - "--own-name=org.davidedmundson.kiot.ActiveWindow"
 
 
 modules:
@@ -57,3 +58,4 @@ modules:
     sources:
       - type: dir
         path: "."
+
