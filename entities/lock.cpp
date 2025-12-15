@@ -48,20 +48,3 @@ void Lock::setState(bool state)
         HaControl::mqttClient()->publish(baseTopic(), state ? "true" : "false", 0, true);
     }
 }
-void Lock::setAttributes(const QVariantMap &attrs)
-{
-    m_attributes = attrs;
-    publishAttributes();
-}
-void Lock::publishAttributes()
-{
-    if (HaControl::mqttClient()->state() != QMqttClient::Connected)
-        return;
-
-    QJsonObject obj;
-    for (auto it = m_attributes.constBegin(); it != m_attributes.constEnd(); ++it)
-        obj[it.key()] = QJsonValue::fromVariant(it.value());
-
-    QJsonDocument doc(obj);
-    HaControl::mqttClient()->publish(baseTopic() + "/attributes", doc.toJson(QJsonDocument::Compact), 0, true);
-}
