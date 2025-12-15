@@ -4,3 +4,4 @@ backups/
 kiot.code-workspace
 scripts/
 *.sh
+flatpak-repo
