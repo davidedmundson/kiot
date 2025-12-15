@@ -14,7 +14,7 @@
 #include <QJsonValue>
 #include <QStandardPaths>
 #include <QTimer>
-
+#include <QDir>
 class ActiveWindowWatcher : public QObject
 {
     Q_OBJECT
@@ -90,7 +90,11 @@ bool ActiveWindowWatcher::registerKWinScript()
         qWarning() << "ActiveWindowWatcher: installed KWin script not found in data dirs";
         return false;
     }
-
+    if (m_scriptPath.startsWith(QLatin1String("/app/")))
+    {
+        QFile::copy(m_scriptPath, "/var/config/activewindow_kwin.js");
+        m_scriptPath =QDir::homePath() + "/.var/app/org.davidedmundson.kiot/config/activewindow_kwin.js";
+    }
     QDBusMessage reply = m_kwinIface->call("loadScript", m_scriptPath, "kiot_activewindow");
     if (reply.type() == QDBusMessage::ErrorMessage) {
         qWarning() << "ActiveWindowWatcher: loadScript failed:" << reply.errorMessage();
@@ -116,14 +120,12 @@ bool ActiveWindowWatcher::registerKWinScript()
     QDBusInterface scriptIface("org.kde.KWin", scriptObjectPath, "org.kde.kwin.Script", QDBusConnection::sessionBus());
     if (!scriptIface.isValid()) {
         qWarning() << "ActiveWindowWatcher: scriptIface invalid for path" << scriptObjectPath;
-        QFile::remove(m_scriptPath);
         return false;
     }
 
     QDBusMessage runReply = scriptIface.call("run");
     if (runReply.type() == QDBusMessage::ErrorMessage) {
         qWarning() << "ActiveWindowWatcher: run failed:" << runReply.errorMessage();
-        QFile::remove(m_scriptPath);
         return false;
     }
 
