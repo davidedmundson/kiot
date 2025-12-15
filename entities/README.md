@@ -59,6 +59,8 @@ This single include gives access to:
 
 ## Available Entity Types
 
+KIOT entity types are designed as a strict 1:1 mapping to Home Assistant entity types, with no additional abstraction layer in between.
+
 ### 1. **Binary Sensor** (`binarysensor.h` / `binarysensor.cpp`)
 Represents binary (on/off) state sensors.
 
