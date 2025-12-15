@@ -2,9 +2,36 @@
 
 This directory contains the core entity implementations for the KIOT (KDE Internet Of Things) project. Entities are the fundamental building blocks that represent devices, sensors, and controls in Home Assistant via MQTT.
 
+## Quick Navigation
+
+- [Overview](#overview)
+- [Main Entry Point](#main-entry-point)
+- [Available Entity Types](#available-entity-types)
+  - [Binary Sensor](#1-binary-sensor)
+  - [Sensor](#2-sensor)
+  - [Switch](#3-switch)
+  - [Button](#4-button)
+  - [Lock](#5-lock)
+  - [Event](#6-event)
+  - [Select](#7-select)
+  - [Number](#8-number)
+  - [Textbox](#9-textbox)
+- [Creating New Entities](#creating-new-entities)
+- [MQTT Topic Structure](#mqtt-topic-structure)
+- [Home Assistant Discovery](#home-assistant-discovery)
+- [Best Practices](#best-practices)
+- [Integration with Home Assistant](#integration-with-home-assistant)
+- [Testing Entities](#testing-entities)
+- [Contributing New Entities](#contributing-new-entities)
+- [See Also](#see-also)
+
+---
+
 ## Overview
 
 Entities in KIOT are QObject-based classes that extend the `Entity` base class. Each entity type corresponds to a specific Home Assistant MQTT entity type and provides the necessary MQTT discovery configuration and communication logic.
+
+---
 
 ## Main Entry Point: `entities.h`
 
@@ -28,21 +55,7 @@ This single include gives access to:
 3. **Consistency**: Ensures all integrations use the same interface
 4. **Future-proofing**: Easy to add new entities without changing integration code
 
-## Entity Base Class
-
-### `entity.h` / `entity.cpp`
-
-The `Entity` class is the foundation for all KIOT entities. It provides:
-
-- **MQTT Topic Management**: Automatic topic generation based on hostname and entity ID
-- **Home Assistant Discovery**: Automatic registration with Home Assistant via MQTT discovery
-- **Attribute Handling**: Conversion and publishing of entity attributes
-- **Connection Management**: Integration with the MQTT client lifecycle
-
-#### Key Features:
-- Base topic format: `[hostname]/[entity_id]`
-- Device grouping for related entities
-- Availability topic support for connection state
+---
 
 ## Available Entity Types
 
@@ -195,6 +208,8 @@ connect(textbox, &Textbox::stateChangeRequested, [](const QString &text) {
 });
 ```
 
+---
+
 ## Creating New Entities
 
 ### Basic Entity Creation Template
@@ -258,6 +273,8 @@ void MyEntity::setCustomValue(const QString &value)
 5. Call `sendRegistration()` to register with Home Assistant
 6. Use `setState()` and `setAttributes()` to update entity state
 
+---
+
 ## MQTT Topic Structure
 
 All entities follow this topic pattern:
@@ -272,6 +289,8 @@ All entities follow this topic pattern:
 - State: `my-pc/battery`
 - Attributes: `my-pc/battery/attributes`
 - Command: `my-pc/battery/command` (for entities supporting commands)
+
+---
 
 ## Home Assistant Discovery
 
@@ -298,6 +317,8 @@ homeassistant/[ha_type]/[hostname]/[entity_id]/config
 }
 ```
 
+---
+
 ## Best Practices
 
 ### 1. **Entity Naming**
@@ -315,7 +336,7 @@ homeassistant/[ha_type]/[hostname]/[entity_id]/config
 - Handle missing dependencies gracefully
 - Log errors with context for debugging
 
-
+---
 
 ## Integration with Home Assistant
 
@@ -333,6 +354,8 @@ Each entity type maps directly to Home Assistant entity types:
 | Number | number | numeric input with constraints |
 | Textbox | text | textbox for input  |
 
+---
+
 ## Testing Entities
 
 ### Manual Testing
@@ -347,6 +370,8 @@ Each entity type maps directly to Home Assistant entity types:
 - Check Home Assistant logs for discovery issues
 - Verify topic permissions and connectivity
 
+---
+
 ## Contributing New Entities
 
 When adding new entity types:
@@ -357,8 +382,11 @@ When adding new entity types:
 4. Test with Home Assistant integration
 5. Update this README with new entity information
 
+---
+
 ## See Also
 
 - [Home Assistant MQTT Integration Documentation](https://www.home-assistant.io/integrations/mqtt/)
 - [Home Assistant Entity Types](https://www.home-assistant.io/integrations/#search/mqtt)
 - [KIOT Main README](../README.md) for project overview and setup
+- [KIOT Integrations README](../integrations/README.md) for creating new integrations
