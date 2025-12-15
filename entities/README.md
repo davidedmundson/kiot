@@ -336,7 +336,7 @@ Each entity type maps directly to Home Assistant entity types:
 ## Testing Entities
 
 ### Manual Testing
-1. Start KIOT with the integration using the entity enabled
+1. Start KIOT with the entity integration enabled
 2. Check MQTT topics are created correctly
 3. Verify Home Assistant discovers the entity
 4. Test state updates and commands
