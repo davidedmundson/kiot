@@ -7,6 +7,11 @@ Kiot (KDE Internet Of Things) is a background daemon that exposes useful informa
 **Important:** Kiot does not directly control smart home devices. Instead, it exposes desktop state information to your home automation controller, allowing you to create automations there. For example:
 - If you want a light to turn on when your PC enters "Do Not Disturb" mode, Kiot exposes the "Do Not Disturb" state to Home Assistant, where you can create the automation to control the light.
 
+## Maintainers
+
+ - David Edmundson
+ - Odd Østlie
+
 ## Current State
 
 This is pre-alpha software suitable for users comfortable with:
