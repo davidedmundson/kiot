@@ -21,7 +21,7 @@ finish-args:
   - "--talk-name=org.kde.StatusNotifierWatcher"
   - "--own-name=org.kde.StatusNotifierItem-2-2"
   - "--talk-name=org.kde.KWin"
-
+  - "--talk-name=org.bluez"
 
 modules:
   - name: extra-cmake-modules
