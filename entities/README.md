@@ -5,7 +5,6 @@ This directory contains the core entity implementations for the KIOT (KDE Intern
 ## Quick Navigation
 
 - [Overview](#overview)
-- [Main Entry Point](#main-entry-point)
 - [Available Entity Types](#available-entity-types)
   - [Binary Sensor](#1-binary-sensor)
   - [Sensor](#2-sensor)
@@ -33,29 +32,6 @@ Entities in KIOT are QObject-based classes that extend the `Entity` base class. 
 
 ---
 
-## Main Entry Point: `entities.h`
-
-### The Unified Header
-
-The `entities.h` header file is the primary interface that all integrations should use. It provides a single include point for accessing all available entity types.
-
-**Usage in Integrations:**
-```cpp
-#include "entities/entities.h"
-```
-
-This single include gives access to:
-- All entity class declarations
-- The Entity base class
-- Any helper functions or types related to entities
-
-**Why use `entities.h` instead of individual headers?**
-1. **Simplicity**: One include instead of multiple
-2. **Maintainability**: Centralized header management
-3. **Consistency**: Ensures all integrations use the same interface
-4. **Future-proofing**: Easy to add new entities without changing integration code
-
----
 
 ## Available Entity Types
 
