@@ -14,7 +14,7 @@ This directory contains the core entity implementations for the KIOT (KDE Intern
   - [Event](#6-event-eventh--eventcpp)
   - [Select](#7-select-selecth--selectcppt)
   - [Number](#8-number-numberh--numbercpp)
-  - [Textbox](#9-textbox-textboxh--textboxcpp)
+  - [Text](#9-text-texth--textcpp)
   - [Camera](#10-camera-camerah--cameracpp)
 - [Creating New Entities](#creating-new-entities)
 - [MQTT Topic Structure](#mqtt-topic-structure)
@@ -349,7 +349,7 @@ Each entity type maps directly to Home Assistant entity types:
 | Event | device_trigger | automation triggers |
 | Select | select | option selection |
 | Number | number | numeric input with constraints |
-| Textbox | text | textbox for input  |
+| Text | text | text for input  |
 | Camera | camera | image publishing |
 ---
 
