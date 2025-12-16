@@ -13,7 +13,7 @@ This directory contains the core entity implementations for the KIOT (KDE Intern
   - [Lock](#5-lock-lockh--lockcpp)
   - [Event](#6-event-eventh--eventcpp)
   - [Select](#7-select-selecth--selectcppt)
-  - [Number](8-number-numberh--numbercpp)
+  - [Number](#8-number-numberh--numbercpp)
   - [Textbox](#9-textbox-textboxh--textboxcpp)
   - [Camera](#10-camera-camerah--cameracpp)
 - [Creating New Entities](#creating-new-entities)
