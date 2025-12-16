@@ -44,7 +44,7 @@ void Camera::init()
     auto subscription = HaControl::mqttClient()->subscribe(baseTopic() + "/command");
     connect(subscription, &QMqttSubscription::messageReceived, this, [this](const QMqttMessage &message) {
         qDebug() << type() << name() << " command received:" << QString::fromUtf8(message.payload());
-        emit commandReceived(QString::fromUtf8(message.payload()));
+        Q_EMIT commandReceived(QString::fromUtf8(message.payload()));
     });
 }
 
