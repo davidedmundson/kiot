@@ -14,7 +14,7 @@ This directory contains the core entity implementations for the KIOT (KDE Intern
   - [Event](#6-event)
   - [Select](#7-select)
   - [Number](#8-number)
-  - [Textbox](#9-textbox)
+  - [Text](#9-text)
 - [Creating New Entities](#creating-new-entities)
 - [MQTT Topic Structure](#mqtt-topic-structure)
 - [Home Assistant Discovery](#home-assistant-discovery)
@@ -168,7 +168,7 @@ connect(number, &Number::stateChangeRequested, [](double value) {
 });
 ```
 
-### 9. **Textbox** (`textbox.h` / `textbox.cpp`)
+### 9. **Text** (`text.h` / `text.cpp`)
 Represents text input entities for string values.
 
 **Home Assistant Type:** `text`  
@@ -176,11 +176,11 @@ Represents text input entities for string values.
 
 **Example Configuration:**
 ```cpp
-Textbox *textbox = new Textbox(parent);
-textbox->setId("script_argument");
-textbox->setName("Script Argument");
-textbox->setState("default_value");
-connect(textbox, &Textbox::stateChangeRequested, [](const QString &text) {
+Text *text = new Text(parent);
+text->setId("script_argument");
+text->setName("Script Argument");
+text->setState("default_value");
+connect(text, &Text::stateChangeRequested, [](const QString &text) {
     // Use text as argument for script execution
     executeScriptWithArgument(text);
 });
@@ -330,7 +330,7 @@ Each entity type maps directly to Home Assistant entity types:
 | Event | device_trigger | automation triggers |
 | Select | select | option selection |
 | Number | number | numeric input with constraints |
-| Textbox | text | textbox for input  |
+| Text | text | text for input  |
 
 ---
 

@@ -67,7 +67,7 @@ set(SOURCES
     entities/event.cpp
     entities/select.cpp
     entities/sensor.cpp
-    entities/textbox.cpp
+    entities/text.cpp
     entities/lock.cpp
 )
 
