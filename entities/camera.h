@@ -44,6 +44,10 @@ public:
     /**
      * @brief Constructs a Camera entity
      * @param parent Parent QObject (optional)
+     * 
+     * @details
+     * Initializes the Camera entity. The actual MQTT setup is performed
+     * in the init() method when the MQTT client connects.
      */
     Camera(QObject *parent = nullptr);
     
@@ -69,7 +73,7 @@ Q_SIGNALS:
      * 
      * @details
      * This is not a part of Home Assistants MQTT camera integration, 
-     * but a custom signal to allow integrations to trigger image updates.
+     * but a custom signal to allow triggers for requesting image updates.
      * Emitted when a command is received on the camera's command topic.
      * Integrations can connect to this signal to trigger image updates
      * when Home Assistant requests a fresh image.
@@ -78,16 +82,23 @@ Q_SIGNALS:
     
 protected:
     /**
-     * @brief Initializes the camera entity
+     * @brief Initializes the camera entity with MQTT configuration
      * 
      * @details
-     * Overrides Entity::init() to set up camera-specific MQTT configuration:
-     * - Sets HA type to "camera"
-     * - Configures image encoding as base64
-     * - Sets up state and command topics
-     * - Subscribes to command topic for image update requests
+     * Sets up the camera entity for Home Assistant MQTT discovery:
+     * - Configures the entity type as "camera"
+     * - Sets the state topic for image publishing
+     * - Configures base64 image encoding
+     * - Sets up a command topic for triggering image updates
+     * - Subscribes to the command topic to receive update requests
      * 
-     * Called automatically when the MQTT client connects.
+     * The command topic functionality is a custom extension beyond the
+     * standard Home Assistant MQTT camera integration, allowing integrations
+     * to trigger image updates via MQTT commands.
+     * 
+     * @note The command topic is not part of the standard Home Assistant
+     *       MQTT camera integration but provides flexibility for custom
+     *       integrations to request fresh images.
      */
     void init() override;
 };
