@@ -1,20 +1,20 @@
 // SPDX-FileCopyrightText: 2025 Odd Østlie <theoddpirate@gmail.com>
 // SPDX-License-Identifier: LGPL-2.1-or-later
 
-#include "textbox.h"
+#include "text.h"
 #include "core.h"
 #include <QJsonDocument>
 #include <QJsonObject>
 #include <QMqttClient>
 #include <QMqttSubscription>
 
-Textbox::Textbox(QObject *parent)
+Text::Text(QObject *parent)
     : Entity(parent)
 {
     setHaType("text");
 }
 
-void Textbox::init()
+void Text::init()
 {
     setDiscoveryConfig("state_topic", baseTopic());
     setDiscoveryConfig("command_topic", baseTopic() + "/set");
@@ -34,7 +34,7 @@ void Textbox::init()
     }
 }
 
-void Textbox::setState(const QString &text)
+void Text::setState(const QString &text)
 {
     m_text = text;
     if (HaControl::mqttClient()->state() == QMqttClient::Connected) {

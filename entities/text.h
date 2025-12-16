@@ -5,11 +5,11 @@
 
 #include "entity.h"
 
-class Textbox : public Entity
+class Text : public Entity
 {
     Q_OBJECT
 public:
-    explicit Textbox(QObject *parent = nullptr);
+    explicit Text(QObject *parent = nullptr);
 
     void init() override;
 
