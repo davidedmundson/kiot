@@ -14,7 +14,8 @@ This directory contains the core entity implementations for the KIOT (KDE Intern
   - [Event](#6-event)
   - [Select](#7-select)
   - [Number](#8-number)
-  - [Text](#9-text)
+  - [Textbox](#9-textbox)
+  - [Camera](#10-camera)
 - [Creating New Entities](#creating-new-entities)
 - [MQTT Topic Structure](#mqtt-topic-structure)
 - [Home Assistant Discovery](#home-assistant-discovery)
@@ -186,6 +187,24 @@ connect(text, &Text::stateChangeRequested, [](const QString &text) {
 });
 ```
 
+### 10. **Camera** (`camera.h` / `camera.cpp`)
+Represents camera entities for image publishing.
+
+**Home Assistant Type:** `camera`  
+**Use Cases:** Screenshot sharing, webcam snapshots, image-based sensors
+
+**Example Configuration:**
+```cpp
+Camera *camera = new Camera(parent);
+camera->setId("screenshot");
+camera->setName("Screenshot");
+// Publish an image:
+camera->publishImage(base64ImageData);
+connect(camera, &Camera::commandReceived, [](const QString &cmd) {
+    // Handle image update requests
+});
+```
+
 ---
 
 ## Creating New Entities
@@ -330,8 +349,8 @@ Each entity type maps directly to Home Assistant entity types:
 | Event | device_trigger | automation triggers |
 | Select | select | option selection |
 | Number | number | numeric input with constraints |
-| Text | text | text for input  |
-
+| Textbox | text | textbox for input  |
+| Camera | camera | image publishing |
 ---
 
 ## Testing Entities
