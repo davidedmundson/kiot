@@ -221,6 +221,7 @@ Shortcuts=true
 | Gamepad Connected | Binary Sensor | Gamepad/joystick connection detection |
 | Scripts | Button | Execute custom scripts |
 | Bluetooth | Switch | Bluetooth adapter control and device connection management |
+
 ## Flatpak Build
 
 Flatpak installation is also supported:
