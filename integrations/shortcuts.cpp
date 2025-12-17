@@ -8,7 +8,6 @@
 #include <KSharedConfig>
 #include <QAction>
 #include <QCoreApplication>
-#include <QDebug>
 
 void registerShortcuts()
 {
