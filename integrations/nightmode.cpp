@@ -51,7 +51,7 @@ NightMode::NightMode(QObject *parent)
                                                                       QStringLiteral("inhibit"));
             QDBusReply<uint32_t> reply = QDBusConnection::sessionBus().call(inhibitCall);
             if (!reply.isValid()) {
-                qCWarning(gamepad) << "Failed to inhibit nightmode";
+                qCWarning(nightmode) << "Failed to inhibit nightmode";
                 return;
             }
             m_inhibitCookie = reply.value();

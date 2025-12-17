@@ -15,7 +15,6 @@ Q_LOGGING_CATEGORY(scripts, "integration.Scripts")
 
 void registerScripts()
 {
-    qCInfo(gamepad) << "Loading scripts";
     auto scriptConfigToplevel = KSharedConfig::openConfig()->group("Scripts");
     const QStringList scriptIds = scriptConfigToplevel.groupList();
     for (const QString &scriptId : scriptIds) {
@@ -34,7 +33,7 @@ void registerScripts()
         // Home assistant integration supports payloads, which we could expose as args
         // maybe via some substitution in the exec line
         QObject::connect(button, &Button::triggered, qApp, [exec, scriptId]() {
-            qCInfo(gamepad) << "Running script " << scriptId;
+            qCInfo(scripts) << "Running script " << scriptId;
             // DAVE TODO flatpak escaping
             KProcess *p = new KProcess();
             p->setShellCommand(exec);
@@ -42,5 +41,7 @@ void registerScripts()
             delete p;
         });
     }
+    if( scriptIds.length() >= 1 )
+        qCInfo(scripts) << "Loaded" << scriptIds.length() << " scripts:" << scriptIds.join(", ");
 }
 REGISTER_INTEGRATION("Scripts", registerScripts, true)

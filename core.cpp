@@ -103,7 +103,7 @@ void HaControl::loadIntegrations(KSharedConfigPtr config)
     auto integrationconfig = config->group("Integrations");
 
     if (!integrationconfig.exists()) {
-        qWarning() << "Integration group not found in config, defaulting to onByDefault values";
+        qCWarning(core) << "Integration group not found in config, defaulting to onByDefault values";
     }
 
     for (const auto &entry : s_integrations) {

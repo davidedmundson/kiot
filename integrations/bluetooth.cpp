@@ -54,7 +54,7 @@ public:
                 m_device->disconnectFromDevice();
             }
         });
-        qCInfo() << "Bluetooth device added: " << device->name() << " (" << device->address() << ")";
+        qCInfo(bt) << "Bluetooth device added: " << device->name() << " (" << device->address() << ")";
     }
 
 private:
