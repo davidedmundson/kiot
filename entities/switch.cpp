@@ -8,6 +8,10 @@
 #include <QMqttClient>
 #include <QMqttSubscription>
 
+#include <QLoggingCategory>
+Q_DECLARE_LOGGING_CATEGORY(swi)
+Q_LOGGING_CATEGORY(swi, "entities.Switch")
+
 Switch::Switch(QObject *parent)
     : Entity(parent)
 {
@@ -33,7 +37,7 @@ void Switch::init()
             } else if (message.payload() == "false") {
                 Q_EMIT stateChangeRequested(false);
             } else {
-                qWarning() << "unknown state request" << message.payload();
+                qCWarning(swi) << "unknown state request" << message.payload();
             }
         });
     }

@@ -8,6 +8,10 @@
 #include <QMqttClient>
 #include <QMqttSubscription>
 
+#include <QLoggingCategory>
+Q_DECLARE_LOGGING_CATEGORY(sel)
+Q_LOGGING_CATEGORY(sel, "entities.Select")
+
 Select::Select(QObject *parent)
     : Entity(parent)
 {
@@ -60,7 +64,7 @@ void Select::init()
     if (subscription) {
         connect(subscription, &QMqttSubscription::messageReceived, this, [this](const QMqttMessage &message) {
             const QString newValue = QString::fromUtf8(message.payload());
-            qDebug() << "Received new value for " << name() << ": " << newValue;
+            qCDebug(sel) << "Received new value for " << name() << ": " << newValue;
             // Oppdater lokalt
             m_state = newValue;
             publishState();

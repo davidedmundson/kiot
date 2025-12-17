@@ -4,6 +4,11 @@
 #include "number.h"
 #include "core.h"
 #include <QMqttClient>
+
+#include <QLoggingCategory>
+Q_DECLARE_LOGGING_CATEGORY(numb)
+Q_LOGGING_CATEGORY(numb, "entities.Number")
+
 Number::Number(QObject *parent)
     : Entity(parent)
 {
@@ -39,7 +44,7 @@ void Number::init()
             if (ok) {
                 Q_EMIT valueChangeRequested(newValue);
             } else {
-                qWarning() << "Invalid payload for number entity:" << message.payload();
+                qCWarning(numb) << "Invalid payload for number entity:" << message.payload();
             }
         });
     }
