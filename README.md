@@ -1,5 +1,20 @@
 # Kiot - KDE Internet Of Things
 
+## Navigation
+- [About](#about)
+- [Setup](#setup)
+  - [Dependencies](#dependencies)
+  - [Download and Install](#download-and-install)
+- [Configuration](#configuration)
+  - [MQTT Configuration](#mqtt-configuration)
+  - [Logging Configuration](#logging-configuration)
+  - [Configuration Examples](#configuration-examples)
+- [Supported Features](#supported-features)
+- [Flatpak Build](#flatpak-build)
+- [Future Development](#future-development)
+- [Contributing](#contributing)
+- [Troubleshooting](#troubleshooting)
+
 ## About
 
 Kiot (KDE Internet Of Things) is a background daemon that exposes useful information and actions from your local desktop session to a home automation controller like Home Assistant.
@@ -52,7 +67,9 @@ Ensure you have these packages installed:
 
 3. If you encounter missing dependencies during the build process, install them using your distribution's package manager.
 
-## MQTT Configuration
+## Configuration
+
+### MQTT Configuration
 
 Home Assistant must have MQTT server enabled. See the [Home Assistant MQTT documentation](https://www.home-assistant.io/integrations/mqtt/).
 
@@ -69,25 +86,120 @@ password=myPassword
 > [!NOTE]
 > If Kiot is running and you change the configuration, you must restart Kiot for changes to take effect.
 
-### Home Assistant Managed MQTT
+#### Home Assistant Managed MQTT
 - `host`: Your Home Assistant local address
 - `port`: 1883 (default)
 - `user` and `password`: Credentials of a Home Assistant user (**recommended to create a dedicated MQTT user**)
 
-### Home Assistant Container
+#### Home Assistant Container
 - `host`: IP address where the MQTT broker is accessible
 - `port`: 1883 (default)
 - `user` and `password`: Credentials configured for your MQTT broker
 
 On the Home Assistant side, everything should work automatically with MQTT discovery. After configuring Kiot, try rebooting Home Assistant, then launch the `kiot` program to see if everything connects properly.
 
-## Project Goals
+### Logging Configuration
 
-Compared to similar projects, Kiot focuses on practical desktop integration rather than exposing unnecessary system statistics. There's no value in exposing "kernel version" in a home automation context. Instead, Kiot emphasizes:
+Kiot includes a comprehensive logging system with the following features:
+- **Colored terminal output** for easy debugging
+- **File-based logging** with automatic rotation
+- **Configurable log levels**
 
-1. **Practical desktop integration** with features that are genuinely useful for home automation
-2. **Plasma-specific properties** (while not exclusive to Plasma)
-3. **Intuitive Home Assistant integration** with device triggers and actions that appear in an easy to use way
+#### Log File Location
+Log files are stored in the application data directory:
+- `~/.local/share/kiot/kiot_logs.log` (current log)
+- `~/.local/share/kiot/kiot_logs.log.old` (rotated backup)
+If using flatpak the log file is at 
+- `~/.var/app/org.kde.kiot/data/kiot/kiot_logs.log` (current log)
+- `~/.var/app/org.kde.kiot/data/kiot/kiot_logs.log.old` (rotated backup)
+
+#### Configuration Options
+Add these options to the `[general]` section of `~/.config/kiotrc`:
+
+```ini
+[general]
+# ... other MQTT settings ...
+
+# Logging configuration (optional)
+logToFile=true          # Enable/disable file logging (default: true)
+
+```
+
+#### Log Rotation
+- Log files automatically rotate when they exceed 2 MB
+- Only one backup file is kept (`kiot_logs.log.old`)
+- The rotation happens automatically during runtime
+
+#### Viewing Logs
+Native
+```bash
+# View current log file
+tail -f ~/.local/share/kiot/kiot_logs.log
+
+# View rotated backup
+cat ~/.local/share/kiot/kiot_logs.log.old
+```
+Flatpak
+```bash
+# View current log file
+tail -f ~/.var/app/org.kde.kiot/data/kiot/kiot_logs.log
+
+# View rotated backup
+cat ~/.var/app/org.kde.kiot/data/kiot/kiot_logs.log.old
+```
+
+### Configuration Examples
+
+#### Basic Configuration
+```ini
+[general]
+host=192.168.1.100
+port=1883
+user=mqtt_user
+password=secure_password
+useSSL=false
+logToFile=true  # Enable file logging
+```
+
+#### Scripts Configuration
+```ini
+[Scripts][launch_chrome]
+Name=Launch Chrome
+Exec=google-chrome
+
+[Scripts][steam_bigpicture]
+Exec=steam steam://open/bigpicture
+Name=Launch steam bigpicture
+```
+
+#### Shortcuts Configuration
+```ini
+[Shortcuts][myShortcut1]
+Name=Do a thing
+# Becomes available in KDE's Global Shortcuts KCM for key assignment
+# Appears as a trigger in Home Assistant for keyboard-driven automations
+```
+
+#### Integration Management
+```ini
+[Integrations]
+# This section is auto-generated and lets you enable/disable integrations
+AccentColour=true
+Active=true
+ActiveWindow=true
+Audio=true
+Battery=true
+Bluetooth=true
+CameraWatcher=true
+DnD=true
+Gamepad=true
+LockedState=true
+Nightmode=true
+Notifications=true
+PowerController=true
+Scripts=true
+Shortcuts=true
+```
 
 ## Supported Features
 
@@ -109,61 +221,6 @@ Compared to similar projects, Kiot focuses on practical desktop integration rath
 | Gamepad Connected | Binary Sensor | Gamepad/joystick connection detection |
 | Scripts | Button | Execute custom scripts |
 
-
-
-## Configuration Examples
-
-### Basic Configuration
-```ini
-[general]
-host=192.168.1.100
-port=1883
-user=mqtt_user
-password=secure_password
-useSSL=false
-```
-
-### Scripts Configuration
-```ini
-[Scripts][launch_chrome]
-Name=Launch Chrome
-Exec=google-chrome
-
-[Scripts][steam_bigpicture]
-Exec=steam steam://open/bigpicture
-Name=Launch steam bigpicture
-```
-
-
-### Shortcuts Configuration
-```ini
-[Shortcuts][myShortcut1]
-Name=Do a thing
-# Becomes available in KDE's Global Shortcuts KCM for key assignment
-# Appears as a trigger in Home Assistant for keyboard-driven automations
-```
-
-### Integration Management
-```ini
-[Integrations]
-# This section is auto-generated and lets you enable/disable integrations
-AccentColour=true
-Active=true
-ActiveWindow=true
-Audio=true
-Battery=true
-Bluetooth=true
-CameraWatcher=true
-DnD=true
-Gamepad=true
-LockedState=true
-Nightmode=true
-Notifications=true
-PowerController=true
-Scripts=true
-Shortcuts=true
-```
-
 ## Flatpak Build
 
 Flatpak installation is also supported:
@@ -178,6 +235,7 @@ Flatpak installation is also supported:
 ### Flatpak Notes
 - The Flatpak version does not autostart automatically
 - Some integrations may have limited functionality due to Flatpak sandboxing
+- Log files are stored within the Flatpak sandbox
 
 ## Future Development
 
@@ -188,7 +246,7 @@ Long-term, Flatpak distribution is the primary focus. The goal is to publish to 
 2. **Enhanced Integration** - More desktop environment features and system monitoring
 3. **Better Documentation** - Comprehensive guides and examples
 4. **Extensibility / Plugin System** – Explore ways to allow community developed integrations
-
+5. **Advanced Logging** - Web-based log viewer, log level filtering, remote logging
 
 ## Contributing
 
@@ -204,10 +262,12 @@ Contributions are welcome!
 2. **Missing Entities in Home Assistant**: Check MQTT discovery is enabled in HA
 3. **Permission Errors**: Some integrations may require additional permissions
 4. **Flatpak Limitations**: Some system integrations may not work in sandboxed environment
+5. **Logging Issues**: Check file permissions in `~/.local/share/kiot/`
 
 ### Getting Help
 - Check the configuration examples above
 - Review the Home Assistant MQTT documentation
 - Examine system logs for error messages
+- Check Kiot's log files in `~/.local/share/kiot/`
 
 ---
