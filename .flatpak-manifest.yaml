@@ -22,6 +22,8 @@ finish-args:
   - "--own-name=org.kde.StatusNotifierItem-2-2"
   - "--talk-name=org.kde.KWin"
   - "--talk-name=org.bluez"
+  - "--talk-name=org.mpris.MediaPlayer2"
+  - "--talk-name=org.freedesktop.DBus"
 
 modules:
   - name: extra-cmake-modules
