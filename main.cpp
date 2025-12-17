@@ -131,7 +131,7 @@ int main(int argc, char **argv)
     KSignalHandler::self()->watchSignal(SIGINT);
     QObject::connect(KSignalHandler::self(), &KSignalHandler::signalReceived, [](int sig) {
         if (sig == SIGTERM || sig == SIGINT) {
-            qCInfo(main) << "Shuting down kiot"
+            qCInfo(main) << "Shuting down kiot";
             QApplication::quit();
         }
     });
