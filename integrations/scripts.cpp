@@ -8,11 +8,14 @@
 #include <KSharedConfig>
 #include <QAction>
 #include <QCoreApplication>
-#include <QDebug>
+
+#include <QLoggingCategory>
+Q_DECLARE_LOGGING_CATEGORY(scripts)
+Q_LOGGING_CATEGORY(scripts, "integration.Scripts")
 
 void registerScripts()
 {
-    qInfo() << "Loading scripts";
+    qCInfo(gamepad) << "Loading scripts";
     auto scriptConfigToplevel = KSharedConfig::openConfig()->group("Scripts");
     const QStringList scriptIds = scriptConfigToplevel.groupList();
     for (const QString &scriptId : scriptIds) {
@@ -21,7 +24,7 @@ void registerScripts()
         const QString exec = scriptConfig.readEntry("Exec");
 
         if (exec.isEmpty()) {
-            qWarning() << "Could not find script Exec entry for" << scriptId;
+            qCWarning(scripts) << "Could not find script Exec entry for" << scriptId;
             continue;
         }
 
@@ -31,7 +34,7 @@ void registerScripts()
         // Home assistant integration supports payloads, which we could expose as args
         // maybe via some substitution in the exec line
         QObject::connect(button, &Button::triggered, qApp, [exec, scriptId]() {
-            qInfo() << "Running script " << scriptId;
+            qCInfo(gamepad) << "Running script " << scriptId;
             // DAVE TODO flatpak escaping
             KProcess *p = new KProcess();
             p->setShellCommand(exec);

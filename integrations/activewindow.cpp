@@ -7,13 +7,16 @@
 #include <QDBusConnection>
 #include <QDBusInterface>
 #include <QDBusReply>
-#include <QDebug>
 #include <QFile>
 #include <QJsonDocument>
 #include <QJsonObject>
 #include <QJsonValue>
 #include <QStandardPaths>
 #include <QTimer>
+
+#include <QLoggingCategory>
+Q_DECLARE_LOGGING_CATEGORY(aw)
+Q_LOGGING_CATEGORY(aw, "integration.ActiveWindow")
 
 class ActiveWindowWatcher : public QObject
 {
@@ -45,19 +48,19 @@ ActiveWindowWatcher::ActiveWindowWatcher(QObject *parent)
     m_sensor->setDiscoveryConfig("icon", "mdi:application");
     // Register DBus service first
     if (!QDBusConnection::sessionBus().registerService("org.davidedmundson.kiot.ActiveWindow")) {
-        qWarning() << "ActiveWindowWatcher: Failed to register DBus service";
+        qCWarning(aw) << "ActiveWindowWatcher: Failed to register DBus service";
         m_sensor->setState("Unavailable");
         return;
     }
 
     if (!QDBusConnection::sessionBus().registerObject("/ActiveWindow", "org.davidedmundson.kiot.ActiveWindow", this, QDBusConnection::ExportAllSlots)) {
-        qWarning() << "ActiveWindowWatcher: Failed to register DBus object";
+        qCWarning(aw) << "ActiveWindowWatcher: Failed to register DBus object";
         m_sensor->setState("Unavailable");
         return;
     }
 
     if (!registerKWinScript()) {
-        qWarning() << "ActiveWindowWatcher: Failed to register KWin script";
+        qCWarning(aw) << "ActiveWindowWatcher: Failed to register KWin script";
         m_sensor->setState("Unavailable");
         return;
     }
@@ -77,7 +80,7 @@ bool ActiveWindowWatcher::registerKWinScript()
     m_kwinIface = new QDBusInterface("org.kde.KWin", "/Scripting", "org.kde.kwin.Scripting", QDBusConnection::sessionBus(), this);
 
     if (!m_kwinIface->isValid()) {
-        qWarning() << "ActiveWindowWatcher: KWin scripting interface not available";
+        qCWarning(aw) << "ActiveWindowWatcher: KWin scripting interface not available";
         return false;
     }
 
@@ -87,18 +90,18 @@ bool ActiveWindowWatcher::registerKWinScript()
     // Locate installed KWin script from KDE data dirs
     m_scriptPath = QStandardPaths::locate(QStandardPaths::GenericDataLocation, QStringLiteral("kiot/activewindow_kwin.js"));
     if (m_scriptPath.isEmpty()) {
-        qWarning() << "ActiveWindowWatcher: installed KWin script not found in data dirs";
+        qCWarning(aw) << "ActiveWindowWatcher: installed KWin script not found in data dirs";
         return false;
     }
 
     QDBusMessage reply = m_kwinIface->call("loadScript", m_scriptPath, "kiot_activewindow");
     if (reply.type() == QDBusMessage::ErrorMessage) {
-        qWarning() << "ActiveWindowWatcher: loadScript failed:" << reply.errorMessage();
+        qCWarning(aw) << "ActiveWindowWatcher: loadScript failed:" << reply.errorMessage();
         return false;
     }
 
     if (reply.arguments().isEmpty()) {
-        qWarning() << "ActiveWindowWatcher: loadScript returned no arguments";
+        qCWarning(aw) << "ActiveWindowWatcher: loadScript returned no arguments";
         return false;
     }
 
@@ -110,19 +113,19 @@ bool ActiveWindowWatcher::registerKWinScript()
         int id = arg.toInt();
         scriptObjectPath = QString("/Scripting/Script%1").arg(id);
     } else {
-        qWarning() << "ActiveWindowWatcher: Unexpected return type from loadScript:" << arg.typeName();
+        qCWarning(aw) << "ActiveWindowWatcher: Unexpected return type from loadScript:" << arg.typeName();
         return false;
     }
     QDBusInterface scriptIface("org.kde.KWin", scriptObjectPath, "org.kde.kwin.Script", QDBusConnection::sessionBus());
     if (!scriptIface.isValid()) {
-        qWarning() << "ActiveWindowWatcher: scriptIface invalid for path" << scriptObjectPath;
+        qCWarning(aw) << "ActiveWindowWatcher: scriptIface invalid for path" << scriptObjectPath;
         QFile::remove(m_scriptPath);
         return false;
     }
 
     QDBusMessage runReply = scriptIface.call("run");
     if (runReply.type() == QDBusMessage::ErrorMessage) {
-        qWarning() << "ActiveWindowWatcher: run failed:" << runReply.errorMessage();
+        qCWarning(aw) << "ActiveWindowWatcher: run failed:" << runReply.errorMessage();
         QFile::remove(m_scriptPath);
         return false;
     }

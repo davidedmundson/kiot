@@ -10,6 +10,9 @@
 #include <BluezQt/InitManagerJob>
 #include <BluezQt/Manager>
 
+#include <QLoggingCategory>
+Q_DECLARE_LOGGING_CATEGORY(bt)
+Q_LOGGING_CATEGORY(bt, "integration.Bluetooth")
 
 // ==== Bluetooth devices code ==========
 class BluetoothDeviceSwitch : public QObject
@@ -51,7 +54,7 @@ public:
                 m_device->disconnectFromDevice();
             }
         });
-      
+        qCInfo() << "Bluetooth device added: " << device->name() << " (" << device->address() << ")";
     }
 
 private:
@@ -64,7 +67,7 @@ private:
         if (!m_device) return;
         if(!m_device->isPaired()){
             // TODO set entity as unavailable in HA and delete this
-            qDebug() << m_device->name() << " is not paired anymore";
+            qCDebug(bt) << m_device->name() << " is not paired anymore";
             m_switch->setState(false);
         }
         //Only update state and icon if actually changed to avoid unnecessary re registreations with mqtt
@@ -129,7 +132,7 @@ BluetoothAdapterWatcher::BluetoothAdapterWatcher(QObject *parent)
 
     connect(job, &BluezQt::InitManagerJob::result, this, [this, job]() {
         if (job->error()) {
-            qWarning() << "Bluez init failed:" << job->errorText();
+            qCWarning(bt) << "Bluez init failed:" << job->errorText();
             m_switch->setState(false);
             return;
         }
@@ -173,7 +176,7 @@ BluetoothAdapterWatcher::BluetoothAdapterWatcher(QObject *parent)
 
         } 
         else {
-            qWarning() << "No adapters found";
+            qCWarning(bt) << "No adapters found";
             m_switch->setState(false);
         }
     });
@@ -186,7 +189,7 @@ BluetoothAdapterWatcher::BluetoothAdapterWatcher(QObject *parent)
             return;
 
         m_adapter->setPowered(requestedState);
-        qDebug() << "Set adapter powered to" << requestedState;
+        qCDebug(bt) << "Set adapter powered to" << requestedState;
     });
 }
 void BluetoothAdapterWatcher::CheckPairedState()
@@ -214,9 +217,8 @@ void BluetoothAdapterWatcher::CheckPairedState()
 void BluetoothAdapterWatcher::update(){
     if(!m_adapter || !m_switch)
     {
-
-    qDebug() << "No adapter or switch found"; //Deb
-    return;
+        qCWarning(bt) << "No adapter or switch found";
+        return;
     }
 
     //Adapter state
