@@ -103,7 +103,7 @@ On the Home Assistant side, everything should work automatically with MQTT disco
 Kiot includes a comprehensive logging system with the following features:
 - **Colored terminal output** for easy debugging
 - **File-based logging** with automatic rotation
-- **Configurable log levels**
+
 
 #### Log File Location
 Log files are stored in the application data directory:
@@ -246,7 +246,6 @@ Long-term, Flatpak distribution is the primary focus. The goal is to publish to 
 2. **Enhanced Integration** - More desktop environment features and system monitoring
 3. **Better Documentation** - Comprehensive guides and examples
 4. **Extensibility / Plugin System** – Explore ways to allow community developed integrations
-5. **Advanced Logging** - Web-based log viewer, log level filtering, remote logging
 
 ## Contributing
 
@@ -262,12 +261,12 @@ Contributions are welcome!
 2. **Missing Entities in Home Assistant**: Check MQTT discovery is enabled in HA
 3. **Permission Errors**: Some integrations may require additional permissions
 4. **Flatpak Limitations**: Some system integrations may not work in sandboxed environment
-5. **Logging Issues**: Check file permissions in `~/.local/share/kiot/`
+5. **Logging Issues**: Check file permissions in `~/.local/share/kiot/` or for Flatpak in  `~/.var/app/org.kde.kiot/data/kiot/kiot_logs.log`
 
 ### Getting Help
 - Check the configuration examples above
 - Review the Home Assistant MQTT documentation
 - Examine system logs for error messages
-- Check Kiot's log files in `~/.local/share/kiot/`
+- Check Kiot's log files in `~/.local/share/kiot/` or for Flatpak in `~/.var/app/org.kde.kiot/data/kiot/kiot_logs.log`
 
 ---
