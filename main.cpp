@@ -1,7 +1,10 @@
-#include <QApplication>
-#include <QDebug>
-
 #include "core.h"
+
+#include <QApplication>
+#include <QFile>
+#include <QDir>
+#include <QMutex>
+
 #include <KAboutData>
 #include <KConfigGroup>
 #include <KDBusService>

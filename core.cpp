@@ -8,6 +8,10 @@
 #include <QJsonObject>
 #include <QMqttClient>
 #include <QTimer>
+#include <QLoggingCategory>
+
+Q_DECLARE_LOGGING_CATEGORY(core)
+Q_LOGGING_CATEGORY(core, "kiot.HaControl")
 
 HaControl *HaControl::s_self = nullptr;
 QList<IntegrationFactory> HaControl::s_integrations;
@@ -35,8 +39,8 @@ HaControl::HaControl()
     m_client->setKeepAlive(3); // set a low ping so we become unavailable on suspend quickly
 
     if (m_client->hostname().isEmpty()) {
-        qCritical() << "Server is not configured, please check " << config->name() << "is configured";
-        qCritical() << "kiotrc expected at " << QStandardPaths::writableLocation(QStandardPaths::ConfigLocation);
+        qCCritical(core) << "Server is not configured, please check " << config->name() << "is configured";
+        qCCritical(core) << "kiotrc expected at " << QStandardPaths::writableLocation(QStandardPaths::ConfigLocation);
     }
 
     m_connectedNode = new ConnectedNode(this);
@@ -53,14 +57,14 @@ HaControl::HaControl()
     connect(m_client, &QMqttClient::stateChanged, this, [reconnectTimer, this](QMqttClient::ClientState state) {
         switch (state) {
         case QMqttClient::Connected:
-            qDebug() << "connected";
+            qCInfo(core) << "connected";
             break;
         case QMqttClient::Connecting:
-            qDebug() << "connecting";
+            qCInfo(core) << "connecting";
             break;
         case QMqttClient::Disconnected:
-            qDebug() << m_client->error();
-            qDebug() << "disconnected";
+            qCWarning(core) << m_client->error();
+            qCInfo(core) << "disconnected";
             reconnectTimer->start();
             // do I need to reconnect?
             break;
@@ -112,9 +116,9 @@ void HaControl::loadIntegrations(KSharedConfigPtr config)
 
         if (enabled) {
             entry.factory();
-            qDebug() << "Started integration:" << entry.name;
+            qCInfo(core) << "Started integration:" << entry.name;
         } else {
-            qDebug() << "Skipped integration:" << entry.name;
+            qCDebug(core) << "Skipped integration:" << entry.name;
         }
     }
 }
