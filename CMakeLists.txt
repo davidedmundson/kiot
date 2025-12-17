@@ -86,6 +86,9 @@ target_link_libraries(
     KF6::CoreAddons
     KF6::DBusAddons
 )
+target_compile_definitions(kiot PRIVATE
+    $<$<CONFIG:Release>:QT_NO_DEBUG_OUTPUT>
+)
 
 install(TARGETS kiot ${KDE_INSTALL_TARGETS_DEFAULT_ARGS})
 
