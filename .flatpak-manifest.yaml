@@ -21,9 +21,16 @@ finish-args:
   - "--talk-name=org.kde.StatusNotifierWatcher"
   - "--own-name=org.kde.StatusNotifierItem-2-2"
   - "--talk-name=org.kde.KWin"
-
+  - "--talk-name=org.bluez"
 
 modules:
+  - name: extra-cmake-modules
+    buildsystem: cmake-ninja
+    sources:
+      - type: git
+        url: https://invent.kde.org/frameworks/extra-cmake-modules
+        tag: v6.21.0
+
   - name: qtmqtt
     buildsystem: cmake-ninja
     sources:
@@ -37,6 +44,13 @@ modules:
       - type: git
         url: https://invent.kde.org/libraries/pulseaudio-qt
         tag: v1.7.0
+
+  - name: bluez-qt
+    buildsystem: cmake-ninja
+    sources:
+      - type: git
+        url: https://invent.kde.org/frameworks/bluez-qt
+        tag: v6.21.0
 
   - name: kiot
     buildsystem: cmake-ninja
