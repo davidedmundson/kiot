@@ -31,7 +31,7 @@ void initLogging();
  * @param msg The actual log message
  * 
  * This handler formats log messages with timestamp, log level, and category,
- * then outputs them to both stderr (with colors) and a log file (if enabled).
+ * then outputs them to both stderr (with colors) 
  * For fatal messages, it calls abort() after logging.
  */
 void kiotMessageHandler(QtMsgType type, const QMessageLogContext &context, const QString &msg);
