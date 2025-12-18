@@ -4,29 +4,15 @@
 #include <QDateTime>
 #include <QStandardPaths>
 
-#include <KConfigGroup>
-#include <KSharedConfig>
-
-#include <csignal>
 #include <cstdio>
 
-// Define logging category
 Q_LOGGING_CATEGORY(main_cpp, "kiot.main")
 
-// Global variables
 QtMessageHandler originalHandler = nullptr;
 
 
-void initLogging(KSharedConfig *config) {
-    // Use provided config or open default
-    KSharedConfigPtr configPtr;
-    if (config) {
-        configPtr = KSharedConfigPtr(config);
-    } else {
-        configPtr = KSharedConfig::openConfig();
-    }
-    
-    // Install message handler
+void initLogging() {
+
     originalHandler = qInstallMessageHandler(kiotMessageHandler);
     
 }

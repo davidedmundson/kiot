@@ -21,10 +21,8 @@ int main(int argc, char **argv)
 {
     QApplication app(argc, argv);
     
-    // Initialize logging system with configuration
     initLogging();
     
-    // Set up KDE application metadata
     KAboutData aboutData(
         QStringLiteral("kiot"),
         "KDE IOT",
@@ -34,13 +32,10 @@ int main(int argc, char **argv)
         "© 2024"
     );
     
-    // Set up D-Bus service
     KDBusService service(KDBusService::Unique | KDBusService::Replace);
     
-    // Initialize application control
     HaControl appControl;
 
-    // Set up signal handling for graceful shutdown
     KSignalHandler::self()->watchSignal(SIGTERM);
     KSignalHandler::self()->watchSignal(SIGINT);
     QObject::connect(KSignalHandler::self(), &KSignalHandler::signalReceived, [](int sig) {
@@ -50,7 +45,6 @@ int main(int argc, char **argv)
         }
     });
 
-    // Start the application event loop
     return app.exec();
 }
 // SPDX-FileCopyrightText: 2025 David Edmundson <davidedmundson@kde.org>

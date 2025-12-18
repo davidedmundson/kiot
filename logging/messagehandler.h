@@ -4,8 +4,6 @@
 #include <QLoggingCategory>
 #include <QtGlobal>
 
-// Forward declaration
-class KSharedConfig;
 
 /**
  * @file messagehandler.h
@@ -24,7 +22,7 @@ extern QtMessageHandler originalHandler;
  * Loads logging settings from KConfig and sets up the message handler.
  * Should be called early in main() before any logging occurs.
  */
-void initLogging(KSharedConfig *config = nullptr);
+void initLogging();
 
 /**
  * @brief Custom Qt message handler for kiot application
