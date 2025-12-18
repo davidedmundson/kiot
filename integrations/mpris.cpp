@@ -326,9 +326,8 @@ private:
         connect(m_playerEntity,&MediaPlayer::volumeChanged, this, [this](double vol){
             if(m_activePlayer) m_activePlayer->setVolume(vol);
         });
-        connect(m_playerEntity, &MediaPlayer::positionChanged, this, [this](qint64 vol){
-            qCDebug(mpris) << "Position changed to" << vol;
-            if(m_activePlayer) m_activePlayer->setPosition(vol);
+        connect(m_playerEntity, &MediaPlayer::positionChanged, this, [this](qint64 pos){
+            if(m_activePlayer) m_activePlayer->setPosition(pos);
         });
         connect(m_playerEntity,&MediaPlayer::playMediaRequested, this, [this](QString payload){
             if(!m_activePlayer) return;
@@ -566,6 +565,7 @@ private:
                 state["albumart"] = "";
             }
         }
+
         m_playerEntity->setState(state);
     }
     
