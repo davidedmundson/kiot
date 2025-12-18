@@ -135,22 +135,20 @@ public:
      * @param pos The target playback position in microseconds (qint64)
      * 
      * @note The pause/play workaround is necessary for proper position reporting in Home Assistant.
-     * Without this workaround, the position might not be correctly updated in HA after seeking.
+     * Without this workaround, the position will not be correctly updated in HA after seeking.
      * 
      * @see position() for getting the current playback position
      * @see stateChanged() signal emitted after position update
-     * 
-     * @warning This function assumes the MPRIS interface is available and may fail silently
-     * if the D-Bus call fails or if the media player doesn't support seeking.
      */
     void setPosition(qint64 pos) { 
 
         QDBusInterface iface(m_busName, "/org/mpris/MediaPlayer2", "org.mpris.MediaPlayer2.Player", QDBusConnection::sessionBus());
         qint64 delta = pos - position();
-        // Can somebody tell me why i need to use pause/play here to get back the correct position in HA
+        
         Pause();
         iface.call("Seek", QVariant::fromValue(delta));
         Play();
+        
         m_state["Position"] = pos;
         emit stateChanged();
     }
@@ -193,12 +191,11 @@ private slots:
             if (it.key() == "Metadata") {
                 m_state["Metadata"] = it.value();
                 changed = true;
-            } else {
-                if (!m_state.contains(it.key()) || m_state[it.key()] != it.value()) {
-                    m_state[it.key()] = it.value();
-                    changed = true;
-                }
+            } else if (!m_state.contains(it.key()) || m_state[it.key()] != it.value()) {
+                m_state[it.key()] = it.value();
+                changed = true;
             }
+            
         }
         if (changed) {
             emit stateChanged();
@@ -236,14 +233,8 @@ private:
     void callMethod(const QString &method,const QString &args=QString())
     {
         QDBusInterface iface(m_busName, "/org/mpris/MediaPlayer2", "org.mpris.MediaPlayer2.Player", QDBusConnection::sessionBus());
-        if(!args.isEmpty())
-            if(method == "Seek")
-            {
-                qint64 delta = args.toLongLong() - m_state["Position"].toLongLong();
-                iface.call("Seek", QVariant::fromValue(delta));
-            }
-            else
-                iface.call(method,args);
+        if(!args.isEmpty()) //The args was just a workaround for OpenUrl and as it worked i kept it
+            iface.call(method,args);
         else
             iface.call(method);
     }
@@ -270,7 +261,7 @@ private:
  * @brief Manages multiple MPRIS players and exposes the active one to Home Assistant
  * 
  * This class monitors all MPRIS players on the system, selects the active
- * player (preferring playing ones), and exposes it through a MediaPlayerEntity
+ * player (preferring playing ones), and exposes it as a single MediaPlayer
  * to Home Assistant. It handles player discovery, removal, and state updates.
  */
 class MprisMultiplexer : public QObject
@@ -297,8 +288,9 @@ public:
             SLOT(onNameOwnerChanged(QString,QString,QString))
         );
     }
+
     /**
-     * @brief Desctructor to set mediaplayer as off
+     * @brief Desctructor to set mediaplayer as off in HA
      */
     ~MprisMultiplexer()
     {
@@ -307,38 +299,38 @@ public:
 private:
 
     /**
-     * @brief Set up the MediaPlayerEntity for Home Assistant integration
+     * @brief Set up the MediaPlayer entity for Home Assistant
      */
     void setupMediaPlayer()
     {
-        m_playerEntity = new MediaPlayerEntity(this);
+        m_playerEntity = new MediaPlayer(this);
         m_playerEntity->setId("mpris_media_player");
         m_playerEntity->setName("Kiot Active MPRIS Player");
 
         // Connect entity signals to player control methods
-        connect(m_playerEntity, &MediaPlayerEntity::playRequested, this, [this]() {
+        connect(m_playerEntity,&MediaPlayer::playRequested, this, [this]() {
             if(m_activePlayer) m_activePlayer->Play();
         });
-        connect(m_playerEntity, &MediaPlayerEntity::pauseRequested, this, [this]() {
+        connect(m_playerEntity,&MediaPlayer::pauseRequested, this, [this]() {
             if(m_activePlayer) m_activePlayer->Pause();
         });
-        connect(m_playerEntity, &MediaPlayerEntity::stopRequested, this, [this]() {
+        connect(m_playerEntity,&MediaPlayer::stopRequested, this, [this]() {
             if(m_activePlayer) m_activePlayer->Stop();
         });
-        connect(m_playerEntity, &MediaPlayerEntity::nextRequested, this, [this]() {
+        connect(m_playerEntity,&MediaPlayer::nextRequested, this, [this]() {
             if(m_activePlayer) m_activePlayer->Next();
         });
-        connect(m_playerEntity, &MediaPlayerEntity::previousRequested, this, [this]() {
+        connect(m_playerEntity,&MediaPlayer::previousRequested, this, [this]() {
             if(m_activePlayer) m_activePlayer->Previous();
         });
-        connect(m_playerEntity, &MediaPlayerEntity::volumeChanged, this, [this](double vol){
+        connect(m_playerEntity,&MediaPlayer::volumeChanged, this, [this](double vol){
             if(m_activePlayer) m_activePlayer->setVolume(vol);
         });
-        connect(m_playerEntity,  &MediaPlayerEntity::positionChanged, this, [this](qint64 vol){
+        connect(m_playerEntity, &MediaPlayer::positionChanged, this, [this](qint64 vol){
             qCDebug(mpris) << "Position changed to" << vol;
             if(m_activePlayer) m_activePlayer->setPosition(vol);
         });
-        connect(m_playerEntity, &MediaPlayerEntity::playMediaRequested, this, [this](QString payload){
+        connect(m_playerEntity,&MediaPlayer::playMediaRequested, this, [this](QString payload){
             if(!m_activePlayer) return;
             QJsonParseError err;
             QJsonDocument doc = QJsonDocument::fromJson(payload.toUtf8(), &err);
@@ -507,9 +499,10 @@ private:
     }
 
     /**
-     * @brief Update the MediaPlayerEntity with state from a player container
+     * @brief Update the MediaPlayer with state from a player container
      * @param container Player container to get state from, or nullptr for empty state
      * 
+     * @details
      * This method converts MPRIS player state to Home Assistant media player entity state.
      * It handles metadata extraction, artwork downloading, and empty state when no player is active.
      */
@@ -553,8 +546,7 @@ private:
             state["art"] = artVal.toString();
             if(metadata.contains("mpris:length")) dur = metadata.value("mpris:length").toLongLong()/1000000;
         }
-        if(cState.contains("Duration") && dur==0) dur = cState.value("Duration").toLongLong()/1000000;
-        qCDebug(mpris) << "Position:" << pos << "Duration:" << dur;
+        
         state["position"] = pos;
         state["duration"] = dur;
 
@@ -577,10 +569,9 @@ private:
         m_playerEntity->setState(state);
     }
     
-    QTimer *m_positionTimer;                      ///< Timer for periodic position updates
     QList<PlayerContainer*> m_containers;         ///< List of all discovered MPRIS players
     PlayerContainer *m_activePlayer = nullptr;    ///< Currently active player (playing or selected)
-    MediaPlayerEntity *m_playerEntity;            ///< Home Assistant media player entity
+    MediaPlayer *m_playerEntity;            ///< Home Assistant media player entity
     
 private slots:
     /**
@@ -611,8 +602,7 @@ private slots:
 /**
  * @brief Initialize the MPRIS integration
  * 
- * This function is called by the integration registry to set up MPRIS support.
- * It creates a MprisMultiplexer instance that manages all MPRIS players.
+ * This function is called by the integration factory
  */
 void setupMprisIntegration()
 {
@@ -622,8 +612,6 @@ void setupMprisIntegration()
 /**
  * @brief Register the MPRIS integration with Kiot
  * 
- * Registers the integration with name "MPRISPlayer", using setupMprisIntegration
- * as the initialization function. The integration is disabled by default.
  */
 REGISTER_INTEGRATION("MPRISPlayer", setupMprisIntegration, false)
 

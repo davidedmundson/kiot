@@ -83,15 +83,6 @@ QVariantMap MediaPlayer::state() const
     return m_state;
 }
 
-void MediaPlayer::setAvailablePlayers(const QStringList &players)
-{
-    m_players = players;
-}
-
-QStringList MediaPlayer::availablePlayers() const
-{
-    return m_players;
-}
 
 // --- Slots for commands ---
 void MediaPlayer::onPlayCommand(const QString &) { play(); }

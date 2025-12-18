@@ -78,21 +78,6 @@ public:
      */
     QVariantMap state() const;
 
-    /**
-     * @brief Sets the list of available media players
-     * @param players List of available media player names
-     * 
-     * @details
-     * Defines the list of media players available for control. This is
-     * typically used when multiple media players are available on the system.
-     */
-    void setAvailablePlayers(const QStringList &players);
-    
-    /**
-     * @brief Gets the list of available media players
-     * @return QStringList List of available media player names
-     */
-    QStringList availablePlayers() const;
 
 protected:
     /**
@@ -200,6 +185,11 @@ signals:
      * @param payload Media playback request payload (e.g., URL, media identifier)
      */
     void playMediaRequested(const QString &payload);
+    
+    /**
+     * @brief Signal emitted when position change is requested from Home Assistant
+     * @param payload Position request payload in seconds
+     */
     void positionChanged(const qint64 &payload);
 
     
@@ -207,7 +197,5 @@ signals:
 private:
     /** @private Current media player state information */
     QVariantMap m_state;
-    
-    /** @private List of available media players */
-    QStringList m_players;
+
 };
