@@ -98,10 +98,7 @@ void MediaPlayer::onNextCommand(const QString &) { next(); }
 void MediaPlayer::onPreviousCommand(const QString &) { previous(); }
 void MediaPlayer::onSetVolumeCommand(const QString &payload) { setVolume(payload.toDouble()); }
 void MediaPlayer::onPlayMediaCommand(const QString &payload) { emit playMediaRequested(payload); }
-void MediaPlayer::onPositionCommand(const QString &payload) { 
-    qDebug() << "Position command received:" << payload;
-    emit positionChanged( static_cast<qint64>(payload.toDouble() * 1000000 ));
-}
+void MediaPlayer::onPositionCommand(const QString &payload) { emit positionChanged( static_cast<qint64>(payload.toDouble() * 1000000 )); }
 
 // --- Public slots ---
 void MediaPlayer::play() { 
