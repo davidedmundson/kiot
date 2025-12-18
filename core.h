@@ -16,7 +16,7 @@ class ConnectedNode;
 struct IntegrationFactory {
     QString name;
     std::function<void()> factory;
-    bool onByDefault = true; // ny flagg for default enabled
+    bool onByDefault = true; // ny flag for default enabled
 };
 
 class HaControl : public QObject
