@@ -97,7 +97,37 @@ password=myPassword
 
 On the Home Assistant side, everything should work automatically with MQTT discovery. After configuring Kiot, try rebooting Home Assistant, then launch the `kiot` program to see if everything connects properly.
 
-### Configuration Examples
+## Project Goals
+
+Compared to similar projects, Kiot focuses on practical desktop integration rather than exposing unnecessary system statistics. There's no value in exposing "kernel version" in a home automation context. Instead, Kiot emphasizes:
+
+1. **Practical desktop integration** with features that are genuinely useful for home automation
+2. **Plasma-specific properties** (while not exclusive to Plasma)
+3. **Intuitive Home Assistant integration** with device triggers and actions that appear in an easy to use way
+
+## Supported Features
+
+### Stable Integrations
+
+| Feature | Entity Type | Description |
+|---------|-------------|-------------|
+| User Activity | Binary Sensor | Detects when user is active/inactive |
+| Locked State | Lock | Screen lock state monitoring and control |
+| Power Control | Button | Suspend, hibernate, power off, and restart |
+| Camera Activity | Binary Sensor | Detects when camera is in use |
+| Accent Colour | Sensor | Current desktop accent color |
+| Shortcuts | Device Trigger | Global keyboard shortcuts for HA automations |
+| Night Mode | Binary Sensor | Night mode/blue light filter status |
+| Active Window | Sensor | Currently focused application window |
+| Audio Controller | Number + Select | Volume control and device selection |
+| Battery Status | Sensor | Battery charge level and attributes |
+| Do Not Disturb | Binary Sensor | DnD mode status |
+| Gamepad Connected | Binary Sensor | Gamepad/joystick connection detection |
+| Scripts | Button | Execute custom scripts |
+| MPRIS Media Player | Media Player | Media control using [MQTT Media Player integration](https://github.com/bkbilly/mqtt_media_player) or patched to support seek [Patched MQTT Media Player](https://github.com/TheOddPirate/mqtt_media_player) |
+
+
+## Configuration Examples
 
 #### Basic Configuration
 ```ini
