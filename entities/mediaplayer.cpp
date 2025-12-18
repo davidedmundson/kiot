@@ -6,13 +6,13 @@
 #include <QMqttSubscription>
 #include <QDebug>
 
-MediaPlayerEntity::MediaPlayerEntity(QObject *parent)
+MediaPlayer::MediaPlayer(QObject *parent)
     : Entity(parent)
 {
     setHaType("media_player");
 }
 
-void MediaPlayerEntity::init()
+void MediaPlayer::init()
 {
 
     setDiscoveryConfig("name",name());
@@ -49,19 +49,19 @@ void MediaPlayerEntity::init()
         }
     };
 
-    subscribe(baseTopic() + "/play", &MediaPlayerEntity::onPlayCommand);
-    subscribe(baseTopic() + "/pause", &MediaPlayerEntity::onPauseCommand);
-    subscribe(baseTopic() + "/playpause", &MediaPlayerEntity::onPlayPauseCommand);
-    subscribe(baseTopic() + "/stop", &MediaPlayerEntity::onStopCommand);
-    subscribe(baseTopic() + "/next", &MediaPlayerEntity::onNextCommand);
-    subscribe(baseTopic() + "/previous", &MediaPlayerEntity::onPreviousCommand);
-    subscribe(baseTopic() + "/set_volume", &MediaPlayerEntity::onSetVolumeCommand);
-    subscribe(baseTopic() + "/playmedia", &MediaPlayerEntity::onPlayMediaCommand);
-    subscribe(baseTopic() + "/setposition", &MediaPlayerEntity::onPositionCommand);
+    subscribe(baseTopic() + "/play", &MediaPlayer::onPlayCommand);
+    subscribe(baseTopic() + "/pause", &MediaPlayer::onPauseCommand);
+    subscribe(baseTopic() + "/playpause", &MediaPlayer::onPlayPauseCommand);
+    subscribe(baseTopic() + "/stop", &MediaPlayer::onStopCommand);
+    subscribe(baseTopic() + "/next", &MediaPlayer::onNextCommand);
+    subscribe(baseTopic() + "/previous", &MediaPlayer::onPreviousCommand);
+    subscribe(baseTopic() + "/set_volume", &MediaPlayer::onSetVolumeCommand);
+    subscribe(baseTopic() + "/playmedia", &MediaPlayer::onPlayMediaCommand);
+    subscribe(baseTopic() + "/setposition", &MediaPlayer::onPositionCommand);
 }
 
 
-void MediaPlayerEntity::setState(const QVariantMap &info)
+void MediaPlayer::setState(const QVariantMap &info)
 {
     bool changed = false;
 
@@ -78,66 +78,66 @@ void MediaPlayerEntity::setState(const QVariantMap &info)
     }
 }
 
-QVariantMap MediaPlayerEntity::state() const
+QVariantMap MediaPlayer::state() const
 {
     return m_state;
 }
 
-void MediaPlayerEntity::setAvailablePlayers(const QStringList &players)
+void MediaPlayer::setAvailablePlayers(const QStringList &players)
 {
     m_players = players;
 }
 
-QStringList MediaPlayerEntity::availablePlayers() const
+QStringList MediaPlayer::availablePlayers() const
 {
     return m_players;
 }
 
 // --- Slots for commands ---
-void MediaPlayerEntity::onPlayCommand(const QString &) { play(); }
-void MediaPlayerEntity::onPauseCommand(const QString &) { pause(); }
-void MediaPlayerEntity::onPlayPauseCommand(const QString &payload) { 
+void MediaPlayer::onPlayCommand(const QString &) { play(); }
+void MediaPlayer::onPauseCommand(const QString &) { pause(); }
+void MediaPlayer::onPlayPauseCommand(const QString &payload) { 
     if(payload == "Pause")
         pause();
     else if(payload == "Play")
         play();
 }
-void MediaPlayerEntity::onStopCommand(const QString &) { stop(); }
-void MediaPlayerEntity::onNextCommand(const QString &) { next(); }
-void MediaPlayerEntity::onPreviousCommand(const QString &) { previous(); }
-void MediaPlayerEntity::onSetVolumeCommand(const QString &payload) { setVolume(payload.toDouble()); }
-void MediaPlayerEntity::onPlayMediaCommand(const QString &payload) { emit playMediaRequested(payload); }
-void MediaPlayerEntity::onPositionCommand(const QString &payload) { 
+void MediaPlayer::onStopCommand(const QString &) { stop(); }
+void MediaPlayer::onNextCommand(const QString &) { next(); }
+void MediaPlayer::onPreviousCommand(const QString &) { previous(); }
+void MediaPlayer::onSetVolumeCommand(const QString &payload) { setVolume(payload.toDouble()); }
+void MediaPlayer::onPlayMediaCommand(const QString &payload) { emit playMediaRequested(payload); }
+void MediaPlayer::onPositionCommand(const QString &payload) { 
     qDebug() << "Position command received:" << payload;
     emit positionChanged( static_cast<qint64>(payload.toDouble() * 1000000 ));
 }
 
 // --- Public slots ---
-void MediaPlayerEntity::play() { 
+void MediaPlayer::play() { 
     m_state["state"] = "playing"; 
     emit playRequested(); 
     publishState();
 }
-void MediaPlayerEntity::pause() { 
+void MediaPlayer::pause() { 
     m_state["state"] = "paused"; 
     emit pauseRequested(); 
     publishState();
 }
-void MediaPlayerEntity::stop() { 
+void MediaPlayer::stop() { 
     m_state["state"] = "stopped"; 
     emit stopRequested(); 
     publishState();
 }
-void MediaPlayerEntity::next() { emit nextRequested(); }
-void MediaPlayerEntity::previous() { emit previousRequested(); }
-void MediaPlayerEntity::setVolume(double volume) { 
+void MediaPlayer::next() { emit nextRequested(); }
+void MediaPlayer::previous() { emit previousRequested(); }
+void MediaPlayer::setVolume(double volume) { 
     m_state["volume"] = volume; 
     emit volumeChanged(volume); 
     publishState();
 }
 
 // --- Publish current state to all HA topics ---
-void MediaPlayerEntity::publishState()
+void MediaPlayer::publishState()
 {
     auto mqtt = HaControl::mqttClient();
     if(m_state.value("name").toString() != name())

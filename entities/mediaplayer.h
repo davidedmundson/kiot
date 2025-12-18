@@ -6,7 +6,7 @@
  * @brief Media Player entity for Home Assistant integration
  * 
  * @details
- * This header defines the MediaPlayerEntity class which implements a media
+ * This header defines the MediaPlayer class which implements a media
  * player entity for Home Assistant. Media player entities provide comprehensive
  * media control functionality including play/pause, volume control, track
  * navigation, and media information display.
@@ -25,11 +25,11 @@
 #include <QMqttMessage>
 
 /**
- * @class MediaPlayerEntity
+ * @class MediaPlayer
  * @brief Media player entity for comprehensive media control
  * 
  * @details
- * The MediaPlayerEntity class represents a media player entity in Home Assistant,
+ * The MediaPlayer class represents a media player entity in Home Assistant,
  * used for controlling media playback on the desktop. It supports the full
  * range of media player functionality including playback control, volume
  * adjustment, track navigation, and media information display.
@@ -46,15 +46,15 @@
  * 
  * @note Inherits from Entity to leverage MQTT discovery and topic management.
  */
-class MediaPlayerEntity : public Entity
+class MediaPlayer : public Entity
 {
     Q_OBJECT
 public:
     /**
-     * @brief Constructs a MediaPlayerEntity
+     * @brief Constructs a MediaPlayer
      * @param parent Parent QObject for memory management (optional)
      */
-    explicit MediaPlayerEntity(QObject *parent = nullptr);
+    explicit MediaPlayer(QObject *parent = nullptr);
 
     /**
      * @brief Sets the complete media player state

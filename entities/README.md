@@ -6,15 +6,16 @@ This directory contains the core entity implementations for the KIOT (KDE Intern
 
 - [Overview](#overview)
 - [Available Entity Types](#available-entity-types)
-  - [Binary Sensor](#1-binary-sensor)
-  - [Sensor](#2-sensor)
-  - [Switch](#3-switch)
-  - [Button](#4-button)
-  - [Lock](#5-lock)
-  - [Event](#6-event)
-  - [Select](#7-select)
-  - [Number](#8-number)
-  - [Text](#9-text)
+  - [Binary Sensor](#1-binary-sensor-binarysensorh--binarysensorcpp)
+  - [Sensor](#2-sensor-sensorh--sensorcppr)
+  - [Switch](#3-switch-switchh--switchcpp)
+  - [Button](#4-button-buttonh--buttoncpp)
+  - [Lock](#5-lock-lockh--lockcpp)
+  - [Event](#6-event-eventh--eventcpp)
+  - [Select](#7-select-selecth--selectcpp)
+  - [Number](#8-number-numberh--numbercpp)
+  - [Text](#9-text-texth--textcpp)
+  - [Media Player](#10-mediaplayer-mediaplayerh--mediaplayercpp)
 - [Creating New Entities](#creating-new-entities)
 - [MQTT Topic Structure](#mqtt-topic-structure)
 - [Home Assistant Discovery](#home-assistant-discovery)
@@ -188,6 +189,71 @@ connect(text, &Text::stateChangeRequested, [](const QString &text) {
 
 ---
 
+### 10. **MediaPlayer** (`mediaplayer.h` / `mediaplayer.cpp`)
+Represents media player entities with full playback control and state 
+**Home Assistant Type:** `media_player`  
+**Use Cases:** Music players, video players, audio systems, streaming services 
+**Features:**
+- Full playback control (play, pause, stop, next, previous)
+- Volume control
+- Media information display (title, artist, album)
+- Position seeking
+- Open media
+
+**Example Configuration:**
+```cpp
+MediaPlayer *player = new MediaPlayer(parent);
+player->setId("livingroom_player");
+player->setName("Living Room Stereo");
+
+// Connect to playback signals
+connect(player, &MediaPlayer::playRequested, []() {
+    // Start playback
+});
+
+connect(player, &MediaPlayer::pauseRequested, []() {
+    // Pause playback
+});
+
+connect(player, &MediaPlayer::stopRequested, []() {
+    // Stop playback
+});
+
+connect(player, &MediaPlayer::nextRequested, []() {
+    // Skip to next track
+});
+
+connect(player, &MediaPlayer::previousRequested, []() {
+    // Go to previous track
+});
+
+connect(player, &MediaPlayer::volumeChanged, [](double volume) {
+    // Adjust volume (0.0 to 1.0 or 0-100%)
+});
+
+connect(player, &MediaPlayer::positionChanged, [](qint64 position) {
+    // Seek to position (in microseconds)
+    // Note: Requires pause/play workaround for proper HA integration
+});
+
+connect(player, &MediaPlayer::playMediaRequested, [](const QString &media) {
+    // Play specific media (URL or identifier)
+});
+
+// Update player state
+QVariantMap state;
+state["state"] = "playing";
+state["title"] = "Song Title";
+state["artist"] = "Artist Name";
+state["album"] = "Album Name";
+state["duration"] = 180000000; // 3 minutes in microseconds
+state["position"] = 45000000;  // 45 seconds in microseconds
+state["volume"] = 0.75;        // 75% volume
+state["albumart"] = "https://example.com/album.jpg";
+state["mediatype"] = "music";
+player->setState(state);
+```
+
 ## Creating New Entities
 
 ### Basic Entity Creation Template
@@ -331,7 +397,7 @@ Each entity type maps directly to Home Assistant entity types:
 | Select | select | option selection |
 | Number | number | numeric input with constraints |
 | Text | text | text for input  |
-
+| MediaPlayer | media_player | play/pause, volume control, track info, seek [Patched MQTT media player](https://github.com/TheOddPirate/mqtt_media_player) |
 ---
 
 ## Testing Entities
