@@ -16,7 +16,7 @@ class KSharedConfig;
 Q_DECLARE_LOGGING_CATEGORY(main_cpp)
 
 extern QtMessageHandler originalHandler;
-extern bool logToFile;
+
 
 /**
  * @brief Initialize logging configuration

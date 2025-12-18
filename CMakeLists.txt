@@ -70,9 +70,7 @@ set(SOURCES
     entities/sensor.cpp
     entities/text.cpp
     entities/lock.cpp
-    logging/logger.cpp
     logging/messagehandler.cpp
-    logging/logger.h
     logging/messagehandler.h
 )
 

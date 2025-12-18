@@ -1,5 +1,5 @@
 #include "messagehandler.h"
-#include "logger.h"
+
 
 #include <QDateTime>
 #include <QStandardPaths>
@@ -15,7 +15,7 @@ Q_LOGGING_CATEGORY(main_cpp, "kiot.main")
 
 // Global variables
 QtMessageHandler originalHandler = nullptr;
-bool logToFile = true;
+
 
 void initLogging(KSharedConfig *config) {
     // Use provided config or open default
@@ -26,15 +26,9 @@ void initLogging(KSharedConfig *config) {
         configPtr = KSharedConfig::openConfig();
     }
     
-    // Load logging configuration
-    auto group = configPtr->group("general");
-    logToFile = group.readEntry("logToFile", true);
-    
     // Install message handler
     originalHandler = qInstallMessageHandler(kiotMessageHandler);
     
-    // Log the current logging configuration
-    qCInfo(main_cpp) << "File logging is" << (logToFile ? "enabled" : "disabled");
 }
 
 void kiotMessageHandler(QtMsgType type, const QMessageLogContext &context, const QString &msg)
@@ -73,10 +67,6 @@ void kiotMessageHandler(QtMsgType type, const QMessageLogContext &context, const
     // 1. Print to the terminal
     fprintf(stderr, "%s%s%s\n", color, line.toUtf8().constData(), reset);
 
-    // 2. Write to the log file
-    if (logToFile) {
-        KiotFileLogger::instance().write(line);
-    }
 
     if (type == QtFatalMsg) {
         abort();

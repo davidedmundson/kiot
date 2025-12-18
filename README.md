@@ -7,7 +7,6 @@
   - [Download and Install](#download-and-install)
 - [Configuration](#configuration)
   - [MQTT Configuration](#mqtt-configuration)
-  - [Logging Configuration](#logging-configuration)
   - [Configuration Examples](#configuration-examples)
 - [Supported Features](#supported-features)
 - [Flatpak Build](#flatpak-build)
@@ -98,56 +97,6 @@ password=myPassword
 
 On the Home Assistant side, everything should work automatically with MQTT discovery. After configuring Kiot, try rebooting Home Assistant, then launch the `kiot` program to see if everything connects properly.
 
-### Logging Configuration
-
-Kiot includes a comprehensive logging system with the following features:
-- **Colored terminal output** for easy debugging
-- **File-based logging** with automatic rotation
-
-
-#### Log File Location
-Log files are stored in the application data directory:
-- `~/.local/share/kiot/kiot_logs.log` (current log)
-- `~/.local/share/kiot/kiot_logs.log.old` (rotated backup)
-If using flatpak the log file is at 
-- `~/.var/app/org.kde.kiot/data/kiot/kiot_logs.log` (current log)
-- `~/.var/app/org.kde.kiot/data/kiot/kiot_logs.log.old` (rotated backup)
-
-#### Configuration Options
-Add these options to the `[general]` section of `~/.config/kiotrc`:
-
-```ini
-[general]
-# ... other MQTT settings ...
-
-# Logging configuration (optional)
-logToFile=true          # Enable/disable file logging (default: true)
-
-```
-
-#### Log Rotation
-- Log files automatically rotate when they exceed 2 MB
-- Only one backup file is kept (`kiot_logs.log.old`)
-- The rotation happens automatically during runtime
-
-#### Viewing Logs
-Native
-```bash
-# View current log file
-tail -f ~/.local/share/kiot/kiot_logs.log
-
-# View rotated backup
-cat ~/.local/share/kiot/kiot_logs.log.old
-```
-Flatpak
-```bash
-# View current log file
-tail -f ~/.var/app/org.kde.kiot/data/kiot/kiot_logs.log
-
-# View rotated backup
-cat ~/.var/app/org.kde.kiot/data/kiot/kiot_logs.log.old
-```
-
 ### Configuration Examples
 
 #### Basic Configuration
@@ -158,7 +107,6 @@ port=1883
 user=mqtt_user
 password=secure_password
 useSSL=false
-logToFile=true  # Enable file logging
 ```
 
 #### Scripts Configuration
@@ -262,12 +210,10 @@ Contributions are welcome!
 2. **Missing Entities in Home Assistant**: Check MQTT discovery is enabled in HA
 3. **Permission Errors**: Some integrations may require additional permissions
 4. **Flatpak Limitations**: Some system integrations may not work in sandboxed environment
-5. **Logging Issues**: Check file permissions in `~/.local/share/kiot/` or for Flatpak in  `~/.var/app/org.kde.kiot/data/kiot/kiot_logs.log`
 
 ### Getting Help
 - Check the configuration examples above
 - Review the Home Assistant MQTT documentation
 - Examine system logs for error messages
-- Check Kiot's log files in `~/.local/share/kiot/` or for Flatpak in `~/.var/app/org.kde.kiot/data/kiot/kiot_logs.log`
 
 ---
