@@ -36,7 +36,10 @@
  * 
  * This entity works with the custom MQTT Media Player integration:
  * https://github.com/bkbilly/mqtt_media_player
- * 
+ *
+ * I made some updates to the mqtt media player here that supports seek to
+ * https://github.com/TheOddPirate/mqtt_media_player 
+ *
  * Common use cases:
  * - MPRIS media player control (via separate integration)
  * - Media playback status monitoring and controlling
@@ -121,7 +124,7 @@ private slots:
     void onPreviousCommand(const QString &payload);
     void onSetVolumeCommand(const QString &payload);
     void onPlayMediaCommand(const QString &payload);
-
+    void onPositionCommand(const QString &payload);
 public slots:
     /**
      * @brief Starts media playback
@@ -197,6 +200,9 @@ signals:
      * @param payload Media playback request payload (e.g., URL, media identifier)
      */
     void playMediaRequested(const QString &payload);
+    void positionChanged(const qint64 &payload);
+
+    
 
 private:
     /** @private Current media player state information */

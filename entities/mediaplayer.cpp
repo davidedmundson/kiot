@@ -33,7 +33,7 @@ void MediaPlayerEntity::init()
     setDiscoveryConfig("command_previous_topic", baseTopic() + "/previous");
     setDiscoveryConfig("command_volume_topic", baseTopic() + "/set_volume");
     setDiscoveryConfig("command_playmedia_topic", baseTopic() + "/playmedia");
-    
+    setDiscoveryConfig("command_seek_position_topic", baseTopic() + "/setposition");
     sendRegistration();
     //subscriptions
     auto mqtt = HaControl::mqttClient();
@@ -57,7 +57,9 @@ void MediaPlayerEntity::init()
     subscribe(baseTopic() + "/previous", &MediaPlayerEntity::onPreviousCommand);
     subscribe(baseTopic() + "/set_volume", &MediaPlayerEntity::onSetVolumeCommand);
     subscribe(baseTopic() + "/playmedia", &MediaPlayerEntity::onPlayMediaCommand);
+    subscribe(baseTopic() + "/setposition", &MediaPlayerEntity::onPositionCommand);
 }
+
 
 void MediaPlayerEntity::setState(const QVariantMap &info)
 {
@@ -105,6 +107,10 @@ void MediaPlayerEntity::onNextCommand(const QString &) { next(); }
 void MediaPlayerEntity::onPreviousCommand(const QString &) { previous(); }
 void MediaPlayerEntity::onSetVolumeCommand(const QString &payload) { setVolume(payload.toDouble()); }
 void MediaPlayerEntity::onPlayMediaCommand(const QString &payload) { emit playMediaRequested(payload); }
+void MediaPlayerEntity::onPositionCommand(const QString &payload) { 
+    qDebug() << "Position command received:" << payload;
+    emit positionChanged( static_cast<qint64>(payload.toDouble() * 1000000 ));
+}
 
 // --- Public slots ---
 void MediaPlayerEntity::play() { 
