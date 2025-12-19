@@ -9,6 +9,10 @@
 #include <libudev.h>
 #include <unistd.h>
 
+#include <QLoggingCategory>
+Q_DECLARE_LOGGING_CATEGORY(gamepad)
+Q_LOGGING_CATEGORY(gamepad, "integration.Gamepad")
+
 class Gamepad : public QObject
 {
     Q_OBJECT
@@ -36,7 +40,7 @@ Gamepad::Gamepad(QObject *parent)
     // Sett opp udev
     m_udev = udev_new();
     if (!m_udev) {
-        qWarning() << "Failed to create udev context";
+        qCWarning(gamepad) << "Failed to create udev context";
         m_sensor->setState(false);
         return;
     }

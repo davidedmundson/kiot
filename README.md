@@ -1,5 +1,19 @@
 # Kiot - KDE Internet Of Things
 
+## Navigation
+- [About](#about)
+- [Setup](#setup)
+  - [Dependencies](#dependencies)
+  - [Download and Install](#download-and-install)
+- [Configuration](#configuration)
+  - [MQTT Configuration](#mqtt-configuration)
+  - [Configuration Examples](#configuration-examples)
+- [Supported Features](#supported-features)
+- [Flatpak Build](#flatpak-build)
+- [Future Development](#future-development)
+- [Contributing](#contributing)
+- [Troubleshooting](#troubleshooting)
+
 ## About
 
 Kiot (KDE Internet Of Things) is a background daemon that exposes useful information and actions from your local desktop session to a home automation controller like Home Assistant.
@@ -52,7 +66,9 @@ Ensure you have these packages installed:
 
 3. If you encounter missing dependencies during the build process, install them using your distribution's package manager.
 
-## MQTT Configuration
+## Configuration
+
+### MQTT Configuration
 
 Home Assistant must have MQTT server enabled. See the [Home Assistant MQTT documentation](https://www.home-assistant.io/integrations/mqtt/).
 
@@ -69,51 +85,21 @@ password=myPassword
 > [!NOTE]
 > If Kiot is running and you change the configuration, you must restart Kiot for changes to take effect.
 
-### Home Assistant Managed MQTT
+#### Home Assistant Managed MQTT
 - `host`: Your Home Assistant local address
 - `port`: 1883 (default)
 - `user` and `password`: Credentials of a Home Assistant user (**recommended to create a dedicated MQTT user**)
 
-### Home Assistant Container
+#### Home Assistant Container
 - `host`: IP address where the MQTT broker is accessible
 - `port`: 1883 (default)
 - `user` and `password`: Credentials configured for your MQTT broker
 
 On the Home Assistant side, everything should work automatically with MQTT discovery. After configuring Kiot, try rebooting Home Assistant, then launch the `kiot` program to see if everything connects properly.
 
-## Project Goals
+### Configuration Examples
 
-Compared to similar projects, Kiot focuses on practical desktop integration rather than exposing unnecessary system statistics. There's no value in exposing "kernel version" in a home automation context. Instead, Kiot emphasizes:
-
-1. **Practical desktop integration** with features that are genuinely useful for home automation
-2. **Plasma-specific properties** (while not exclusive to Plasma)
-3. **Intuitive Home Assistant integration** with device triggers and actions that appear in an easy to use way
-
-## Supported Features
-
-### Stable Integrations
-
-| Feature | Entity Type | Description |
-|---------|-------------|-------------|
-| User Activity | Binary Sensor | Detects when user is active/inactive |
-| Locked State | Lock | Screen lock state monitoring and control |
-| Power Control | Button | Suspend, hibernate, power off, and restart |
-| Camera Activity | Binary Sensor | Detects when camera is in use |
-| Accent Colour | Sensor | Current desktop accent color |
-| Shortcuts | Device Trigger | Global keyboard shortcuts for HA automations |
-| Night Mode | Binary Sensor | Night mode/blue light filter status |
-| Active Window | Sensor | Currently focused application window |
-| Audio Controller | Number + Select | Volume control and device selection |
-| Battery Status | Sensor | Battery charge level and attributes |
-| Do Not Disturb | Binary Sensor | DnD mode status |
-| Gamepad Connected | Binary Sensor | Gamepad/joystick connection detection |
-| Scripts | Button | Execute custom scripts |
-
-
-
-## Configuration Examples
-
-### Basic Configuration
+#### Basic Configuration
 ```ini
 [general]
 host=192.168.1.100
@@ -123,7 +109,7 @@ password=secure_password
 useSSL=false
 ```
 
-### Scripts Configuration
+#### Scripts Configuration
 ```ini
 [Scripts][launch_chrome]
 Name=Launch Chrome
@@ -134,8 +120,7 @@ Exec=steam steam://open/bigpicture
 Name=Launch steam bigpicture
 ```
 
-
-### Shortcuts Configuration
+#### Shortcuts Configuration
 ```ini
 [Shortcuts][myShortcut1]
 Name=Do a thing
@@ -143,7 +128,7 @@ Name=Do a thing
 # Appears as a trigger in Home Assistant for keyboard-driven automations
 ```
 
-### Integration Management
+#### Integration Management
 ```ini
 [Integrations]
 # This section is auto-generated and lets you enable/disable integrations
@@ -164,6 +149,27 @@ Scripts=true
 Shortcuts=true
 ```
 
+## Supported Features
+
+### Integrations
+
+| Feature | Entity Type | Description |
+|---------|-------------|-------------|
+| User Activity | Binary Sensor | Detects when user is active/inactive |
+| Locked State | Lock | Screen lock state monitoring and control |
+| Power Control | Button | Suspend, hibernate, power off, and restart |
+| Camera Activity | Binary Sensor | Detects when camera is in use |
+| Accent Colour | Sensor | Current desktop accent color |
+| Shortcuts | Device Trigger | Global keyboard shortcuts for HA automations |
+| Night Mode | Binary Sensor | Night mode/blue light filter status |
+| Active Window | Sensor | Currently focused application window |
+| Audio Controller | Number + Select | Volume control and device selection |
+| Battery Status | Sensor | Battery charge level and attributes |
+| Do Not Disturb | Binary Sensor | DnD mode status |
+| Gamepad Connected | Binary Sensor | Gamepad/joystick connection detection |
+| Scripts | Button | Execute custom scripts |
+| Bluetooth | Switch | Bluetooth adapter control and device connection management |
+
 ## Flatpak Build
 
 Flatpak installation is also supported:
@@ -178,6 +184,7 @@ Flatpak installation is also supported:
 ### Flatpak Notes
 - The Flatpak version does not autostart automatically
 - Some integrations may have limited functionality due to Flatpak sandboxing
+- Log files are stored within the Flatpak sandbox
 
 ## Future Development
 
@@ -188,7 +195,6 @@ Long-term, Flatpak distribution is the primary focus. The goal is to publish to 
 2. **Enhanced Integration** - More desktop environment features and system monitoring
 3. **Better Documentation** - Comprehensive guides and examples
 4. **Extensibility / Plugin System** – Explore ways to allow community developed integrations
-
 
 ## Contributing
 

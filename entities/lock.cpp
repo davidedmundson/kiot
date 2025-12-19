@@ -8,6 +8,10 @@
 #include <QMqttClient>
 #include <QMqttSubscription>
 
+#include <QLoggingCategory>
+Q_DECLARE_LOGGING_CATEGORY(lock)
+Q_LOGGING_CATEGORY(lock, "entities.Lock")
+
 Lock::Lock(QObject *parent)
     : Entity(parent)
 {
@@ -36,7 +40,7 @@ void Lock::init()
             } else if (message.payload() == "false") {
                 Q_EMIT stateChangeRequested(false);
             } else {
-                qWarning() << "unknown state request" << message.payload();
+                qCWarning(lock) << "unknown state request" << message.payload();
             }
         });
     }

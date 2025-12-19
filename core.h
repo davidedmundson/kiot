@@ -5,7 +5,6 @@
 
 #include <KSharedConfig>
 #include <QCoreApplication>
-#include <QDebug>
 #include <QMqttSubscription>
 #include <QObject>
 #include <QVariantMap>

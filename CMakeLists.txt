@@ -70,6 +70,8 @@ set(SOURCES
     entities/sensor.cpp
     entities/text.cpp
     entities/lock.cpp
+    logging/messagehandler.cpp
+    logging/messagehandler.h
 )
 
 add_subdirectory(integrations)
@@ -85,6 +87,9 @@ target_link_libraries(
     KIOTIntegrations
     KF6::CoreAddons
     KF6::DBusAddons
+)
+target_compile_definitions(kiot PRIVATE
+    $<$<CONFIG:Release>:QT_NO_DEBUG_OUTPUT>
 )
 
 install(TARGETS kiot ${KDE_INSTALL_TARGETS_DEFAULT_ARGS})

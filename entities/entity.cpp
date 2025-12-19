@@ -24,6 +24,10 @@
 #include <QJsonArray>
 #include <QMqttClient>
 
+#include <QLoggingCategory>
+Q_DECLARE_LOGGING_CATEGORY(base)
+Q_LOGGING_CATEGORY(base, "entities.Entity")
+
 Entity::Entity(QObject *parent):
     QObject(parent)
 {
@@ -82,7 +86,7 @@ QString Entity::haIcon() const
 QString Entity::id() const
 {
     if (m_id.isEmpty()) {
-        qWarning() << "Entity ID not set for entity" << name()
+        qCWarning(base) << "Entity ID not set for entity" << name()
                    << " remember to use setId(IDstring)";
     }
     return m_id;

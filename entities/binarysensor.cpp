@@ -4,6 +4,11 @@
 #include "binarysensor.h"
 #include "core.h"
 #include <QMqttClient>
+
+#include <QLoggingCategory>
+Q_DECLARE_LOGGING_CATEGORY(binary)
+Q_LOGGING_CATEGORY(binary, "entities.BinarySensor")
+
 BinarySensor::BinarySensor(QObject *parent)
     : Entity(parent)
 {
@@ -21,7 +26,7 @@ void BinarySensor::init()
 
 void BinarySensor::publish()
 {
-    qDebug() << name() << "publishing state" << m_state;
+    qCDebug(binary) << name() << "publishing state" << m_state;
     if (HaControl::mqttClient()->state() == QMqttClient::Connected) {
         HaControl::mqttClient()->publish(baseTopic(), m_state ? "true" : "false", 0, true);
     }
