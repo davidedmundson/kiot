@@ -118,6 +118,12 @@ Exec=google-chrome
 [Scripts][steam_bigpicture]
 Exec=steam steam://open/bigpicture
 Name=Launch steam bigpicture
+
+[Scripts][youtube_studio]
+Exec=brave  --new-window  "https://studio.youtube.com"
+Name=Launch YoutubeStudio
+icon=mdi:youtube-studio
+#icon is optional, defaults to "mdi:script-text" if not set
 ```
 
 #### Shortcuts Configuration
