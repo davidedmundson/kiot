@@ -25,6 +25,12 @@
 
 #include <atomic>
 
+#include <QLoggingCategory>
+Q_DECLARE_LOGGING_CATEGORY(docker)
+Q_LOGGING_CATEGORY(docker, "integration.Docker")
+
+static int SOCKET_TIMEOUT_MS = 5000;
+static const char* DOCKER_SOCKET_PATH = "/var/run/docker.sock";
 /**
  * Manages Docker container events by listening to Docker socket
  * 
@@ -53,18 +59,18 @@ protected:
         QLocalSocket socket;
         socket.connectToServer("/var/run/docker.sock", QIODevice::ReadWrite);
         if (!socket.waitForConnected(1000)) {
-            qWarning() << "[docker] Failed to connect to Docker socket";
+            qCWarning(docker) << "Failed to connect to Docker socket";
             return;
         }
 
         const QByteArray request = "GET /events HTTP/1.0\r\nHost: localhost\r\n\r\n";
         if (socket.write(request) != request.size()) {
-            qWarning() << "[docker] Failed to write request to socket";
+            qCWarning(docker) << "Failed to write request to socket";
             return;
         }
         socket.flush();
 
-        qDebug() << "[docker] Event listener started";
+        qCInfo(docker) << "Event listener started";
         
         while (!m_stop && socket.state() == QLocalSocket::ConnectedState) {
             if (!socket.waitForReadyRead(1000)) {
@@ -79,7 +85,7 @@ protected:
         }
 
         socket.disconnectFromServer();
-        qDebug() << "[docker] Event listener stopped";
+        qCInfo(docker) << "Event listener stopped";
     }
 
 private:
@@ -87,7 +93,7 @@ private:
         QJsonParseError parseError;
         const QJsonDocument doc = QJsonDocument::fromJson(line, &parseError);
         if (parseError.error != QJsonParseError::NoError) {
-            //qWarning() << "[docker] JSON parse error:" << parseError.errorString();
+            //qCDebug(docker) << "JSON parse error:" << parseError.errorString();
             return false;
         }
         
@@ -130,20 +136,15 @@ public:
     explicit DockerSwitch(QObject *parent = nullptr)
         : QObject(parent) 
     {
-        if (!isDockerAvailable()) {
-            qWarning() << "[docker] Docker socket not available at: " << DOCKER_SOCKET_PATH << " stopping integration";
-            return;
-        }
-
         if (!ensureConfigDefaults()) {
-            qWarning() << "[docker] Failed to initialize configuration";
+            qCWarning(docker) << "Failed to initialize configuration";
             return;
         }
 
         initializeSwitches();
         startEventListener();
         
-        qDebug() << "[docker] Integration initialized with" << m_containers.size() << "containers";
+        qCInfo(docker) << "Integration initialized with" << m_containers.size() << "containers";
     }
     ~DockerSwitch() override
     {
@@ -158,25 +159,7 @@ private:
     QList<ContainerInfo> m_containers;
     DockerEventListener *m_listener = nullptr;
     
-    static constexpr int SOCKET_TIMEOUT_MS = 5000;
-    static constexpr const char* DOCKER_SOCKET_PATH = "/var/run/docker.sock";
-    
-    /**
-     * Checks if Docker socket is accessible
-     * 
-     * @return bool True if Docker socket can be connected, false otherwise
-     * @brief Verifies Docker daemon connectivity
-     */
-    bool isDockerAvailable() const {
-        QLocalSocket testSocket;
-        testSocket.connectToServer(DOCKER_SOCKET_PATH, QIODevice::ReadWrite);
-        const bool available = testSocket.waitForConnected(1000);
-        if (available) {
-            testSocket.disconnectFromServer();
-        }
-        return available;
-    }
-    
+     
     /**
      * Initializes switches for Docker containers based on configuration
      * 
@@ -195,7 +178,7 @@ private:
         for (const auto &key : grp.keyList()) {
             if (!grp.readEntry(key, false)) continue;
 
-            qDebug() << "[docker] Enabling control for container" << key;
+            qCInfo(docker) << "Enabling control for container" << key;
             createContainerSwitch(key);
         }
     }
@@ -243,7 +226,7 @@ private:
         
         m_listener->stop();
         if (!m_listener->wait(3000)) {
-            qWarning() << "[docker] Event listener did not stop gracefully, terminating";
+            qCDebug(docker) << "Event listener did not stop gracefully, terminating";
             m_listener->terminate(); // terminate() is a last resort to avoid hanging shutdown
             m_listener->wait(1000);
         }
@@ -265,7 +248,7 @@ private:
         
         const QStringList currentContainers = listAllContainers();
         if (currentContainers.isEmpty()) {
-            qWarning() << "[docker] No containers found";
+            qCDebug(docker) << "No containers found";
             return false;
         }
         
@@ -278,7 +261,7 @@ private:
             if (!grp.hasKey(containerName)) {
                 grp.writeEntry(containerName, false);
                 configChanged = true;
-                qDebug() << "[docker] Added new container to config:" << containerName;
+                qCDebug(docker) << "Added new container to config:" << containerName;
             }
                 }
         
@@ -287,13 +270,13 @@ private:
             if (!currentContainers.contains(configContainer)) {
                 grp.deleteEntry(configContainer);
                 configChanged = true;
-                qDebug() << "[docker] Removed unavailable container from config:" << configContainer;
+                qCDebug(docker) << "Removed unavailable container from config:" << configContainer;
             }
         }
         
         if (configChanged) {
             cfg->sync();
-            qDebug() << "[docker] Configuration updated with current containers";
+            qCDebug(docker) << "Configuration updated with current containers";
         }
         
         return true;
@@ -313,18 +296,18 @@ private:
         QLocalSocket socket;
         socket.connectToServer(DOCKER_SOCKET_PATH, QIODevice::ReadWrite);
         if (!socket.waitForConnected(1000)) {
-            qWarning() << "[docker] Failed to connect to Docker socket";
+            qCDebug(docker) << "Failed to connect to Docker socket";
             return false;
         }
 
         if (socket.write(request) != request.size()) {
-            qWarning() << "[docker] Failed to write request to socket";
+            qCDebug(docker) << "Failed to write request to socket";
             return false;
         }
         
         socket.flush();
         if (!socket.waitForReadyRead(SOCKET_TIMEOUT_MS)) {
-            qWarning() << "[docker] Timeout waiting for response";
+            qCDebug(docker) << "Timeout waiting for response";
             return false;
         }
 
@@ -334,12 +317,11 @@ private:
     }
     
     /**
-    * Retrieves list of all Docker containers on the system, with limited retries on failure
-    * 
-    * @param retries Maximum number of attempts if Docker socket fails or response is invalid (default 3)
-    * @return QStringList Container names, including stopped containers
-    * @brief Discovers all available Docker containers and handles transient errors
-    */
+     * Retrieves list of all Docker containers on the system
+     * 
+     * @return QStringList Container names, including stopped containers
+     * @brief Discovers all available Docker containers
+     */
     QStringList listAllContainers(int retries = 3) {
         QStringList names;
         QByteArray response;
@@ -353,7 +335,7 @@ private:
 
             const QJsonDocument doc = QJsonDocument::fromJson(body);
             if (!doc.isArray()) {
-                qWarning() << "[docker] Unexpected response format for container list, retries left:" << retries;
+                qCDebug(docker) << "Unexpected response format for container list, retries left:" << retries;
                 continue;
             }
 
@@ -420,7 +402,7 @@ private:
     QByteArray extractHttpBody(const QByteArray &response) {
         const int headerEnd = response.indexOf("\r\n\r\n");
         if (headerEnd == -1) {
-            qWarning() << "[docker] Invalid HTTP response format";
+            qCDebug(docker) << "Invalid HTTP response format";
             return QByteArray();
         }
         return response.mid(headerEnd + 4);
@@ -440,11 +422,11 @@ private:
         
         QByteArray response;
         if (!callDockerSocket(request, response)) {
-            qWarning() << "[docker] Failed to" << action << "container" << name;
+            qCDebug(docker) << "Failed to" << action << "container" << name;
             return;
         }
         
-        qDebug() << "[docker] Container" << name << (start ? "started" : "stopped");
+        qCDebug(docker) << "Container" << name << (start ? "started" : "stopped");
         
         // Update the specific switch
         for (auto &containerInfo : m_containers) {
@@ -472,7 +454,7 @@ private:
                                   .arg(name).toUtf8();
         
         if (!callDockerSocket(request, response)) {
-            qWarning() << "[docker] Failed to get container details for" << name;
+            qCDebug(docker) << "Failed to get container details for" << name;
             return;
         }
         
@@ -481,7 +463,7 @@ private:
         
         const QJsonDocument doc = QJsonDocument::fromJson(body);
         if (!doc.isObject()) {
-            qWarning() << "[docker] Invalid container details response for" << name;
+            qCDebug(docker) << "Invalid container details response for" << name;
             return;
         }
         
@@ -513,12 +495,34 @@ private slots:
         }
     }
 };
+
+/**
+ * Checks if Docker socket is accessible
+ * 
+ * @return bool True if Docker socket can be connected, false otherwise
+ * @brief Verifies Docker daemon connectivity
+ */
+bool isDockerAvailable() {
+    QLocalSocket testSocket;
+    testSocket.connectToServer(DOCKER_SOCKET_PATH, QIODevice::ReadWrite);
+    const bool available = testSocket.waitForConnected(1000);
+    if (available) {
+        testSocket.disconnectFromServer();
+    }
+    return available;
+}
+
 /**
  * Initializes Docker integration for Home Assistant
  * 
  * @brief Creates DockerSwitch instance to manage Docker container switches
  */
 void setupDockerSwitch() {
+    if (!isDockerAvailable())
+    {
+        qCWarning(docker) << "Docker socket not available. Docker integration will not be enabled."; //
+        return;
+    }
     new DockerSwitch(qApp);
 }
 
