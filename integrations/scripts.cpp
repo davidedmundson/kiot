@@ -37,7 +37,11 @@ void registerScripts()
         // maybe via some substitution in the exec line
         QObject::connect(button, &Button::triggered, qApp, [exec, scriptId]() {
             qCInfo(scripts) << "Running script " << scriptId;
-            QStringList args = QProcess::splitCommand(exec);  
+            QStringList args = QProcess::splitCommand(exec); 
+            if (args.isEmpty()) {                            
+                qCWarning(scrips) << "Could not parse script Exec entry for" << scriptId;
+                return;
+            } 
             QString program = args.takeFirst();           
 
             KProcess *p = new KProcess();
