@@ -6,6 +6,8 @@
 #include <KConfigGroup>
 #include <KProcess>
 #include <KSharedConfig>
+#include <KSandbox>
+
 #include <QAction>
 #include <QCoreApplication>
 
@@ -34,9 +36,19 @@ void registerScripts()
         // maybe via some substitution in the exec line
         QObject::connect(button, &Button::triggered, qApp, [exec, scriptId]() {
             qCInfo(scripts) << "Running script " << scriptId;
-            // DAVE TODO flatpak escaping
+            QStringList args = QProcess::splitCommand(exec);  
+            QString program = args.takeFirst();           
+
             KProcess *p = new KProcess();
-            p->setShellCommand(exec);
+            p->setProgram(program);
+            p->setArguments(args);
+
+            if (KSandbox::isFlatpak()) {
+                KSandbox::ProcessContext ctx = KSandbox::makeHostContext(*p);
+                p->setProgram(ctx.program);
+                p->setArguments(ctx.arguments);
+            }
+
             p->startDetached();
             delete p;
         });
