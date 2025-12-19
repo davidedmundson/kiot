@@ -39,7 +39,7 @@ void registerScripts()
             qCInfo(scripts) << "Running script " << scriptId;
             QStringList args = QProcess::splitCommand(exec); 
             if (args.isEmpty()) {                            
-                qCWarning(scrips) << "Could not parse script Exec entry for" << scriptId;
+                qCWarning(scripts) << "Could not parse script Exec entry for" << scriptId;
                 return;
             } 
             QString program = args.takeFirst();           
