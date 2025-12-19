@@ -15,7 +15,7 @@ finish-args:
   - "--socket=fallback-x11"
   - "--socket=session-bus"
   - "--socket=system-bus"
-
+  - "--filesystem=/var/run/docker.sock"
   - "--filesystem=home:ro"
   - "--filesystem=xdg-config/kiotrc"
   - "--talk-name=org.kde.StatusNotifierWatcher"
