@@ -23,7 +23,7 @@ void registerScripts()
         auto scriptConfig = scriptConfigToplevel.group(scriptId);
         const QString name = scriptConfig.readEntry("Name", scriptId);
         const QString exec = scriptConfig.readEntry("Exec");
-
+        const QString icon = scriptConfig.readEntry("icon","mdi:script-text");
         if (exec.isEmpty()) {
             qCWarning(scripts) << "Could not find script Exec entry for" << scriptId;
             continue;
@@ -32,6 +32,7 @@ void registerScripts()
         auto button = new Button(qApp);
         button->setId(scriptId);
         button->setName(name);
+        button->setDiscoveryConfig("icon", icon);
         // Home assistant integration supports payloads, which we could expose as args
         // maybe via some substitution in the exec line
         QObject::connect(button, &Button::triggered, qApp, [exec, scriptId]() {
