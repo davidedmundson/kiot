@@ -41,7 +41,7 @@ public:
         connect(device.data(), &BluezQt::Device::trustedChanged, this, [this](bool){
             update();
         });
-        // connec to signal from switch in HA        
+        // connect to signal from switch in HA        
         connect(m_switch, &Switch::stateChangeRequested, this, [this](bool requestedState){
             if (!m_device)
                 return;
@@ -136,7 +136,7 @@ BluetoothAdapterWatcher::BluetoothAdapterWatcher(QObject *parent)
 
         auto adapters = job->manager()->adapters();
         if (!adapters.isEmpty()) {
-            m_adapter = adapters.first(); // Use first adapter, could probaby be customized from config but who has more than 1 bt adapter?
+            m_adapter = adapters.first(); // Use first adapter, could probably be customized from config but who has more than 1 bt adapter?
             m_initialized = true;
             update();
             // connect to adapter signals for updates
@@ -180,7 +180,7 @@ BluetoothAdapterWatcher::BluetoothAdapterWatcher(QObject *parent)
 
     job->start();
 
-    // Connect to signal from switch to adapter, so we can turn on/off bluetooth fro
+    // Connect to signal from switch to adapter, so we can turn bluetooth on/off
     connect(m_switch, &Switch::stateChangeRequested, this, [this](bool requestedState){
         if (!m_initialized || !m_adapter)
             return;
@@ -203,7 +203,7 @@ void BluetoothAdapterWatcher::CheckPairedState()
             }
             else {
             // device is no longer paired, remove the switch if it exists
-            //Does anyone know how to actually unpair? i cant find anythhing making paired state change, forget from settings does not work
+            //Does anyone know how to actually unpair? I can't find anything making paired state change, forget from settings does not work
                 if (m_btSwitches.contains(key)) {
                     auto *sw = m_btSwitches.take(key);
                     sw->deleteLater();

@@ -81,7 +81,7 @@ Audio::Audio(QObject *parent)
         return;
     }
 
-    // Sink selctor and signal connection
+    // Sink selector and signal connection
     m_sinkSelector = new Select(this);
     m_sinkSelector->setId("volume_output_selector");
     m_sinkSelector->setDiscoveryConfig("icon", "mdi:volume-source");
