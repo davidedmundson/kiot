@@ -7,3 +7,6 @@
 - Integrations
 
 - UI
+  - KCM dynamic tabs based on config file content and suport for creating/deleting scripts/shortcuts
+  - Systray icon, green/yellow/red icon based on connection state of mqtt client and a menu for opening setting/config file and reconnecting
+  
