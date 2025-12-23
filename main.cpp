@@ -3,7 +3,7 @@
 
 #include <QApplication>
 #include <csignal>
-
+#include <QDate>
 #include <KAboutData>
 #include <KDBusService>
 #include <KSignalHandler>
@@ -30,7 +30,7 @@ int main(int argc, char **argv)
         QStringLiteral(KIOT_VERSION),
         "KDE Internet of Things Connection",
         KAboutLicense::GPL_V3,
-        "© 2024"
+        "© 2024-"+QString::number(QDate::currentDate().year())
     );
     
     KDBusService service(KDBusService::Unique | KDBusService::Replace);
