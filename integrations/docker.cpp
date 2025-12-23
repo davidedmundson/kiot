@@ -10,7 +10,7 @@
  */
  
 #include "core.h"
-#include "entities/entities.h"
+#include "entities/switch.h"
 
 #include <KConfigGroup>
 #include <KSharedConfig>

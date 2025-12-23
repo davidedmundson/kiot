@@ -3,7 +3,7 @@
 
 #include "core.h"
 #include "dbusproperty.h"
-#include "entities/entities.h"
+#include "entities/binarysensor.h"
 #include <QCoreApplication>
 
 void setupDndSensor()

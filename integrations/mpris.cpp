@@ -21,7 +21,7 @@
  */
 #include "mpris.h"
 #include "core.h"
-#include "entities/entities.h"
+#include "entities/mediaplayer.h"
 
 // Qt Core includes
 #include <QObject>

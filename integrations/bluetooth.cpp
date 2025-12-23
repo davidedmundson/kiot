@@ -1,7 +1,7 @@
 // SPDX-FileCopyrightText: 2025 Odd Østlie <theoddpirate@gmail.com>
 // SPDX-License-Identifier: LGPL-2.1-or-later
 #include "core.h"
-#include "entities/entities.h"
+#include "entities/switch.h"
 
 #include <BluezQt/Adapter>
 // Re add after bluez-qt works on new version via flatpak manifest

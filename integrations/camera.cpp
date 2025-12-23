@@ -6,7 +6,7 @@
 //          SPDX-FileCopyrightText: 2007 Flavio Castelli <flavio.castelli@gmail.com>
 
 #include "core.h"
-#include "entities/entities.h"
+#include "entities/binarysensor.h"
 #include <KIdleTime>
 
 #include <QDir>

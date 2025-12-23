@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: LGPL-2.1-or-later
 
 #include "core.h"
-#include "entities/entities.h"
+#include "entities/lock.h"
 #include <QObject>
 
 #include <QDBusConnection>

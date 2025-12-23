@@ -3,7 +3,9 @@
 
 #include "core.h"
 #include "dbusproperty.h"
-#include "entities/entities.h"
+#include "entities/switch.h"
+#include "entities/binarysensor.h"
+
 #include <QCoreApplication>
 
 #include <QDBusConnection>

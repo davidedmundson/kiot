@@ -2,7 +2,8 @@
 // SPDX-License-Identifier: LGPL-2.1-or-later
 
 #include "core.h"
-#include "entities/entities.h"
+#include "entities/number.h"
+#include "entities/select.h"
 
 #include <PulseAudioQt/Context>
 #include <PulseAudioQt/Server>
