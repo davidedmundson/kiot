@@ -23,10 +23,11 @@ int main(int argc, char **argv)
     
     initLogging();
     
+    qCInfo(main_cpp) << "Starting kiot version " << QStringLiteral(KIOT_VERSION);
     KAboutData aboutData(
         QStringLiteral("kiot"),
         "KDE IOT",
-        QStringLiteral("0.1"),
+        QStringLiteral(KIOT_VERSION),
         "KDE Internet of Things Connection",
         KAboutLicense::GPL_V3,
         "© 2024"
