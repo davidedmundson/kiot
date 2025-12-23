@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<component type="console-application">
+  <id>org.davidedmundson.kiot</id>
+  
+  <name>Kiot</name>
+  <summary>KDE Internet of Things: desktop integration for Home Automation</summary>
+  
+  <metadata_license>FSFAP</metadata_license>
+  <project_license>LGPL-2.1-or-later</project_license>
+  
+  <description>
+    <p>
+      Kiot is a background daemon that bridges your KDE desktop session with home automation platforms like Home Assistant. 
+      It exposes device sensors, system information, and controls, allowing your home automation system to interact seamlessly 
+      with your local environment.
+    </p>
+    <p>
+      Monitor system stats, control media players, and access device information in real time, all while keeping your desktop secure and private.
+    </p>
+  </description>
+  
+  <author>
+    <name>David Edmundson</name>
+    <email>davidedmundson@kde.org</email>
+    <url>https://github.com/davidedmundson/kiot</url>
+  </author>
+
+  <screenshots>
+    <screenshot type="default">
+      <caption>Prototype settings page</caption>
+      <image>https://raw.githubusercontent.com/TheOddPirate/kiot/363e26663485660b940f38babdcd7dd1ec21cf47/flatpak/images/system-settings.png</image>
+    </screenshot>
+    <screenshot type="other">
+      <caption>Device sensors overview</caption>
+      <image>https://raw.githubusercontent.com/TheOddPirate/kiot/363e26663485660b940f38babdcd7dd1ec21cf47/flatpak/images/device_sensors.png</image>
+    </screenshot>
+    <screenshot type="other">
+      <caption>Device controls panel</caption>
+      <image>https://raw.githubusercontent.com/TheOddPirate/kiot/363e26663485660b940f38babdcd7dd1ec21cf47/flatpak/images/device_controls.png</image>
+    </screenshot>
+    <screenshot type="other">
+      <caption>Integrated media player</caption>
+      <image>https://raw.githubusercontent.com/TheOddPirate/kiot/363e26663485660b940f38babdcd7dd1ec21cf47/flatpak/images/media_player.png</image>
+    </screenshot>
+  </screenshots>
+
+  <url type="homepage">https://github.com/davidedmundson/kiot</url>
+  <url type="license">https://github.com/davidedmundson/kiot/blob/main/LICENSE</url>
+
+  <icon type="stock">org.davidedmundson.kiot.svg</icon>
+  
+  <categories>
+    <category>System</category>
+    <category>KDE</category>
+    <category>Utility</category>
+  </categories>
+  
+  <provides>
+    <binary>kiot</binary>
+  </provides>
+
+  <tags>
+    IoT, Home Automation, KDE, Sensors, Media Player, Daemon, Desktop Integration
+  </tags>
+</component>

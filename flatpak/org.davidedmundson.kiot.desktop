@@ -1,0 +1,16 @@
+[Desktop Entry]
+Name=KDE IOT (Flatpak)
+Comment=Home Assistant integration for KDE Plasma
+Icon=org.davidedmundson.kiot
+Type=Application
+Categories=Utility;
+X-KDE-StartupNotify=false
+NoDisplay=false
+Exec=
+X-Flatpak-RenamedFrom=kiot.desktop;
+
+# Autostart specific
+X-GNOME-Autostart-enabled=true
+X-KDE-autostart-phase=2
+X-KDE-autostart-after=panel
+OnlyShowIn=KDE;
