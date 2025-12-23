@@ -6,6 +6,7 @@
 #include "camera.h"
 #include "event.h"
 #include "lock.h"
+#include "mediaplayer.h"
 #include "notify.h"
 #include "number.h"
 #include "select.h"

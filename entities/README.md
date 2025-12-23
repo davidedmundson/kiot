@@ -18,6 +18,7 @@ This directory contains the core entity implementations for the KIOT (KDE Intern
   - [Camera](#10-camera-camerah--cameracpp)
   - [Notify](#11-notify-notifyh--notifycpp)
   - [Update](#12-update-updateh--updatecpp)
+  - [Media Player](#13-mediaplayer-mediaplayerh--mediaplayercpp)
 - [Creating New Entities](#creating-new-entities)
 - [MQTT Topic Structure](#mqtt-topic-structure)
 - [Home Assistant Discovery](#home-assistant-discovery)
@@ -222,8 +223,6 @@ connect(notify, &Notify::notificationReceived, [](const QString &message) {
     // Display notification or speak message
 });
 ```
-
-
 ### 12. **Update** (`update.h` / `update.cpp`)
 Represents firmware/software update entities for monitoring and installing updates.
 
@@ -252,6 +251,66 @@ connect(update, &Update::installRequested, []() {
     // update->setInProgress(false);
 });
 ```
+
+### 13. **MediaPlayer** (`mediaplayer.h` / `mediaplayer.cpp`)
+Represents media player entities for comprehensive media control and monitoring.
+
+**Home Assistant Type:** `media_player`  
+**Use Cases:** MPRIS media player control, desktop media playback monitoring, remote media control from Home Assistant
+
+**Home Assistant Integration:**
+ - Requirecs a custom MQTT Media Player integration [MQTT Media Player With Seek](https://github.com/TheOddPirate/mqtt_media_player) 
+ - Requirecs a custom MQTT Media Player integration [MQTT Media Player Original](https://github.com/bkbilly/mqtt_media_player) 
+
+**Example Configuration:**
+```cpp
+MediaPlayer *player = new MediaPlayer(parent);
+player->setId("desktop_media");
+player->setName("Desktop Media Player");
+
+// Connect to media player signals
+connect(player, &MediaPlayer::playRequested, []() {
+    // Start media playback
+});
+
+connect(player, &MediaPlayer::pauseRequested, []() {
+    // Pause media playback
+});
+
+connect(player, &MediaPlayer::volumeChanged, [](double volume) {
+    // Set volume level (0.0 to 1.0)
+});
+
+connect(player, &MediaPlayer::nextRequested, []() {
+    // Skip to next track
+});
+
+connect(player, &MediaPlayer::previousRequested, []() {
+    // Go to previous track
+});
+
+connect(player, &MediaPlayer::playMediaRequested, [](const QString &payload) {
+    // Play specific media (URL or media identifier)
+});
+
+connect(player, &MediaPlayer::positionChanged, [](qint64 position) {
+    // Seek to specific position (in microseconds)
+});
+
+// Update media player state
+QVariantMap state;
+state["state"] = "playing"; // "playing", "paused", "stopped"
+state["title"] = "Song Title";
+state["artist"] = "Artist Name";
+state["album"] = "Album Name";
+state["duration"] = 180; // seconds
+state["position"] = 45; // current position in seconds
+state["volume"] = 0.75; // volume level (0.0 to 1.0)
+state["albumart"] = Base64ImageString; // Base64 encoded image
+state["mediatype"] = "music"; // "music", "video", "tvshow", etc.
+player->setState(state);
+```
+
 
 ---
 
@@ -399,6 +458,8 @@ Each entity type maps directly to Home Assistant entity types:
 | Number | number | numeric input with constraints |
 | Text | text | text for input  |
 | Camera | camera | image publishing |
+| Notify | notify | notification sending |
+| Update | update | firmware updates |
 
 ---
 

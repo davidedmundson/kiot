@@ -65,6 +65,9 @@ set(SOURCES
     entities/entity.cpp
     entities/binarysensor.cpp
     entities/button.cpp
+    entities/camera.cpp
+    entities/mediaplayer.cpp
+    entities/notify.cpp
     entities/number.cpp
     entities/switch.cpp
     entities/event.cpp
@@ -72,6 +75,7 @@ set(SOURCES
     entities/sensor.cpp
     entities/text.cpp
     entities/lock.cpp
+    entities/update.cpp
     logging/messagehandler.cpp
     logging/messagehandler.h
 )

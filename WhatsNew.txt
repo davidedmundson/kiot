@@ -6,7 +6,8 @@
   - Camera entity
   - Notify entity
   - Update entity
-
+  - MediaPlayer entity (requires custom integration)
+  
 - Integrations
 
 - UI
