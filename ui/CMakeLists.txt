@@ -20,9 +20,9 @@ kconfig_target_kcfg_file(kcm_kiot
 
 target_link_libraries(kcm_kiot PRIVATE
     Qt6::Core
+    Qt6::Qml
     KF6::ConfigCore
     KF6::I18n
     KF6::KCMUtils
     KF6::KCMUtilsQuick
 )
-
