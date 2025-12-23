@@ -1,5 +1,7 @@
 # Kiot - KDE Internet Of Things
 
+NOTE: This is a higly experimental branch, and is not recommended if you do not feel comfortable with reporting issues 
+
 ## Navigation
 - [About](#about)
 - [Setup](#setup)
