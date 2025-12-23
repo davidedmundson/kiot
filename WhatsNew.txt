@@ -7,8 +7,10 @@
   - Notify entity
   - Update entity
   - MediaPlayer entity (requires custom integration)
-  
+
 - Integrations
+  - Docker allows you to expose selected docker images as a switch to start/stop it and attributes shows the image name, status, and container id
+  - SystemD allows you to expose selected systemd services as a switch to start/stop it
 
 - UI
   - KCM dynamic tabs based on config file content and suport for creating/deleting scripts/shortcuts

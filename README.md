@@ -178,6 +178,7 @@ Shortcuts=true
 | Scripts | Button | Execute custom scripts |
 | Bluetooth | Switch | Bluetooth adapter control and device connection management |
 | Docker | Switch | Docker container control and status as attributes |
+| SystemD | Switch | Systemd service control|
 
 ## Flatpak Build
 
