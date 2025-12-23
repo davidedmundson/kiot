@@ -1,0 +1,9 @@
+- Core
+  Made Connected node report same version as CMakeLists
+
+  
+- Entities
+
+- Integrations
+
+- UI
