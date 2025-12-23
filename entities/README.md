@@ -16,6 +16,7 @@ This directory contains the core entity implementations for the KIOT (KDE Intern
   - [Number](#8-number-numberh--numbercpp)
   - [Text](#9-text-texth--textcpp)
   - [Camera](#10-camera-camerah--cameracpp)
+  - [Notify](#11-notify-notifyh--notifycpp)
 - [Creating New Entities](#creating-new-entities)
 - [MQTT Topic Structure](#mqtt-topic-structure)
 - [Home Assistant Discovery](#home-assistant-discovery)
@@ -202,6 +203,22 @@ camera->setName("Screenshot");
 camera->publishImage(base64ImageData);
 connect(camera, &Camera::commandReceived, [](const QString &cmd) {
     // Handle image update requests
+});
+```
+
+### 11. **Notify** (`notify.h` / `notify.cpp`)
+Represents notification entities for receiving messages.
+
+**Home Assistant Type:** `notify`  
+**Use Cases:** Text-to-speech messages, desktop notifications, alert systems
+
+**Example Configuration:**
+```cpp
+Notify *notify = new Notify(parent);
+notify->setId("desktop_alerts");
+notify->setName("Desktop Alerts");
+connect(notify, &Notify::notificationReceived, [](const QString &message) {
+    // Display notification or speak message
 });
 ```
 
