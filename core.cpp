@@ -136,7 +136,7 @@ ConnectedNode::ConnectedNode(QObject *parent)
     setDiscoveryConfig("device",
                        QVariantMap({{"name", hostname()},
                                     {"identifiers", "linux_ha_bridge_" + hostname()},
-                                    {"sw_version", "0.1"},
+                                    {"sw_version", QStringLiteral(KIOT_VERSION)},
                                     {"manufacturer", "Linux HA Bridge"},
                                     {"model", "Linux"}}));
 
