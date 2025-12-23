@@ -88,6 +88,11 @@ set(SOURCES
 add_subdirectory(integrations)
 add_subdirectory(ui)
 
+# For building our flatpak installer with metainfo
+if(BUILD_FLATPAK)
+    add_subdirectory(flatpak)
+endif()
+
 add_executable(kiot ${SOURCES})
 
 target_link_libraries(
@@ -105,7 +110,9 @@ target_compile_definitions(kiot PRIVATE
 
 install(TARGETS kiot ${KDE_INSTALL_TARGETS_DEFAULT_ARGS})
 
-ecm_install_configured_files(INPUT org.davidedmundson.kiot.desktop.in @ONLY DESTINATION ${KDE_INSTALL_AUTOSTARTDIR})
-ecm_install_configured_files(INPUT org.davidedmundson.kiot.desktop.in @ONLY DESTINATION ${KDE_INSTALL_APPDIR})
-
+# Installs the desktop files if we are not under flatpak, the flatpak subfolder got a desktop file working with flatpak
+if(NOT BUILD_FLATPAK)
+    ecm_install_configured_files(INPUT org.davidedmundson.kiot.desktop.in @ONLY DESTINATION ${KDE_INSTALL_AUTOSTARTDIR})
+    ecm_install_configured_files(INPUT org.davidedmundson.kiot.desktop.in @ONLY DESTINATION ${KDE_INSTALL_APPDIR})
+endif()
 feature_summary(WHAT ALL INCLUDE_QUIET_PACKAGES FATAL_ON_MISSING_REQUIRED_PACKAGES)
