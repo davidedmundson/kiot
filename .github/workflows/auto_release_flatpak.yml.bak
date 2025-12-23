@@ -1,0 +1,90 @@
+name: Release
+
+on:
+  push:
+    branches: [ the_odd_experiments ]
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          ref: testing_updated
+
+      - name: Read version from CMakeLists.txt
+        id: cmake_version
+        uses: DarwinInnovation/cmake-project-version-action@v1.0
+
+      - name: Get latest release version
+        id: latest_release
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          latest=$(gh release view --json tagName -q .tagName 2>/dev/null || echo "")
+          latest=${latest#v}
+          echo "latest=$latest" >> "$GITHUB_OUTPUT"
+
+      - name: Compare versions
+        id: version_check
+        run: |
+          current="${{ steps.cmake_version.outputs.version }}"
+          latest="${{ steps.latest_release.outputs.latest }}"
+
+          echo "Current version: $current"
+          echo "Latest release: $latest"
+
+          if [ -z "$latest" ]; then
+            echo "publish=true" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          if [ "$(printf '%s\n%s\n' "$latest" "$current" | sort -V | tail -n1)" = "$current" ] && [ "$current" != "$latest" ]; then
+            echo "publish=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "publish=false" >> "$GITHUB_OUTPUT"
+          fi
+
+
+      - name: Cancel workflow if no changes
+        if: steps.version_check.outputs.publish != 'true'
+        uses: actions/github-script@v6
+        with:
+          script: |
+            github.rest.actions.cancelWorkflowRun({
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            run_id: context.runId
+            });
+      - name: Install Flatpak tooling
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y flatpak flatpak-builder
+
+      - name: Add Flathub remote
+        run: |
+          flatpak remote-add --if-not-exists --user flathub https://flathub.org/repo/flathub.flatpakrepo
+
+      - name: Build Flatpak
+        run: |
+          flatpak-builder --user --install-deps-from=flathub --force-clean build-dir .flatpak-manifest.yaml
+          rm -rf repo
+          flatpak-builder --user --repo=repo --force-clean build-dir .flatpak-manifest.yaml
+          flatpak build-bundle repo kiot-${{ steps.cmake_version.outputs.version }}.flatpak org.davidedmundson.kiot master
+      
+      - name: Build Changelog
+        uses: mikepenz/release-changelog-builder-action@v5
+        id: build_changelog
+        with:
+          mode: "COMMIT"
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ steps.cmake_version.outputs.version }}
+          body: ${{ steps.build_changelog.outputs.changelog }}
+          name: kiot V ${{ steps.cmake_version.outputs.version }}
+          files: kiot-${{ steps.cmake_version.outputs.version }}.flatpak
