@@ -5,6 +5,7 @@
 - Entities
   - Camera entity
   - Notify entity
+  - Update entity
 
 - Integrations
 

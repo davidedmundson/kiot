@@ -17,6 +17,7 @@ This directory contains the core entity implementations for the KIOT (KDE Intern
   - [Text](#9-text-texth--textcpp)
   - [Camera](#10-camera-camerah--cameracpp)
   - [Notify](#11-notify-notifyh--notifycpp)
+  - [Update](#12-update-updateh--updatecpp)
 - [Creating New Entities](#creating-new-entities)
 - [MQTT Topic Structure](#mqtt-topic-structure)
 - [Home Assistant Discovery](#home-assistant-discovery)
@@ -219,6 +220,36 @@ notify->setId("desktop_alerts");
 notify->setName("Desktop Alerts");
 connect(notify, &Notify::notificationReceived, [](const QString &message) {
     // Display notification or speak message
+});
+```
+
+
+### 12. **Update** (`update.h` / `update.cpp`)
+Represents firmware/software update entities for monitoring and installing updates.
+
+**Home Assistant Type:** `update`  
+**Use Cases:** Kiot update from Home Assistant, firmware version monitoring, remote update installation
+
+**Example Configuration:**
+```cpp
+Update *update = new Update(parent);
+update->setId("kiot_firmware");
+update->setName("Kiot Firmware");
+update->setInstalledVersion("1.0.0");
+update->setLatestVersion("1.1.0");
+update->setTitle("Kiot System Update");
+update->setReleaseSummary("Bug fixes and performance improvements");
+update->setReleaseUrl("https://github.com/davidedmundson/kiot/releases");
+
+connect(update, &Update::installRequested, []() {
+    // Start update installation process
+    // Update progress during installation:
+    // update->setInProgress(true);
+    // update->setUpdatePercentage(25);
+    // ...
+    // When complete:
+    // update->setInstalledVersion("1.1.0");
+    // update->setInProgress(false);
 });
 ```
 
