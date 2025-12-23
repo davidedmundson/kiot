@@ -179,6 +179,7 @@ Shortcuts=true
 | Bluetooth | Switch | Bluetooth adapter control and device connection management |
 | Docker | Switch | Docker container control and status as attributes |
 | SystemD | Switch | Systemd service control|
+| MPRIS | Media Player | MPRIS media player control [Custom Integration](https://github.com/TheOddPirate/mqtt_media_player)|
 
 ## Flatpak Build
 

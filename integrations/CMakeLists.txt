@@ -3,7 +3,7 @@ find_package(PkgConfig REQUIRED)
 pkg_check_modules(LIBUDEV libudev)
 
 include_directories(..)
-
+include_directories(../dbus/)
 set(KIOT_INTEGRATIONS_SRC
     active.cpp
     notifications.cpp
@@ -22,7 +22,21 @@ set(KIOT_INTEGRATIONS_SRC
     bluetooth.cpp
     docker.cpp
     systemd.cpp
+    mpris.cpp   
 )
+
+# Auto generates dbus interfaces on build
+set_source_files_properties(
+   ../dbus/org.freedesktop.DBus.Properties.xml
+   ../dbus/org.mpris.MediaPlayer2.Player.xml
+   ../dbus/org.mpris.MediaPlayer2.xml
+   PROPERTIES
+   NO_NAMESPACE ON)
+qt_add_dbus_interface(KIOT_INTEGRATIONS_SRC ../dbus/org.freedesktop.DBus.Properties.xml dbusproperties)
+qt_add_dbus_interface(KIOT_INTEGRATIONS_SRC ../dbus/org.mpris.MediaPlayer2.Player.xml mprisplayer)
+qt_add_dbus_interface(KIOT_INTEGRATIONS_SRC ../dbus/org.mpris.MediaPlayer2.xml mprisroot)
+
+
 
 # Include gamepad.cpp only when libudev library is found
 if(LIBUDEV_FOUND)

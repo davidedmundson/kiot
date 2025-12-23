@@ -11,6 +11,7 @@
 - Integrations
   - Docker allows you to expose selected docker images as a switch to start/stop it and attributes shows the image name, status, and container id
   - SystemD allows you to expose selected systemd user services as a switch to start/stop it
+  - MPRIS exposes the mpris player over mqtt, stays on the currently active player (requires customm integration)
 
 - UI
   - KCM dynamic tabs based on config file content and suport for creating/deleting scripts/shortcuts
