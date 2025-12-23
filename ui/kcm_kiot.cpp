@@ -15,7 +15,7 @@
 #include <QVariantMap>
 #include <QVariantList>
 #include <QRegularExpression>
-#include <QDebug>
+
 Q_DECLARE_LOGGING_CATEGORY(ui)
 Q_LOGGING_CATEGORY(ui, "kiot.UI.kcm")
 
@@ -48,7 +48,6 @@ public:
     }
     
     Q_INVOKABLE void saveConfigValue(const QString &section, const QString &key, const QVariant &value) {
-        qCDebug(ui) << "Saving config value:" << section << key << value;
         auto config = KSharedConfig::openConfig("kiotrc", KSharedConfig::CascadeConfig);
         
         if (section.contains("][")) {
@@ -75,7 +74,7 @@ public:
     
     Q_INVOKABLE void saveNestedConfigValue(const QString &mainSection, const QString &subSection, 
                                           const QString &key, const QVariant &value) {
-        qCDebug(ui) << "Saving nested config value:" << mainSection << subSection << key << value;
+        //qCDebug(ui) << "Saving nested config value:" << mainSection << subSection << key << value;
         auto config = KSharedConfig::openConfig("kiotrc", KSharedConfig::CascadeConfig);
         KConfigGroup mainGroup(config, mainSection);
         KConfigGroup subGroup(&mainGroup, subSection);
@@ -93,7 +92,6 @@ public:
     }
     
     Q_INVOKABLE QVariant getConfigValue(const QString &section, const QString &key, const QVariant &defaultValue = QVariant()) {
-        qCDebug(ui) << "Getting config value:" << section << key << defaultValue;
         auto config = KSharedConfig::openConfig("kiotrc", KSharedConfig::CascadeConfig);
         
         if (section.contains("][")) {
@@ -110,7 +108,6 @@ public:
     }
     
     Q_INVOKABLE void deleteNestedConfig(const QString &mainSection, const QString &subSection) {
-        qCDebug(ui) << "Deleting nested config:" << mainSection << subSection;
         auto config = KSharedConfig::openConfig("kiotrc", KSharedConfig::CascadeConfig);
         KConfigGroup mainGroup(config, mainSection);
     
@@ -220,8 +217,7 @@ private:
                 } else {
                     currentSectionData[key] = value;
                 }
-            qCDebug(ui) << "After parsing - key:" << key << "value:" << currentSectionData[key] << "type:" << currentSectionData[key].typeName();
-      
+           
             }
         }
         
@@ -243,7 +239,6 @@ private:
         for (const QVariant &sectionVar : m_sectionOrder) {
             QString sectionStr = sectionVar.toString();
             QVariant sectionData = m_configSections.value(sectionStr);
-            qCDebug(ui) << "Section:" << sectionStr << "type:" << sectionData.typeName() << "keys:" << sectionData.toMap().keys();
         }
         
         emit configSectionsChanged();
