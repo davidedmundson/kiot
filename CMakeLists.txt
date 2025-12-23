@@ -1,5 +1,8 @@
 cmake_minimum_required(VERSION 3.16)
 
+# Used for building flatpak
+option(BUILD_FLATPAK "Build for Flatpak environment" OFF)
+
 # Moved version here to work with github actions and it looks like this auto generates PROJECT_VERSION and all that
 project(kiot VERSION 0.0.1)
 # For automatic firmware updates in connected node
