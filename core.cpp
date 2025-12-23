@@ -43,6 +43,16 @@ HaControl::HaControl()
         qCCritical(core) << "kiotrc expected at " << QStandardPaths::writableLocation(QStandardPaths::ConfigLocation);
     }
 
+    // Loads systray and makes sure its part of config file if missing
+    if(!group.hasKey("systray"))
+    {
+        qCDebug(core) << "systray not configured, defaulting to true";
+        group.writeEntry("systray", true); // default to true if not configured
+        config->sync();
+    }
+    if(group.readEntry("systray", true))
+        m_systemTray = new SystemTray(this);
+
     m_connectedNode = new ConnectedNode(this);
 
     loadIntegrations(config);

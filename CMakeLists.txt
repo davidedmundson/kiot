@@ -61,6 +61,7 @@ set(SOURCES
     core.cpp
     dbusproperty.cpp
     dbusproperty.h
+    systray.cpp
     entities/entity.cpp
     entities/binarysensor.cpp
     entities/button.cpp

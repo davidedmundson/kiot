@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: LGPL-2.1-or-later
 
 #pragma once
-
+#include "systray.h"
 #include <KSharedConfig>
 #include <QCoreApplication>
 #include <QMqttSubscription>
@@ -39,6 +39,7 @@ private:
     static HaControl *s_self;
     QMqttClient *m_client;
     ConnectedNode *m_connectedNode;
+    SystemTray *m_systemTray;
 };
 
 // clang-format off
