@@ -3,6 +3,7 @@
 #include "entity.h"
 #include "binarysensor.h"
 #include "button.h"
+#include "camera.h"
 #include "event.h"
 #include "lock.h"
 #include "number.h"

@@ -6,15 +6,16 @@ This directory contains the core entity implementations for the KIOT (KDE Intern
 
 - [Overview](#overview)
 - [Available Entity Types](#available-entity-types)
-  - [Binary Sensor](#1-binary-sensor)
-  - [Sensor](#2-sensor)
-  - [Switch](#3-switch)
-  - [Button](#4-button)
-  - [Lock](#5-lock)
-  - [Event](#6-event)
-  - [Select](#7-select)
-  - [Number](#8-number)
-  - [Text](#9-text)
+  - [Binary Sensor](#1-binary-sensor-binarysensorh--binarysensorcpp)
+  - [Sensor](#2-sensor-sensorh--sensorcpp)
+  - [Switch](#3-switch-switchh--switchcpp)
+  - [Button](#4-button-buttonh--buttoncpp)
+  - [Lock](#5-lock-lockh--lockcpp)
+  - [Event](#6-event-eventh--eventcpp)
+  - [Select](#7-select-selecth--selectcpp)
+  - [Number](#8-number-numberh--numbercpp)
+  - [Text](#9-text-texth--textcpp)
+  - [Camera](#10-camera-camerah--cameracpp)
 - [Creating New Entities](#creating-new-entities)
 - [MQTT Topic Structure](#mqtt-topic-structure)
 - [Home Assistant Discovery](#home-assistant-discovery)
@@ -186,6 +187,24 @@ connect(text, &Text::stateChangeRequested, [](const QString &text) {
 });
 ```
 
+### 10. **Camera** (`camera.h` / `camera.cpp`)
+Represents camera entities for image publishing.
+
+**Home Assistant Type:** `camera`  
+**Use Cases:** Screenshot sharing, webcam snapshots, image-based sensors
+
+**Example Configuration:**
+```cpp
+Camera *camera = new Camera(parent);
+camera->setId("screenshot");
+camera->setName("Screenshot");
+// Publish an image:
+camera->publishImage(base64ImageData);
+connect(camera, &Camera::commandReceived, [](const QString &cmd) {
+    // Handle image update requests
+});
+```
+
 ---
 
 ## Creating New Entities
@@ -331,6 +350,7 @@ Each entity type maps directly to Home Assistant entity types:
 | Select | select | option selection |
 | Number | number | numeric input with constraints |
 | Text | text | text for input  |
+| Camera | camera | image publishing |
 
 ---
 
