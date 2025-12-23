@@ -3,7 +3,7 @@ find_package(PkgConfig REQUIRED)
 pkg_check_modules(LIBUDEV libudev)
 
 include_directories(..)
-include_directories(../dbus/)
+
 set(KIOT_INTEGRATIONS_SRC
     active.cpp
     notifications.cpp
@@ -23,6 +23,7 @@ set(KIOT_INTEGRATIONS_SRC
     docker.cpp
     systemd.cpp
     mpris.cpp   
+
 )
 
 # Auto generates dbus interfaces on build
