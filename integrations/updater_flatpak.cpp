@@ -244,7 +244,7 @@ private:
     KConfigGroup updaterGroup;
     QDateTime lastCheck;
     // TODO change to upstream repo
-    QString repo_url = "https://github.com/TheOddPirate/kiot/";
+    QString repo_url = "https://github.com/davidedmundson/kiot";
     QVariantMap lastRepoData;
     QTimer *m_updateTimer = nullptr;
     Update *m_updater;
