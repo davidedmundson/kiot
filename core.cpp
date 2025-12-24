@@ -4,12 +4,15 @@
 #include "core.h"
 #include "entities/entity.h"
 #include <KConfigGroup>
+#include <KNotification>
+#include <QApplication>
 #include <QJsonDocument>
 #include <QJsonObject>
 #include <QMqttClient>
 #include <QTimer>
-#include <QLoggingCategory>
 #include <QProcess>
+
+#include <QLoggingCategory>
 Q_DECLARE_LOGGING_CATEGORY(core)
 Q_LOGGING_CATEGORY(core, "kiot.HaControl")
 
@@ -30,10 +33,15 @@ HaControl::HaControl()
 {
     s_self = this;
     auto config = KSharedConfig::openConfig();
+    //Checks that config is valid and opens the kcm module if its not
     if(!ensureConfigDefaults(config))
     {
         QProcess::startDetached("kcmshell6", {"kcm_kiot"});
-        QCoreApplication::quit();
+        KNotification::event(KNotification::Notification, QString("Invalid Config"), QString("Config file is not valid, please fill out everything in the general tab"));
+        //This timer was added to give the notification time to show before we close down and direct users at what needs to be done
+        QTimer::singleShot(5000, this, [this](){
+        qCFatal(core) << "Config file is invalid please fill it correctly";
+        });
     }
     auto group = config->group("general");
     m_client = new QMqttClient(this);
@@ -125,29 +133,27 @@ bool HaControl::ensureConfigDefaults(KSharedConfigPtr config)
             configChanged = true;
             qCDebug(core) << "Added missing config key:" << key << "with default value:" << defaultValue;
             
-            // Hvis dette er et kritisk felt (host, port), merk config som ugyldig
+            // Mark config as invalid if a critical field is missing
             if (key == "host" && defaultValue.toString().isEmpty()) {
                 configValid = false;
             }
         }
+        else if (generalGroup.hasKey(key))
+        {
+            auto readValue = generalGroup.readEntry(key,"");
+            if(readValue.isEmpty() || readValue == "")
+            {
+                if(key == "host" || key == "port" || key == "user" || key == "password")
+                    configValid = false;
+            }
+        }
     }
-    
-    // Sjekk og initialiser "Integrations" gruppen
-    KConfigGroup integrationsGroup = config->group("Integrations");
-    
-    if (!integrationsGroup.exists()) {
-        qCDebug(core) << "Integrations group not found, will be created when integrations register";
-        // Vi oppretter ikke denne gruppen her - den vil bli opprettet av loadIntegrations()
-        // når integrasjoner registrerer seg
-    }
-    
-    // Hvis config ble endret, sync den
+   
     if (configChanged) {
         config->sync();
         qCDebug(core) << "Configuration updated with default values";
     }
     
-    // Sjekk om host er konfigurert (kritisk for oppkobling)
     if (generalGroup.readEntry("host", "").isEmpty()) {
         qCCritical(core) << "MQTT host is not configured!";
         configValid = false;
