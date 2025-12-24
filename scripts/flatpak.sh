@@ -10,7 +10,7 @@ build() {
     echo "Building flatpak bundle...."
     flatpak-builder --repo=flatpak-repo --force-clean build-installer .flatpak-manifest.yaml 
     echo "Building flatpak installer..........."
-    flatpak build-bundle flatpak-repo ./build/kiot.flatpak org.davidedmundson.kiot testing_updated
+    flatpak build-bundle flatpak-repo ./build/kiot.flatpak org.davidedmundson.kiot master
     echo "installer buildt and located at ./build/kiot.flatpak"
 }
 

@@ -19,6 +19,8 @@ All notable changes to this experimental branch of Kiot will be documented in th
 - **GameLauncher Integration**: Detect installed Steam/Heroic games and expose them as a dropdown menu in Home Assistant for voice-assisted game launching
 - **Flatpak Updater Integration** (Flatpak only): Check for latest releases on GitHub and enable automatic installation via user-installed Flatpak setup
 - **ActiveWindow Integration**: Updated to work in flatpak
+- **Scripts Integration**: Added support for custom input variables, 
+if exec line contains "{arg}", it exposes a textbox in HA and replaces {arg} with the input value
 
 #### User Interface
 - **KCM Improvements**: 
@@ -28,6 +30,12 @@ All notable changes to this experimental branch of Kiot will be documented in th
 - **System Tray Icon**: 
   - Green/yellow/red icon based on MQTT client connection state
   - Menu for opening settings, config file, and reconnecting
+
+#### Helper Scripts
+- **Main Helper Menu** (`helper.sh`): Interactive menu for easy installation and setup
+- **Dependency Installer** (`scripts/dependencies.sh`): Automatic dependency installation for multiple distributions (apt/pacman)
+- **Native Installer** (`scripts/native.sh`): Interactive menu for native build and installation
+- **Flatpak Installer** (`scripts/flatpak.sh`): Interactive menu for Flatpak build and installation
 
 #### Core Improvements
 - **Version Management**: Updated CMakeLists to make project version available throughout codebase
@@ -49,13 +57,12 @@ All notable changes to this experimental branch of Kiot will be documented in th
 
 ### Documentation
 - Updated README.md with new integrations and features
+- Added comprehensive documentation for helper scripts
 - Added this changelog file for tracking changes
 
 ## Notes
 - This branch is highly experimental and intended for testing purposes
 - Some features (like MediaPlayer and MPRIS) require custom Home Assistant integrations
-- Flatpak builds may have limited functionality due to sandboxing constraints
+- Helper scripts provide simplified installation for new users
 
 ---
-
-*This changelog follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/) format.*

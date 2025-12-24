@@ -98,7 +98,14 @@ void SystemTray::onQuit()
     qCDebug(st) << "Quit requested from system tray";
     QApplication::quit();
 }
-
+/**
+ * @brief Restarts kiot
+ */
+void SystemTray::onRestart()
+{
+    qCDebug(st) << "Restart requested from system tray";
+    QProcess::startDetached("kiot");
+}
 void SystemTray::createIcons()
 {
     QPixmap connectedPixmap(32, 32);
@@ -139,7 +146,8 @@ void SystemTray::setupMenu()
 {
     m_statusAction = m_menu->addAction("Status: Disconnected");
     m_statusAction->setEnabled(false);
-
+    m_versionAction = m_menu->addAction("Version: " +  QStringLiteral(KIOT_VERSION));
+    m_versionAction->setEnabled(false);
     m_menu->addSeparator();
 
     QAction *settingsAction = m_menu->addAction(QIcon::fromTheme("configure"), "Open Settings");
@@ -151,6 +159,10 @@ void SystemTray::setupMenu()
     QAction *reconnectAction = m_menu->addAction(QIcon::fromTheme("view-refresh"), "Reconnect");
     connect(reconnectAction, &QAction::triggered, this, &SystemTray::onReconnect);
     m_menu->addSeparator();
+
+    QAction *restartAction = m_menu->addAction(QIcon::fromTheme("system-reboot"), "Restart");
+    connect(restartAction, &QAction::triggered, this, &SystemTray::onRestart);
+
     QAction *quitAction = m_menu->addAction(QIcon::fromTheme("application-exit"), "Quit");
     connect(quitAction, &QAction::triggered, this, &SystemTray::onQuit);
 

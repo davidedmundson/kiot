@@ -1,5 +1,5 @@
 #include "core.h"
-#include "entities/entities.h"
+#include "entities/update.h"
 
 #include <QDir>
 #include <QEventLoop>
@@ -243,6 +243,7 @@ private:
     KSharedConfig::Ptr config;
     KConfigGroup updaterGroup;
     QDateTime lastCheck;
+    // TODO change to upstream repo
     QString repo_url = "https://github.com/TheOddPirate/kiot/";
     QVariantMap lastRepoData;
     QTimer *m_updateTimer = nullptr;
@@ -258,5 +259,5 @@ void setupFlatpakUpdater()
     new FlatpakUpdater(qApp);
 }
 
-REGISTER_INTEGRATION("UpdaterFlatpak", setupFlatpakUpdater, false)
+REGISTER_INTEGRATION("UpdaterFlatpak", setupFlatpakUpdater, true)
 #include "updater_flatpak.moc"

@@ -26,7 +26,7 @@ private slots:
     void onOpenSettings();
     void onOpenConfig();
     void onReconnect();
-
+    void onRestart();
     void onQuit();
 
 private:
@@ -60,6 +60,7 @@ private:
     QSystemTrayIcon *m_trayIcon = nullptr;
     QMenu *m_menu = nullptr;
     QAction *m_statusAction = nullptr;
+    QAction *m_versionAction = nullptr;
 
     QIcon m_connectedIcon;
     QIcon m_disconnectedIcon;

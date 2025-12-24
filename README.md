@@ -1,12 +1,13 @@
 # Kiot - KDE Internet Of Things
 
-NOTE: This is a higly experimental branch, and is not recommended if you do not feel comfortable with reporting issues 
+NOTE: This is a highly experimental branch, and is not recommended if you do not feel comfortable with reporting issues 
 
 ## Navigation
 - [About](#about)
 - [Setup](#setup)
   - [Dependencies](#dependencies)
   - [Download and Install](#download-and-install)
+  - [Helper Scripts](#helper-scripts)
 - [Configuration](#configuration)
   - [MQTT Configuration](#mqtt-configuration)
   - [Configuration Examples](#configuration-examples)
@@ -51,14 +52,33 @@ Ensure you have these packages installed:
 
 ### Download and Install
 
+#### Using Helper Scripts (Recommended)
+The easiest way to install Kiot is using the provided helper scripts:
+
+```bash
+# Make helper scripts executable
+chmod +x helper.sh scripts/*.sh
+
+# Run the main helper menu
+./helper.sh
+```
+
+This will open an interactive menu where you can:
+1. Install dependencies automatically
+2. Build and install natively
+3. Build and install as Flatpak
+
+#### Manual Installation
+If you prefer manual installation:
+
 1. Clone the repository:
-   ```sh
+   ```bash
    git clone https://github.com/davidedmundson/kiot.git
    cd kiot
    ```
 
 2. Build and install:
-   ```sh
+   ```bash
    mkdir build
    cd build
    cmake ..
@@ -67,6 +87,24 @@ Ensure you have these packages installed:
    ```
 
 3. If you encounter missing dependencies during the build process, install them using your distribution's package manager.
+
+### Helper Scripts
+
+This repository includes several helper scripts to simplify installation:
+
+#### Main Helper Menu
+- **`helper.sh`** - Main interactive menu that guides you through the entire installation process
+
+#### Individual Scripts (in `scripts/` directory)
+- **`dependencies.sh`** - Automatically installs dependencies for your distribution (supports apt and pacman)
+- **`native.sh`** - Interactive menu for native installation using `make install`
+- **`flatpak.sh`** - Interactive menu for Flatpak installation and management
+
+#### Quick Start
+```bash
+# One-liner for quick installation
+chmod +x helper.sh && ./helper.sh
+```
 
 ## Configuration
 
@@ -109,6 +147,7 @@ port=1883
 user=mqtt_user
 password=secure_password
 useSSL=false
+systray=true #To enable/disable the systray icon
 ```
 
 #### Scripts Configuration
@@ -116,16 +155,17 @@ useSSL=false
 [Scripts][launch_chrome]
 Name=Launch Chrome
 Exec=google-chrome
-
+#icon is optional 
 [Scripts][steam_bigpicture]
 Exec=steam steam://open/bigpicture
 Name=Launch steam bigpicture
+icon=mdi:steam
+#Shows use of custom input variables with scripts
+[Scripts][open]
+Exec=xdg-open '{arg}'
+Name=Open
+icon=mdi:launch
 
-[Scripts][youtube_studio]
-Exec=brave  --new-window  "https://studio.youtube.com"
-Name=Launch YoutubeStudio
-icon=mdi:youtube-studio
-#icon is optional, defaults to "mdi:script-text" if not set
 ```
 
 #### Shortcuts Configuration
@@ -193,15 +233,24 @@ Flatpak installation is also supported:
 
 1. Clone this repository
 2. Run:
-   ```sh
+   ```bash
    flatpak-builder build .flatpak-manifest.yaml --user --install --force-clean
    ```
    This builds and installs Kiot as a Flatpak, automatically fetching all dependencies.
 
+### Using Helper Script for Flatpak
+```bash
+./helper.sh
+```
+or directly:
+```bash
+./scripts/flatpak.sh
+```
+
 ### Flatpak Notes
-- The Flatpak version does not autostart automatically
-- Some integrations may have limited functionality due to Flatpak sandboxing
-- Log files are stored within the Flatpak sandbox
+- The Flatpak version does not autostart automatically, but supports auto start from system-settings
+
+
 
 ## Future Development
 
@@ -220,6 +269,12 @@ Contributions are welcome!
 2. Document new integrations
 3. Follow existing entity patterns
 
+### Using Helper Scripts for Development
+The helper scripts make it easy to set up a development environment:
+```bash
+./helper.sh  # Use option 1 to install dependencies, then option 2 to build
+```
+
 ## Troubleshooting
 
 ### Common Issues
@@ -232,5 +287,6 @@ Contributions are welcome!
 - Check the configuration examples above
 - Review the Home Assistant MQTT documentation
 - Examine system logs for error messages
+- Use helper scripts for automated dependency resolution
 
 ---
