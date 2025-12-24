@@ -9,7 +9,7 @@
 #include <QMqttClient>
 #include <QTimer>
 #include <QLoggingCategory>
-
+#include <QProcess>
 Q_DECLARE_LOGGING_CATEGORY(core)
 Q_LOGGING_CATEGORY(core, "kiot.HaControl")
 
@@ -30,6 +30,11 @@ HaControl::HaControl()
 {
     s_self = this;
     auto config = KSharedConfig::openConfig();
+    if(!ensureConfigDefaults(config))
+    {
+        QProcess::startDetached("kcmshell6", {"kcm_kiot"});
+        QCoreApplication::quit();
+    }
     auto group = config->group("general");
     m_client = new QMqttClient(this);
     m_client->setHostname(group.readEntry("host"));
@@ -87,6 +92,68 @@ HaControl::HaControl()
 HaControl::~HaControl()
 {
     delete m_connectedNode;
+}
+
+bool HaControl::ensureConfigDefaults(KSharedConfigPtr config)
+{
+    bool configValid = true;
+    bool configChanged = false;
+    
+    // Sjekk og initialiser "general" gruppen
+    KConfigGroup generalGroup = config->group("general");
+    
+    // Liste over nødvendige felter i general gruppen
+    const QVector<QPair<QString, QVariant>> generalDefaults = {
+        {"host", ""},           // MQTT server hostname/IP
+        {"port", 1883},         // MQTT port
+        {"user", ""},           // MQTT username
+        {"password", ""},       // MQTT password
+        {"useSSL", false},      // SSL/TLS
+        {"systray", true}       // System tray icon
+    };
+    
+    // Sjekk om general gruppen eksisterer og har alle nødvendige nøkler
+    if (!generalGroup.exists()) {
+        qCWarning(core) << "General configuration group not found, creating with defaults";
+        configValid = false;
+    }
+    
+    // Legg til manglende nøkler med standardverdier
+    for (const auto &[key, defaultValue] : generalDefaults) {
+        if (!generalGroup.hasKey(key)) {
+            generalGroup.writeEntry(key, defaultValue);
+            configChanged = true;
+            qCDebug(core) << "Added missing config key:" << key << "with default value:" << defaultValue;
+            
+            // Hvis dette er et kritisk felt (host, port), merk config som ugyldig
+            if (key == "host" && defaultValue.toString().isEmpty()) {
+                configValid = false;
+            }
+        }
+    }
+    
+    // Sjekk og initialiser "Integrations" gruppen
+    KConfigGroup integrationsGroup = config->group("Integrations");
+    
+    if (!integrationsGroup.exists()) {
+        qCDebug(core) << "Integrations group not found, will be created when integrations register";
+        // Vi oppretter ikke denne gruppen her - den vil bli opprettet av loadIntegrations()
+        // når integrasjoner registrerer seg
+    }
+    
+    // Hvis config ble endret, sync den
+    if (configChanged) {
+        config->sync();
+        qCDebug(core) << "Configuration updated with default values";
+    }
+    
+    // Sjekk om host er konfigurert (kritisk for oppkobling)
+    if (generalGroup.readEntry("host", "").isEmpty()) {
+        qCCritical(core) << "MQTT host is not configured!";
+        configValid = false;
+    }
+    
+    return configValid;
 }
 
 void HaControl::doConnect()

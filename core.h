@@ -35,6 +35,7 @@ public:
 private:
     void doConnect();
     void loadIntegrations(KSharedConfigPtr config);
+    bool ensureConfigDefaults(KSharedConfigPtr config);
     static QList<IntegrationFactory> s_integrations;
     static HaControl *s_self;
     QMqttClient *m_client;

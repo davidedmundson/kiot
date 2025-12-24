@@ -88,7 +88,7 @@ public:
         m_select = new Select(this);
         m_select->setId("steam_launcher");
         m_select->setName("Steam Launcher");
-        m_select->setDiscoveryConfig("icon","mdi:steam")
+        m_select->setDiscoveryConfig("icon","mdi:steam");
         connect(m_select, &Select::optionSelected, this, &Steam::onOptionSelected);
         createGameEntities(games);
     }
@@ -457,7 +457,7 @@ public:
         m_select = new Select(this);
         m_select->setId("heroic_launcher");
         m_select->setName("Heroic Launcher");
-        m_select->setDiscoveryConfig("icon","mdi:gamepad-square")
+        m_select->setDiscoveryConfig("icon","mdi:gamepad-square");
         connect(m_select, &Select::optionSelected, this, &Heroic::onOptionSelected);
         createGameEntities(games);
     }
