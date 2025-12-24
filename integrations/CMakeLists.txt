@@ -23,7 +23,7 @@ set(KIOT_INTEGRATIONS_SRC
     docker.cpp
     systemd.cpp
     mpris.cpp   
-
+    gamelauncher.cpp
 )
 
 # Auto generates dbus interfaces on build
