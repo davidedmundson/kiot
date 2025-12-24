@@ -5,3 +5,4 @@ kiot.code-workspace
 scripts/
 *.sh
 flatpak-repo
+.continue/
