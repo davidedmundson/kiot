@@ -27,12 +27,12 @@ SystemTray::SystemTray(QObject *parent)
     connect(m_trayIcon, &QSystemTrayIcon::activated,
             this, &SystemTray::onTrayActivated);
 
-    auto mqttClient = HaControl::mqttClient();
-    if (mqttClient) {
-        connect(mqttClient, &QMqttClient::stateChanged,
-                this, &SystemTray::onMqttStateChanged);
-        onMqttStateChanged(mqttClient->state());
-    }
+ //   auto mqttClient = HaControl::mqttClient();
+ //   if (mqttClient) {
+ //       connect(mqttClient, &QMqttClient::stateChanged,
+ //               this, &SystemTray::onMqttStateChanged);
+ //       onMqttStateChanged(mqttClient->state());
+ //   }
 
     m_trayIcon->show();
     qCDebug(st) << "System tray icon initialized";
@@ -190,6 +190,9 @@ void SystemTray::updateIcon(QMqttClient::ClientState state)
             m_statusAction->setText("Status: Disconnected");
         }
     }
+   const bool connected = (state == QMqttClient::Connected);
+   const QString statusText = connected ? "Connected" : "Disconnected";
+   m_trayIcon->setToolTip("Kiot - " + statusText);
 }
 
 

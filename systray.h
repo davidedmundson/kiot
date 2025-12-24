@@ -14,6 +14,11 @@ class SystemTray : public QObject
 
 public:
     explicit SystemTray(QObject *parent = nullptr);
+    /**
+     * @brief Updates the tray icon based on connection state
+     * @param state The MQTT Client state
+     */
+    void updateIcon(QMqttClient::ClientState state);
 
 private slots:
     void onMqttStateChanged(QMqttClient::ClientState state);
@@ -35,11 +40,6 @@ private:
      */
     void setupMenu();
 
-    /**
-     * @brief Updates the tray icon based on connection state
-     * @param state The MQTT Client state
-     */
-    void updateIcon(QMqttClient::ClientState state);
 
     /**
      * @brief Opens Kiot settings with fallback to configuration file

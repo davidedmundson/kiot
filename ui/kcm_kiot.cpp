@@ -11,6 +11,7 @@
 
 #include <QLoggingCategory>
 #include <QFile>
+#include <QProcess>
 #include <QTextStream>
 #include <QVariantMap>
 #include <QVariantList>
@@ -121,7 +122,14 @@ public:
         }
     }
 
-    
+    Q_INVOKABLE void save()
+    {
+        KQuickManagedConfigModule::save();
+
+        qCDebug(ui) << "Settings applied, restarting Kiot";
+        QProcess::startDetached("kiot");
+    }
+
 private:
     void writeEntry(KConfigGroup &group, const QString &key, const QVariant &value) {
         if (value.typeId() == QMetaType::Bool) {
