@@ -97,12 +97,6 @@ The current icon (`org.davidedmundson.kiot.svg`) is a placeholder. Before publis
 1. Create a proper icon that represents Kiot/IoT
 2. Generate multiple sizes using `./generate-icons.sh`
 
-### Screenshots
-The screenshots in `images/` directory are referenced in the metainfo.xml file. Before publishing:
-1. Update screenshot URLs in metadata files to point to the final repository
-2. Ensure all referenced screenshots exist in the `images/` directory
-3. Screenshots should be at least 800x600 pixels
-
 ### Sandbox Limitations
 Some features may have limited functionality in the Flatpak sandbox:
 - Hardware access may be restricted
