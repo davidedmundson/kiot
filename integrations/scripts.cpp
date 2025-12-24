@@ -3,6 +3,7 @@
 
 #include "core.h"
 #include "entities/button.h"
+#include "entities/text.h"
 #include <KConfigGroup>
 #include <KProcess>
 #include <KSharedConfig>
@@ -19,6 +20,7 @@ void registerScripts()
 {
     auto scriptConfigToplevel = KSharedConfig::openConfig()->group("Scripts");
     const QStringList scriptIds = scriptConfigToplevel.groupList();
+    Textbox *textb = nullptr;
     for (const QString &scriptId : scriptIds) {
         auto scriptConfig = scriptConfigToplevel.group(scriptId);
         const QString name = scriptConfig.readEntry("Name", scriptId);
@@ -28,7 +30,13 @@ void registerScripts()
             qCWarning(scripts) << "Could not find script Exec entry for" << scriptId;
             continue;
         }
-
+        //Creates a shared textbox for input variables to script only if user has defined {arg} in the Exec line
+        if (exec.contains("{arg}") && textb == nullptr) {
+            textb = new Textbox(qApp);
+            textb->setId("scripts_arguments");
+            textb->setName("arguments");
+            textb->setDiscoveryConfig("icon", "mdi:console");
+        }
         auto button = new Button(qApp);
         button->setId(scriptId);
         button->setName(name);
@@ -37,11 +45,16 @@ void registerScripts()
         // maybe via some substitution in the exec line
         QObject::connect(button, &Button::triggered, qApp, [exec, scriptId]() {
             qCInfo(scripts) << "Running script " << scriptId;
+            if(exec.contains("{arg}")  && textb != nullptr)
+            {
+                ex = ex.replace("{arg}",textb->state());
+                textb->setState(""); //Clears the textbox after use, should it be kept?
+            }
             QStringList args = QProcess::splitCommand(exec); 
             if (args.isEmpty()) {                            
                 qCWarning(scripts) << "Could not parse script Exec entry for" << scriptId;
                 return;
-            } 
+            }
             QString program = args.takeFirst();           
 
             KProcess *p = new KProcess();
