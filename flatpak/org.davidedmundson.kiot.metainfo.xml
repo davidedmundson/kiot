@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<component type="console-application">
+<component type="desktop-application">
   <id>org.davidedmundson.kiot</id>
   
   <name>Kiot</name>
@@ -15,39 +15,98 @@
       with your local environment.
     </p>
     <p>
-      Monitor system stats, control media players, and access device information in real time, all while keeping your desktop secure and private.
+      With Kiot, you can:
+    </p>
+    <ul>
+      <li>Monitor system status </li>
+      <li>Control media players via MPRIS</li>
+      <li>Manage Docker containers</li>
+      <li>Control systemd services</li>
+      <li>Launch games from Steam/Heroic</li>
+      <li>Send notifications to your desktop</li>
+      <li>Track active window and user activity</li>
+    </ul>
+    <p>
+      All data is exposed via MQTT to Home Assistant, where you can create powerful automations that integrate your desktop with your smart home.
     </p>
   </description>
   
-  <author>
-    <name>David Edmundson</name>
-    <email>davidedmundson@kde.org</email>
-    <url>https://github.com/davidedmundson/kiot</url>
-  </author>
+  <url type="homepage">https://github.com/davidedmundson/kiot</url>
+  <url type="bugtracker">https://github.com/davidedmundson/kiot/issues</url>
+  <url type="help">https://github.com/davidedmundson/kiot/blob/master/README.md</url>
+  <url type="donation">https://kde.org/community/donations</url>
+  <url type="translate">https://github.com/davidedmundson/kiot</url>
+  <url type="vcs-browser">https://github.com/davidedmundson/kiot</url>
+  
+  <developer_name>David Edmundson &amp; Odd Østlie</developer_name>
+  <update_contact>davidedmundson@kde.org</update_contact>
 
   <screenshots>
     <screenshot type="default">
-      <caption>Prototype settings page</caption>
-      <image>https://raw.githubusercontent.com/TheOddPirate/kiot/363e26663485660b940f38babdcd7dd1ec21cf47/flatpak/images/system-settings.png</image>
+      <caption>System Settings Integration</caption>
+      <image>https://github.com/TheOddPirate/kiot/blob/d5335e0fbd0ae9e0009a0cbbfbe788d5fb0ff28f/flatpak/images/system-settings.png?raw=true</image>
     </screenshot>
     <screenshot type="other">
-      <caption>Device sensors overview</caption>
-      <image>https://raw.githubusercontent.com/TheOddPirate/kiot/363e26663485660b940f38babdcd7dd1ec21cf47/flatpak/images/device_sensors.png</image>
+      <caption>Device Sensors Overview</caption>
+      <image>https://github.com/TheOddPirate/kiot/blob/d5335e0fbd0ae9e0009a0cbbfbe788d5fb0ff28f/flatpak/images/device_sensors.png?raw=true</image>
     </screenshot>
     <screenshot type="other">
-      <caption>Device controls panel</caption>
-      <image>https://raw.githubusercontent.com/TheOddPirate/kiot/363e26663485660b940f38babdcd7dd1ec21cf47/flatpak/images/device_controls.png</image>
+      <caption>Device Controls Panel</caption>
+      <image>https://github.com/TheOddPirate/kiot/blob/d5335e0fbd0ae9e0009a0cbbfbe788d5fb0ff28f/flatpak/images/device_controls.png?raw=true</image>
     </screenshot>
     <screenshot type="other">
-      <caption>Integrated media player</caption>
-      <image>https://raw.githubusercontent.com/TheOddPirate/kiot/363e26663485660b940f38babdcd7dd1ec21cf47/flatpak/images/media_player.png</image>
+      <caption>Media Player Integration</caption>
+      <image>https://github.com/TheOddPirate/kiot/blob/d5335e0fbd0ae9e0009a0cbbfbe788d5fb0ff28f/flatpak/images/media_player.png?raw=true</image>
     </screenshot>
   </screenshots>
 
-  <url type="homepage">https://github.com/davidedmundson/kiot</url>
-  <url type="license">https://github.com/davidedmundson/kiot/blob/main/LICENSE</url>
 
-  <icon type="stock">org.davidedmundson.kiot.svg</icon>
+  <content_rating type="oars-1.1">
+    <content_attribute id="violence-cartoon">none</content_attribute>
+    <content_attribute id="violence-fantasy">none</content_attribute>
+    <content_attribute id="violence-realistic">none</content_attribute>
+    <content_attribute id="violence-bloodshed">none</content_attribute>
+    <content_attribute id="violence-sexual">none</content_attribute>
+    <content_attribute id="violence-desecration">none</content_attribute>
+    <content_attribute id="violence-slavery">none</content_attribute>
+    <content_attribute id="violence-worship">none</content_attribute>
+    <content_attribute id="drugs-alcohol">none</content_attribute>
+    <content_attribute id="drugs-narcotics">none</content_attribute>
+    <content_attribute id="drugs-tobacco">none</content_attribute>
+    <content_attribute id="sex-nudity">none</content_attribute>
+    <content_attribute id="sex-themes">none</content_attribute>
+    <content_attribute id="sex-homosexuality">none</content_attribute>
+    <content_attribute id="sex-prostitution">none</content_attribute>
+    <content_attribute id="sex-adultery">none</content_attribute>
+    <content_attribute id="sex-appearance">none</content_attribute>
+    <content_attribute id="language-profanity">none</content_attribute>
+    <content_attribute id="language-humor">none</content_attribute>
+    <content_attribute id="language-discrimination">none</content_attribute>
+    <content_attribute id="social-chat">none</content_attribute>
+    <content_attribute id="social-info">none</content_attribute>
+    <content_attribute id="social-audio">none</content_attribute>
+    <content_attribute id="social-location">none</content_attribute>
+    <content_attribute id="social-contacts">none</content_attribute>
+    <content_attribute id="money-purchasing">none</content_attribute>
+    <content_attribute id="money-gambling">none</content_attribute>
+  </content_rating>
+  
+  <releases>
+    <release version="0.0.1" date="2024-12-7">
+      <description>
+        <p>Initial experimental release with Flatpak support</p>
+        <ul>
+          <li>MQTT integration with Home Assistant</li>
+          <li>System monitoring (battery, activity, windows)</li>
+          <li>Media player control via MPRIS</li>
+          <li>Docker container management</li>
+          <li>Systemd service control</li>
+          <li>Game launcher integration</li>
+          <li>Flatpak auto-updater</li>
+        </ul>
+      </description>
+    </release>
+  </releases>
   
   <categories>
     <category>System</category>
@@ -55,11 +114,33 @@
     <category>Utility</category>
   </categories>
   
+  <keywords>
+    <keyword>iot</keyword>
+    <keyword>home automation</keyword>
+    <keyword>kde</keyword>
+    <keyword>sensors</keyword>
+    <keyword>mqtt</keyword>
+    <keyword>media player</keyword>
+    <keyword>daemon</keyword>
+    <keyword>desktop integration</keyword>
+  </keywords>
+  
+  <icon type="stock">org.davidedmundson.kiot.svg</icon>
+  
+  <kudos>
+    <kudo>ModernToolkit</kudo>
+    <kudo>Qt</kudo>
+    <kudo>KDE</kudo>
+    <kudo>NetworkTransparent</kudo>
+  </kudos>
+  
   <provides>
     <binary>kiot</binary>
   </provides>
-
-  <tags>
-    IoT, Home Automation, KDE, Sensors, Media Player, Daemon, Desktop Integration
-  </tags>
+  
+  <custom>
+    <value key="Flathub::automerge">true</value>
+    <value key="Flathub::runtime-version">6.10</value>
+    <value key="Flathub::suggested-version">0.0.1</value>
+  </custom>
 </component>

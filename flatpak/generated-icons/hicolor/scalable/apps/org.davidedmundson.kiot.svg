@@ -1,29 +1,29 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <svg width="256" height="256" viewBox="0 0 256 256" xmlns="http://www.w3.org/2000/svg">
-
+  <!-- Background circle -->
   <circle cx="128" cy="128" r="120" fill="#1d99f3" fill-opacity="0.1" stroke="#1d99f3" stroke-width="8"/>
   
-
+  <!-- House -->
   <path d="M 100,100 L 128,75 L 156,100 L 156,150 L 100,150 Z" fill="#1d99f3" stroke="#1a7bc9" stroke-width="4"/>
   
-
+  <!-- Door -->
   <rect x="118" y="120" width="20" height="30" fill="#1a7bc9" rx="2"/>
   
-
+  <!-- Windows -->
   <rect x="105" y="105" width="12" height="12" fill="#ffffff" stroke="#1a7bc9" stroke-width="2" rx="2"/>
   <rect x="139" y="105" width="12" height="12" fill="#ffffff" stroke="#1a7bc9" stroke-width="2" rx="2"/>
   
-
+  <!-- IoT/Waves -->
   <path d="M 70,170 Q 90,150 110,170 T 150,170 T 190,170" fill="none" stroke="#1d99f3" stroke-width="6" stroke-linecap="round"/>
   <path d="M 65,185 Q 85,165 105,185 T 145,185 T 185,185" fill="none" stroke="#1d99f3" stroke-width="6" stroke-linecap="round" opacity="0.7"/>
   <path d="M 60,200 Q 80,180 100,200 T 140,200 T 180,200" fill="none" stroke="#1d99f3" stroke-width="6" stroke-linecap="round" opacity="0.4"/>
   
-
+  <!-- Connection dots -->
   <circle cx="110" cy="170" r="4" fill="#ffffff"/>
   <circle cx="130" cy="170" r="4" fill="#ffffff"/>
   <circle cx="150" cy="170" r="4" fill="#ffffff"/>
   
-
+  <!-- KDE/Plasma accent -->
   <circle cx="128" cy="60" r="12" fill="#1d99f3" opacity="0.8">
     <animate attributeName="r" values="12;14;12" dur="2s" repeatCount="indefinite"/>
   </circle>

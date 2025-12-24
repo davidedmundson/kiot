@@ -130,7 +130,7 @@ public:
         }
     }
 
-    Q_INVOKABLE void save()
+    Q_INVOKABLE void save() override
     {
         KQuickManagedConfigModule::save();
 
