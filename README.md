@@ -182,6 +182,11 @@ Shortcuts=true
 | MPRIS | Media Player | MPRIS media player control [Custom Integration](https://github.com/TheOddPirate/mqtt_media_player)|Button
 | Game Launcher | Select | Game launcher for steam/heroic games|
 
+### Flatpak Only Integrations
+| Feature | Entity Type | Description |
+|---------|-------------|-------------|
+| Update | update | Lets you update kiot from github releases via home assistant |
+
 ## Flatpak Build
 
 Flatpak installation is also supported:

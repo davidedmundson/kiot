@@ -26,6 +26,13 @@ set(KIOT_INTEGRATIONS_SRC
     gamelauncher.cpp
 )
 
+# For flatpak only integrations, the flatpak manifest sets BUILD_FLATPAK to on
+if(BUILD_FLATPAK)
+    list(APPEND KIOT_INTEGRATIONS_SRC 
+        updater_flatpak.cpp
+    )
+endif()
+
 # Auto generates dbus interfaces on build
 set_source_files_properties(
    ../dbus/org.freedesktop.DBus.Properties.xml
@@ -33,6 +40,7 @@ set_source_files_properties(
    ../dbus/org.mpris.MediaPlayer2.xml
    PROPERTIES
    NO_NAMESPACE ON)
+   
 qt_add_dbus_interface(KIOT_INTEGRATIONS_SRC ../dbus/org.freedesktop.DBus.Properties.xml dbusproperties)
 qt_add_dbus_interface(KIOT_INTEGRATIONS_SRC ../dbus/org.mpris.MediaPlayer2.Player.xml mprisplayer)
 qt_add_dbus_interface(KIOT_INTEGRATIONS_SRC ../dbus/org.mpris.MediaPlayer2.xml mprisroot)
