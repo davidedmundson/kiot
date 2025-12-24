@@ -15,7 +15,6 @@
 Q_DECLARE_LOGGING_CATEGORY(audio)
 Q_LOGGING_CATEGORY(audio, "integration.Audio")
 
-
 class Audio : public QObject
 {
     Q_OBJECT

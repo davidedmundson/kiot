@@ -37,4 +37,3 @@ void Sensor::publishState()
 
     HaControl::mqttClient()->publish(baseTopic(), m_state.toUtf8(), 0, true);
 }
-

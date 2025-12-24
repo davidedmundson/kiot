@@ -4,11 +4,11 @@
 /**
  * @file entity.cpp
  * @brief Base Entity class implementation for KIOT Home Assistant integration
- * 
+ *
  * @details
  * This file implements the Entity base class which provides common functionality
  * for all KIOT entities that integrate with Home Assistant via MQTT.
- * 
+ *
  * The Entity class handles:
  * - MQTT topic management and discovery
  * - Attribute publishing and conversion for Home Assistant compatibility
@@ -19,17 +19,17 @@
 #include "entity.h"
 #include "core.h"
 #include <QHostInfo>
+#include <QJsonArray>
 #include <QJsonDocument>
 #include <QJsonObject>
-#include <QJsonArray>
 #include <QMqttClient>
 
 #include <QLoggingCategory>
 Q_DECLARE_LOGGING_CATEGORY(base)
 Q_LOGGING_CATEGORY(base, "entities.Entity")
 
-Entity::Entity(QObject *parent):
-    QObject(parent)
+Entity::Entity(QObject *parent)
+    : QObject(parent)
 {
     connect(HaControl::mqttClient(), &QMqttClient::connected, this, &Entity::init);
 }
@@ -86,8 +86,7 @@ QString Entity::haIcon() const
 QString Entity::id() const
 {
     if (m_id.isEmpty()) {
-        qCWarning(base) << "Entity ID not set for entity" << name()
-                   << " remember to use setId(IDstring)";
+        qCWarning(base) << "Entity ID not set for entity" << name() << " remember to use setId(IDstring)";
     }
     return m_id;
 }
@@ -98,11 +97,12 @@ void Entity::setId(const QString &newId)
 }
 
 void Entity::init()
-{}
+{
+}
 
-/** @private Static discovery prefix for Home Assistant MQTT discovery 
+/** @private Static discovery prefix for Home Assistant MQTT discovery
  *  @note Should this be moved to the config file? to support custom prefixes
-*/
+ */
 static QString s_discoveryPrefix = "homeassistant";
 
 void Entity::sendRegistration()
@@ -112,8 +112,8 @@ void Entity::sendRegistration()
     }
     QVariantMap config = m_haConfig;
     config["name"] = name();
-    
-    if (id() != "connected") { //special case
+
+    if (id() != "connected") { // special case
         config["availability_topic"] = hostname() + "/connected";
         config["payload_available"] = "on";
         config["payload_not_available"] = "off";
@@ -122,14 +122,17 @@ void Entity::sendRegistration()
             config["icon"] = icon;
         }
     }
-    //Attributes topic, since every mqtt entity looks like it supports attributes
+    // Attributes topic, since every mqtt entity looks like it supports attributes
     config["json_attributes_topic"] = baseTopic() + "/attributes";
     if (!config.contains("device")) {
-        config["device"] = QVariantMap({{"identifiers", "linux_ha_bridge_" + hostname() }});
+        config["device"] = QVariantMap({{"identifiers", "linux_ha_bridge_" + hostname()}});
     }
-    config["unique_id"] = "linux_ha_control_"+ hostname() + "_" + id();
-    HaControl::mqttClient()->publish(s_discoveryPrefix + "/" + haType() + "/" + hostname() + "/" + id() + "/config", QJsonDocument(QJsonObject::fromVariantMap(config)).toJson(QJsonDocument::Compact), 0, true);
-    if (id() != "connected") { //special case
+    config["unique_id"] = "linux_ha_control_" + hostname() + "_" + id();
+    HaControl::mqttClient()->publish(s_discoveryPrefix + "/" + haType() + "/" + hostname() + "/" + id() + "/config",
+                                     QJsonDocument(QJsonObject::fromVariantMap(config)).toJson(QJsonDocument::Compact),
+                                     0,
+                                     true);
+    if (id() != "connected") { // special case
         HaControl::mqttClient()->publish(hostname() + "/connected", "on", 0, false);
     }
 }
@@ -140,41 +143,41 @@ void Entity::setAttributes(const QVariantMap &attrs)
     publishAttributes();
 }
 
-QVariant Entity::convertForHomeAssistant(const QVariant &value) {
+QVariant Entity::convertForHomeAssistant(const QVariant &value)
+{
     switch (value.typeId()) {
-        case QVariant::Bool:
-            return value.toBool() ? "true" : "false";
-        
-        case QVariant::DateTime:
-            return value.toDateTime().toString(Qt::ISODate);
-        
-        case QVariant::List: {
-            QJsonArray jsonArray;
-            for (const QVariant &item : value.toList()) {
-                jsonArray.append(QJsonValue::fromVariant(item));
-            }
-            return jsonArray;
+    case QVariant::Bool:
+        return value.toBool() ? "true" : "false";
+
+    case QVariant::DateTime:
+        return value.toDateTime().toString(Qt::ISODate);
+
+    case QVariant::List: {
+        QJsonArray jsonArray;
+        for (const QVariant &item : value.toList()) {
+            jsonArray.append(QJsonValue::fromVariant(item));
         }
-        
-        case QVariant::Map: {
-            QJsonObject jsonObj;
-            QVariantMap map = value.toMap();
-            for (auto it = map.begin(); it != map.end(); ++it) {
-                jsonObj[it.key()] = QJsonValue::fromVariant(it.value());
-            }
-            return jsonObj;
+        return jsonArray;
+    }
+
+    case QVariant::Map: {
+        QJsonObject jsonObj;
+        QVariantMap map = value.toMap();
+        for (auto it = map.begin(); it != map.end(); ++it) {
+            jsonObj[it.key()] = QJsonValue::fromVariant(it.value());
         }
-        
-        case QVariant::UserType: {
-            return value;
-        }
-        
-        default:
-            return value;
+        return jsonObj;
+    }
+
+    case QVariant::UserType: {
+        return value;
+    }
+
+    default:
+        return value;
     }
     return value;
 }
-
 
 void Entity::publishAttributes()
 {
@@ -186,7 +189,7 @@ void Entity::publishAttributes()
         QVariant convertedValue = convertForHomeAssistant(it.value());
         obj[it.key()] = QJsonValue::fromVariant(convertedValue);
     }
-    
+
     QJsonDocument doc(obj);
     HaControl::mqttClient()->publish(baseTopic() + "/attributes", doc.toJson(QJsonDocument::Compact), 0, true);
 }

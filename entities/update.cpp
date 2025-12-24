@@ -5,10 +5,10 @@
 // https://www.home-assistant.io/integrations/update.mqtt/
 #include "update.h"
 #include "core.h"
-#include <QMqttSubscription>
-#include <QMqttClient>
 #include <QJsonDocument>
 #include <QJsonObject>
+#include <QMqttClient>
+#include <QMqttSubscription>
 
 #include <QLoggingCategory>
 Q_DECLARE_LOGGING_CATEGORY(upd)
@@ -26,13 +26,13 @@ void Update::init()
     setDiscoveryConfig("state_topic", baseTopic());
     setDiscoveryConfig("command_topic", baseTopic() + "/set");
     setDiscoveryConfig("payload_install", "install");
-    
+
     // Send registration to Home Assistant
     sendRegistration();
-    
+
     // Publish initial state
     publishState();
-    
+
     // Subscribe to command topic for installation requests
     auto subscription = HaControl::mqttClient()->subscribe(baseTopic() + "/set");
     if (subscription) {
@@ -97,7 +97,7 @@ void Update::setEntityPicture(const QString &url)
 void Update::setInProgress(bool inProgress)
 {
     if (m_inProgress != inProgress) {
-        if(!inProgress)
+        if (!inProgress)
             m_updatePercentage = -1;
         m_inProgress = inProgress;
         publishState();
@@ -111,7 +111,7 @@ void Update::setUpdatePercentage(int percentage)
         qCWarning(upd) << "Invalid update percentage:" << percentage << "(must be -1 to 100)";
         return;
     }
-    
+
     if (m_updatePercentage != percentage) {
         m_updatePercentage = percentage;
         publishState();
@@ -125,41 +125,40 @@ void Update::publishState()
 
     // Build JSON payload according to Home Assistant update entity schema
     QJsonObject payload;
-    
+
     // Required fields
     if (!m_installedVersion.isEmpty()) {
         payload["installed_version"] = m_installedVersion;
     }
-    
+
     if (!m_latestVersion.isEmpty()) {
         payload["latest_version"] = m_latestVersion;
     }
-    
+
     // Optional fields
     if (!m_title.isEmpty()) {
         payload["title"] = m_title;
     }
-    
+
     if (!m_releaseSummary.isEmpty()) {
         payload["release_summary"] = m_releaseSummary;
     }
-    
+
     if (!m_releaseUrl.isEmpty()) {
         payload["release_url"] = m_releaseUrl;
     }
-    
+
     if (!m_entityPicture.isEmpty()) {
         payload["entity_picture"] = m_entityPicture;
     }
-    
-    payload["in_progress"]  = m_inProgress ? "true" : "false";
-    
+
+    payload["in_progress"] = m_inProgress ? "true" : "false";
+
     if (m_inProgress && m_updatePercentage >= 0) {
         payload["update_percentage"] = m_updatePercentage;
     } else {
         payload["update_percentage"] = QJsonValue(); // clear it in HA
     }
-    
 
     QJsonDocument doc(payload);
     HaControl::mqttClient()->publish(baseTopic(), doc.toJson(QJsonDocument::Compact), 0, true);

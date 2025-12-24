@@ -1,40 +1,38 @@
 #include "core.h"
 #include "logging/messagehandler.h"
 
-#include <QApplication>
-#include <csignal>
-#include <QDate>
 #include <KAboutData>
 #include <KDBusService>
 #include <KSignalHandler>
+#include <QApplication>
+#include <QDate>
+#include <csignal>
 
 /**
  * @brief Main entry point for the kiot application
  * @param argc Argument count
  * @param argv Argument vector
  * @return Application exit code
- * 
+ *
  * Initializes the Qt application, sets up custom logging, handles KDE
  * integration, and watches for termination signals (SIGTERM, SIGINT).
  */
 int main(int argc, char **argv)
 {
     QApplication app(argc, argv);
-    
+
     initLogging();
-    
+
     qCInfo(main_cpp) << "Starting kiot version " << QStringLiteral(KIOT_VERSION);
-    KAboutData aboutData(
-        QStringLiteral("kiot"),
-        "KDE IOT",
-        QStringLiteral(KIOT_VERSION),
-        "KDE Internet of Things Connection",
-        KAboutLicense::GPL_V3,
-        "© 2024-"+QString::number(QDate::currentDate().year())
-    );
-    
+    KAboutData aboutData(QStringLiteral("kiot"),
+                         "KDE IOT",
+                         QStringLiteral(KIOT_VERSION),
+                         "KDE Internet of Things Connection",
+                         KAboutLicense::GPL_V3,
+                         "© 2024-" + QString::number(QDate::currentDate().year()));
+
     KDBusService service(KDBusService::Unique | KDBusService::Replace);
-    
+
     HaControl appControl;
 
     KSignalHandler::self()->watchSignal(SIGTERM);

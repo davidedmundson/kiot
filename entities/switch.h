@@ -10,7 +10,10 @@ class Switch : public Entity
 public:
     Switch(QObject *parent = nullptr);
     void setState(bool state);
-     bool state() { return  m_state;}
+    bool state()
+    {
+        return m_state;
+    }
 Q_SIGNALS:
     void stateChangeRequested(bool state);
 
@@ -19,5 +22,4 @@ protected:
 
 private:
     bool m_state = false;
-
 };

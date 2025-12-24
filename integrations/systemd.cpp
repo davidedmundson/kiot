@@ -6,18 +6,17 @@
 
 #include <QDBusConnection>
 #include <QDBusInterface>
-#include <QDBusReply>
 #include <QDBusMessage>
+#include <QDBusReply>
 #include <QRegularExpression>
 
-#include <QTimer>
-#include <QFileInfo>
 #include <KConfigGroup>
 #include <KProcess>
+#include <QFileInfo>
 #include <QLoggingCategory>
+#include <QTimer>
 Q_DECLARE_LOGGING_CATEGORY(SystemD)
 Q_LOGGING_CATEGORY(SystemD, "integration.SystemD")
-
 
 class SystemDWatcher : public QObject
 {
@@ -28,17 +27,13 @@ public:
 
     bool ensureConfig();
 
-
 private slots:
-    void onUnitPropertiesChanged(const QString &interface,
-                                 const QVariantMap &changedProps,
-                                 const QStringList &invalidatedProps,
-                                 const QDBusMessage &msg);
+    void onUnitPropertiesChanged(const QString &interface, const QVariantMap &changedProps, const QStringList &invalidatedProps, const QDBusMessage &msg);
     void performInit();
 
 private:
     KSharedConfig::Ptr cfg;
-    QHash<QString, Switch*> m_serviceSwitches;
+    QHash<QString, Switch *> m_serviceSwitches;
     QDBusInterface *m_systemdUser = nullptr;
     QString sanitizeServiceId(const QString &svc);
     QStringList listUserServices() const;
@@ -47,8 +42,9 @@ private:
     bool m_initialized = false;
 };
 
-namespace {
-    static const QRegularExpression invalidCharRegex("[^a-zA-Z0-9]");
+namespace
+{
+static const QRegularExpression invalidCharRegex("[^a-zA-Z0-9]");
 }
 
 SystemDWatcher::SystemDWatcher(QObject *parent)
@@ -56,20 +52,14 @@ SystemDWatcher::SystemDWatcher(QObject *parent)
 {
     cfg = KSharedConfig::openConfig();
 
-    m_systemdUser = new QDBusInterface(
-        "org.freedesktop.systemd1",
-        "/org/freedesktop/systemd1",
-        "org.freedesktop.systemd1.Manager",
-        QDBusConnection::sessionBus(),
-        this
-    );
+    m_systemdUser =
+        new QDBusInterface("org.freedesktop.systemd1", "/org/freedesktop/systemd1", "org.freedesktop.systemd1.Manager", QDBusConnection::sessionBus(), this);
 
     if (!m_systemdUser->isValid()) {
         qCWarning(SystemD) << "Failed to connect to systemd user D-Bus";
         return;
     }
-    if (!ensureConfig())
-    {
+    if (!ensureConfig()) {
         qCWarning(SystemD) << "Failed to ensure config";
         return;
     }
@@ -86,7 +76,7 @@ bool SystemDWatcher::ensureConfig()
         qCDebug(SystemD) << "No systemd services found";
         return false;
     }
- 
+
     bool configChanged = false;
     for (const QString &svc : currentServices) {
         if (!grp.hasKey(svc)) {
@@ -95,7 +85,7 @@ bool SystemDWatcher::ensureConfig()
             qCDebug(SystemD) << "Added new service to config:" << svc;
         }
     }
-   const QStringList configServices = grp.keyList();
+    const QStringList configServices = grp.keyList();
     // Remove services no longer available
     for (const QString &cfgSvc : configServices) {
         if (!currentServices.contains(cfgSvc) && cfgSvc != QLatin1String("initialized")) {
@@ -113,8 +103,6 @@ bool SystemDWatcher::ensureConfig()
     return true;
 }
 
-
-
 void SystemDWatcher::performInit()
 {
     if (m_initialized) {
@@ -129,38 +117,30 @@ void SystemDWatcher::performInit()
         auto *sw = new Switch(this);
         sw->setId("systemd_" + sanitizeServiceId(svc));
         sw->setName(sanitizeServiceId(svc));
-        sw->setState(false);//temp
+        sw->setState(false); // temp
         // Query initial state from D-Bus
         QDBusReply<QDBusObjectPath> unitPathReply = m_systemdUser->call("LoadUnit", svc);
         if (unitPathReply.isValid()) {
             qCDebug(SystemD) << "Getting inital state for " << svc;
             QDBusObjectPath unitPath = unitPathReply.value();
 
-            QDBusInterface unitIface(
-                "org.freedesktop.systemd1",
-                unitPath.path(),
-                "org.freedesktop.DBus.Properties",
-                QDBusConnection::sessionBus()
-            );
+            QDBusInterface unitIface("org.freedesktop.systemd1", unitPath.path(), "org.freedesktop.DBus.Properties", QDBusConnection::sessionBus());
 
             QDBusReply<QVariant> stateReply = unitIface.call("Get", "org.freedesktop.systemd1.Unit", "ActiveState");
             if (stateReply.isValid()) {
                 sw->setState(stateReply.value().toString() == "active");
-            }
-            else{
+            } else {
                 qCDebug(SystemD) << "Failed to get state for " << svc << ": " << stateReply.error().message();
             }
 
             // Listen for live property changes
-            QDBusConnection::sessionBus().connect(
-                "org.freedesktop.systemd1",
-                unitPath.path(),
-                "org.freedesktop.DBus.Properties",
-                "PropertiesChanged",
-                this,
-                SLOT(onUnitPropertiesChanged(QString,QVariantMap,QStringList,QDBusMessage))
-            );
-        }else {
+            QDBusConnection::sessionBus().connect("org.freedesktop.systemd1",
+                                                  unitPath.path(),
+                                                  "org.freedesktop.DBus.Properties",
+                                                  "PropertiesChanged",
+                                                  this,
+                                                  SLOT(onUnitPropertiesChanged(QString, QVariantMap, QStringList, QDBusMessage)));
+        } else {
             qCWarning(SystemD) << "Failed to get unit path for " << svc << ": " << unitPathReply.error().message();
         }
 
@@ -170,21 +150,20 @@ void SystemDWatcher::performInit()
                 qCWarning(SystemD) << "SystemD: D-Bus interface not available for toggling service";
                 return;
             }
-            
+
             QString method = state ? "StartUnit" : "StopUnit";
             QString mode = "replace"; // replace existing job if any
-            
+
             QDBusReply<QDBusObjectPath> reply = m_systemdUser->call(method, svc, mode);
             if (!reply.isValid()) {
-                qCWarning(SystemD) << "SystemD: Failed to" << (state ? "start" : "stop") 
-                           << "service" << svc << ":" << reply.error().message();
+                qCWarning(SystemD) << "SystemD: Failed to" << (state ? "start" : "stop") << "service" << svc << ":" << reply.error().message();
             } else {
-                //qCDebug(SystemD) << "Toggled service" << svc << "to" << (state ? "start" : "stop");
+                // qCDebug(SystemD) << "Toggled service" << svc << "to" << (state ? "start" : "stop");
             }
         });
         m_serviceSwitches[svc] = sw;
     }
-    
+
     m_initialized = true;
     qCInfo(SystemD) << "SystemD: Initialized" << m_serviceSwitches.size() << "service switches";
 }
@@ -226,11 +205,8 @@ QStringList SystemDWatcher::listUserServices() const
     }
     arg.endArray();
 
-
     return services;
 }
-
-
 
 // Convert D-Bus path to proper unit name
 QString SystemDWatcher::pathToUnitName(const QString &path) const

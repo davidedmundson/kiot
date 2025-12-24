@@ -1,12 +1,11 @@
 #include "core.h"
 
 #include <QApplication>
+#include <QFile>
 #include <QPainter>
-#include <QTimer>
 #include <QProcess>
 #include <QStandardPaths>
-#include <QFile>
-
+#include <QTimer>
 
 #include <QLoggingCategory>
 
@@ -24,15 +23,14 @@ SystemTray::SystemTray(QObject *parent)
 
     setupMenu();
 
-    connect(m_trayIcon, &QSystemTrayIcon::activated,
-            this, &SystemTray::onTrayActivated);
+    connect(m_trayIcon, &QSystemTrayIcon::activated, this, &SystemTray::onTrayActivated);
 
- //   auto mqttClient = HaControl::mqttClient();
- //   if (mqttClient) {
- //       connect(mqttClient, &QMqttClient::stateChanged,
- //               this, &SystemTray::onMqttStateChanged);
- //       onMqttStateChanged(mqttClient->state());
- //   }
+    //   auto mqttClient = HaControl::mqttClient();
+    //   if (mqttClient) {
+    //       connect(mqttClient, &QMqttClient::stateChanged,
+    //               this, &SystemTray::onMqttStateChanged);
+    //       onMqttStateChanged(mqttClient->state());
+    //   }
 
     m_trayIcon->show();
     qCDebug(st) << "System tray icon initialized";
@@ -45,17 +43,16 @@ void SystemTray::onMqttStateChanged(QMqttClient::ClientState state)
 
     const QString statusText = connected ? "Connected" : "Disconnected";
     m_trayIcon->setToolTip("Kiot - " + statusText);
-
 }
 
 void SystemTray::onTrayActivated(QSystemTrayIcon::ActivationReason reason)
 {
     switch (reason) {
-        case QSystemTrayIcon::Trigger:
-            openSettings();
-            break;
-        default:
-            break;
+    case QSystemTrayIcon::Trigger:
+        openSettings();
+        break;
+    default:
+        break;
     }
 }
 
@@ -70,7 +67,7 @@ void SystemTray::onOpenConfig()
 
 /**
  * @brief Slot called when "Reconnect" is clicked
- * 
+ *
  * @details
  * Attempts to reconnect to MQTT broker.
  */
@@ -101,7 +98,6 @@ void SystemTray::onQuit()
     qCDebug(st) << "Quit requested from system tray";
     QApplication::quit();
 }
-
 
 void SystemTray::createIcons()
 {
@@ -139,7 +135,6 @@ void SystemTray::createIcons()
     m_connectingIcon = QIcon(connectingPixmap);
 }
 
-
 void SystemTray::setupMenu()
 {
     m_statusAction = m_menu->addAction("Status: Disconnected");
@@ -147,30 +142,20 @@ void SystemTray::setupMenu()
 
     m_menu->addSeparator();
 
-    QAction *settingsAction =
-        m_menu->addAction(QIcon::fromTheme("configure"), "Open Settings");
-    connect(settingsAction, &QAction::triggered,
-            this, &SystemTray::onOpenSettings);
+    QAction *settingsAction = m_menu->addAction(QIcon::fromTheme("configure"), "Open Settings");
+    connect(settingsAction, &QAction::triggered, this, &SystemTray::onOpenSettings);
 
-    QAction *configAction =
-        m_menu->addAction(QIcon::fromTheme("configure"), "Open Config file");
-    connect(configAction, &QAction::triggered,
-            this, &SystemTray::onOpenConfig);
+    QAction *configAction = m_menu->addAction(QIcon::fromTheme("configure"), "Open Config file");
+    connect(configAction, &QAction::triggered, this, &SystemTray::onOpenConfig);
 
-
-    QAction *reconnectAction =
-        m_menu->addAction(QIcon::fromTheme("view-refresh"), "Reconnect");
-    connect(reconnectAction, &QAction::triggered,
-            this, &SystemTray::onReconnect);
+    QAction *reconnectAction = m_menu->addAction(QIcon::fromTheme("view-refresh"), "Reconnect");
+    connect(reconnectAction, &QAction::triggered, this, &SystemTray::onReconnect);
     m_menu->addSeparator();
-    QAction *quitAction =
-        m_menu->addAction(QIcon::fromTheme("application-exit"), "Quit");
-    connect(quitAction, &QAction::triggered,
-            this, &SystemTray::onQuit);
+    QAction *quitAction = m_menu->addAction(QIcon::fromTheme("application-exit"), "Quit");
+    connect(quitAction, &QAction::triggered, this, &SystemTray::onQuit);
 
     m_trayIcon->setContextMenu(m_menu);
 }
-
 
 void SystemTray::updateIcon(QMqttClient::ClientState state)
 {
@@ -190,11 +175,10 @@ void SystemTray::updateIcon(QMqttClient::ClientState state)
             m_statusAction->setText("Status: Disconnected");
         }
     }
-   const bool connected = (state == QMqttClient::Connected);
-   const QString statusText = connected ? "Connected" : "Disconnected";
-   m_trayIcon->setToolTip("Kiot - " + statusText);
+    const bool connected = (state == QMqttClient::Connected);
+    const QString statusText = connected ? "Connected" : "Disconnected";
+    m_trayIcon->setToolTip("Kiot - " + statusText);
 }
-
 
 void SystemTray::openSettings()
 {
@@ -204,9 +188,7 @@ void SystemTray::openSettings()
         return;
     }
 
-    const QString configPath =
-        QStandardPaths::writableLocation(QStandardPaths::ConfigLocation)
-        + "/kiotrc";
+    const QString configPath = QStandardPaths::writableLocation(QStandardPaths::ConfigLocation) + "/kiotrc";
 
     if (QFile::exists(configPath)) {
         QProcess::startDetached("xdg-open", {configPath});
@@ -216,14 +198,11 @@ void SystemTray::openSettings()
     }
 }
 
-
 void SystemTray::openConfig()
 {
     qCDebug(st) << "Opening config file";
 
-    const QString configPath =
-        QStandardPaths::writableLocation(QStandardPaths::ConfigLocation)
-        + "/kiotrc";
+    const QString configPath = QStandardPaths::writableLocation(QStandardPaths::ConfigLocation) + "/kiotrc";
 
     if (QFile::exists(configPath)) {
         QProcess::startDetached("xdg-open", {configPath});
@@ -232,5 +211,3 @@ void SystemTray::openConfig()
         qCWarning(st) << "Could not open config file";
     }
 }
-
-

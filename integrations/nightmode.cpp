@@ -3,8 +3,8 @@
 
 #include "core.h"
 #include "dbusproperty.h"
-#include "entities/switch.h"
 #include "entities/binarysensor.h"
+#include "entities/switch.h"
 
 #include <QCoreApplication>
 

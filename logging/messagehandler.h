@@ -4,7 +4,6 @@
 #include <QLoggingCategory>
 #include <QtGlobal>
 
-
 /**
  * @file messagehandler.h
  * @brief Custom Qt message handler and logging configuration
@@ -15,10 +14,9 @@ Q_DECLARE_LOGGING_CATEGORY(main_cpp)
 
 extern QtMessageHandler originalHandler;
 
-
 /**
  * @brief Initialize logging configuration
- * 
+ *
  * Loads logging settings from KConfig and sets up the message handler.
  * Should be called early in main() before any logging occurs.
  */
@@ -29,9 +27,9 @@ void initLogging();
  * @param type The type of message (debug, info, warning, etc.)
  * @param context The logging context (file, line, function)
  * @param msg The actual log message
- * 
+ *
  * This handler formats log messages with timestamp, log level, and category,
- * then outputs them to both stderr (with colors) 
+ * then outputs them to both stderr (with colors)
  * For fatal messages, it calls abort() after logging.
  */
 void kiotMessageHandler(QtMsgType type, const QMessageLogContext &context, const QString &msg);

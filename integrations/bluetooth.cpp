@@ -5,7 +5,7 @@
 
 #include <BluezQt/Adapter>
 // Re add after bluez-qt works on new version via flatpak manifest
-//#include <BluezQt/Battery>
+// #include <BluezQt/Battery>
 #include <BluezQt/Device>
 #include <BluezQt/InitManagerJob>
 #include <BluezQt/Manager>
@@ -20,37 +20,38 @@ class BluetoothDeviceSwitch : public QObject
     Q_OBJECT
 public:
     explicit BluetoothDeviceSwitch(const BluezQt::DevicePtr &device, QObject *parent = nullptr)
-    : QObject(parent), m_device(device)
+        : QObject(parent)
+        , m_device(device)
     {
         m_switch = new Switch(this);
         m_switch->setId("bluetooth_device_" + device->address().replace(':', '_'));
         m_switch->setName(device->name());
-        m_switch->setDiscoveryConfig("icon","mdi:bluetooth");  
+        m_switch->setDiscoveryConfig("icon", "mdi:bluetooth");
         update();
 
         // Connect signals
-        connect(device.data(), &BluezQt::Device::connectedChanged, this, [this](bool){
+        connect(device.data(), &BluezQt::Device::connectedChanged, this, [this](bool) {
             update();
         });
-        connect(device.data(), &BluezQt::Device::batteryChanged, this, [this](QSharedPointer<BluezQt::Battery>){            
+        connect(device.data(), &BluezQt::Device::batteryChanged, this, [this](QSharedPointer<BluezQt::Battery>) {
             update();
         });
-        connect(device.data(), &BluezQt::Device::pairedChanged, this, [this](bool){
+        connect(device.data(), &BluezQt::Device::pairedChanged, this, [this](bool) {
             update();
         });
-        connect(device.data(), &BluezQt::Device::blockedChanged, this, [this](bool){
+        connect(device.data(), &BluezQt::Device::blockedChanged, this, [this](bool) {
             update();
         });
-        connect(device.data(), &BluezQt::Device::trustedChanged, this, [this](bool){
+        connect(device.data(), &BluezQt::Device::trustedChanged, this, [this](bool) {
             update();
         });
-        // connect to signal from switch in HA        
-        connect(m_switch, &Switch::stateChangeRequested, this, [this](bool requestedState){
+        // connect to signal from switch in HA
+        connect(m_switch, &Switch::stateChangeRequested, this, [this](bool requestedState) {
             if (!m_device)
                 return;
-            if (requestedState){
+            if (requestedState) {
                 m_device->connectToDevice();
-            }else {
+            } else {
                 m_device->disconnectFromDevice();
             }
         });
@@ -61,34 +62,31 @@ private:
     BluezQt::DevicePtr m_device;
     Switch *m_switch = nullptr;
 
-
     void update()
     {
-        if (!m_device) return;
-        if(!m_device->isPaired()){
+        if (!m_device)
+            return;
+        if (!m_device->isPaired()) {
             // TODO set entity as unavailable in HA and delete this
             qCDebug(bt) << m_device->name() << " is not paired anymore";
             m_switch->setState(false);
         }
-        //Only update state and icon if actually changed to avoid unnecessary re registreations with mqtt
-        if(m_device->isConnected() && !m_switch->state())
-        {
+        // Only update state and icon if actually changed to avoid unnecessary re registreations with mqtt
+        if (m_device->isConnected() && !m_switch->state()) {
             m_switch->setHaIcon("mdi:bluetooth");
             m_switch->setState(true);
-        }
-        else if(!m_device->isConnected() && m_switch->state()) 
-        {
+        } else if (!m_device->isConnected() && m_switch->state()) {
             m_switch->setHaIcon("mdi:bluetooth-off");
             m_switch->setState(false);
         }
-        //Update attributes
+        // Update attributes
         QVariantMap attrs;
         attrs["mac"] = m_device->address();
         attrs["rssi"] = m_device->rssi();
         // Re add after bluez-qt works on new version via flatpak manifest
-        //auto battery = m_device->battery();
-        //if (battery)
-        //    attrs["battery"] = battery->percentage(); 
+        // auto battery = m_device->battery();
+        // if (battery)
+        //    attrs["battery"] = battery->percentage();
 
         attrs["paired"] = QVariant(m_device->isPaired()).toString();
         attrs["trusted"] = QVariant(m_device->isTrusted()).toString();
@@ -96,9 +94,7 @@ private:
         if (m_switch->attributes() != attrs)
             m_switch->setAttributes(attrs);
     }
-    
 };
-
 
 // ====== Bluetooth Adapter code ======
 class BluetoothAdapterWatcher : public QObject
@@ -107,7 +103,7 @@ class BluetoothAdapterWatcher : public QObject
 
 public:
     explicit BluetoothAdapterWatcher(QObject *parent = nullptr);
-    
+
 private:
     void update();
     void CheckPairedState();
@@ -115,7 +111,7 @@ private:
     BluezQt::Manager *m_manager = nullptr;
     BluezQt::AdapterPtr m_adapter;
     bool m_initialized = false;
-    QMap<QString, BluetoothDeviceSwitch*> m_btSwitches;
+    QMap<QString, BluetoothDeviceSwitch *> m_btSwitches;
 };
 
 BluetoothAdapterWatcher::BluetoothAdapterWatcher(QObject *parent)
@@ -150,8 +146,7 @@ BluetoothAdapterWatcher::BluetoothAdapterWatcher(QObject *parent)
             connect(m_adapter.data(), &BluezQt::Adapter::systemNameChanged, this, &BluetoothAdapterWatcher::update);
             connect(m_adapter.data(), &BluezQt::Adapter::uuidsChanged, this, &BluetoothAdapterWatcher::update);
 
-              
-            // TODO figure out if its a better way to do this check for new/removed paired devices. 
+            // TODO figure out if its a better way to do this check for new/removed paired devices.
             // I tested deviceAdded and deviceRemoved but was not what i expected
             connect(m_adapter.data(), &BluezQt::Adapter::deviceAdded, this, [this]() {
                 CheckPairedState();
@@ -161,8 +156,8 @@ BluetoothAdapterWatcher::BluetoothAdapterWatcher(QObject *parent)
                 CheckPairedState();
                 update();
             });
-            
-            // Add all paired devices 
+
+            // Add all paired devices
             // could probably use the CheckPairedState function here now
             for (const auto &dev : m_adapter->devices()) {
                 if (dev->isPaired()) {
@@ -174,8 +169,7 @@ BluetoothAdapterWatcher::BluetoothAdapterWatcher(QObject *parent)
                 }
             }
 
-        } 
-        else {
+        } else {
             qCWarning(bt) << "No adapters found";
             m_switch->setState(false);
         }
@@ -184,7 +178,7 @@ BluetoothAdapterWatcher::BluetoothAdapterWatcher(QObject *parent)
     job->start();
 
     // Connect to signal from switch to adapter, so we can turn bluetooth on/off
-    connect(m_switch, &Switch::stateChangeRequested, this, [this](bool requestedState){
+    connect(m_switch, &Switch::stateChangeRequested, this, [this](bool requestedState) {
         if (!m_initialized || !m_adapter)
             return;
 
@@ -194,42 +188,42 @@ BluetoothAdapterWatcher::BluetoothAdapterWatcher(QObject *parent)
 }
 void BluetoothAdapterWatcher::CheckPairedState()
 {
-    if(!m_adapter) return;
+    if (!m_adapter)
+        return;
 
     for (const auto &dev : m_adapter->devices()) {
         const auto key = dev->address();
-            if (dev->isPaired()) {
-                if (!m_btSwitches.contains(key)) {
-                    auto sw = new BluetoothDeviceSwitch(dev, this);
-                    m_btSwitches.insert(key, sw);
-                    }
+        if (dev->isPaired()) {
+            if (!m_btSwitches.contains(key)) {
+                auto sw = new BluetoothDeviceSwitch(dev, this);
+                m_btSwitches.insert(key, sw);
             }
-            else {
+        } else {
             // device is no longer paired, remove the switch if it exists
-            //Does anyone know how to actually unpair? I can't find anything making paired state change, forget from settings does not work
-                if (m_btSwitches.contains(key)) {
-                    auto *sw = m_btSwitches.take(key);
-                    sw->deleteLater();
-                }
+            // Does anyone know how to actually unpair? I can't find anything making paired state change, forget from settings does not work
+            if (m_btSwitches.contains(key)) {
+                auto *sw = m_btSwitches.take(key);
+                sw->deleteLater();
             }
+        }
     }
 }
-void BluetoothAdapterWatcher::update(){
-    if(!m_adapter || !m_switch)
-    {
+void BluetoothAdapterWatcher::update()
+{
+    if (!m_adapter || !m_switch) {
         qCWarning(bt) << "No adapter or switch found";
         return;
     }
 
-    //Adapter state
-    //Only change icon and state if its actually not matching HA
-    bool powered =  m_adapter->isPowered();  
-    if (powered && !m_switch->state()){
+    // Adapter state
+    // Only change icon and state if its actually not matching HA
+    bool powered = m_adapter->isPowered();
+    if (powered && !m_switch->state()) {
         m_switch->setHaIcon("mdi:bluetooth");
-    } else if (!powered && m_switch->state()) {    
+    } else if (!powered && m_switch->state()) {
         m_switch->setHaIcon("mdi:bluetooth-off");
     }
-    if(m_switch->state() != powered)
+    if (m_switch->state() != powered)
         m_switch->setState(powered);
     QVariantMap attrs;
     attrs["mac"] = m_adapter->address();
@@ -244,7 +238,6 @@ void BluetoothAdapterWatcher::update(){
     attrs["uuids"] = uuidList;
     if (m_switch->attributes() != attrs)
         m_switch->setAttributes(attrs);
-
 }
 // setup function
 void setupBluetoothAdapter()

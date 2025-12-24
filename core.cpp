@@ -9,8 +9,8 @@
 #include <QJsonDocument>
 #include <QJsonObject>
 #include <QMqttClient>
-#include <QTimer>
 #include <QProcess>
+#include <QTimer>
 
 #include <QLoggingCategory>
 Q_DECLARE_LOGGING_CATEGORY(core)
@@ -33,14 +33,15 @@ HaControl::HaControl()
 {
     s_self = this;
     auto config = KSharedConfig::openConfig();
-    //Checks that config is valid and opens the kcm module if its not
-    if(!ensureConfigDefaults(config))
-    {
+    // Checks that config is valid and opens the kcm module if its not
+    if (!ensureConfigDefaults(config)) {
         QProcess::startDetached("kcmshell6", {"kcm_kiot"});
-        KNotification::event(KNotification::Notification, QString("Invalid Config"), QString("Config file is not valid, please fill out everything in the general tab"));
-        //This timer was added to give the notification time to show before we close down and direct users at what needs to be done
-        QTimer::singleShot(5000, this, [this](){
-        qCFatal(core) << "Config file is invalid please fill it correctly";
+        KNotification::event(KNotification::Notification,
+                             QString("Invalid Config"),
+                             QString("Config file is not valid, please fill out everything in the general tab"));
+        // This timer was added to give the notification time to show before we close down and direct users at what needs to be done
+        QTimer::singleShot(5000, this, [this]() {
+            qCFatal(core) << "Config file is invalid please fill it correctly";
         });
     }
     auto group = config->group("general");
@@ -57,7 +58,7 @@ HaControl::HaControl()
     }
 
     // Loads systray icon if enabled
-    if(group.readEntry("systray", true))
+    if (group.readEntry("systray", true))
         m_systemTray = new SystemTray(this);
 
     m_connectedNode = new ConnectedNode(this);
@@ -72,7 +73,8 @@ HaControl::HaControl()
     //
 
     connect(m_client, &QMqttClient::stateChanged, this, [reconnectTimer, this](QMqttClient::ClientState state) {
-        if(m_systemTray) m_systemTray->updateIcon(state);
+        if (m_systemTray)
+            m_systemTray->updateIcon(state);
         switch (state) {
         case QMqttClient::Connected:
             qCInfo(core) << "connected";
@@ -101,59 +103,56 @@ bool HaControl::ensureConfigDefaults(KSharedConfigPtr config)
 {
     bool configValid = true;
     bool configChanged = false;
-    
+
     // Sjekk og initialiser "general" gruppen
     KConfigGroup generalGroup = config->group("general");
-    
+
     // Liste over nødvendige felter i general gruppen
     const QVector<QPair<QString, QVariant>> generalDefaults = {
-        {"host", ""},           // MQTT server hostname/IP
-        {"port", 1883},         // MQTT port
-        {"user", ""},           // MQTT username
-        {"password", ""},       // MQTT password
-        {"useSSL", false},      // SSL/TLS
-        {"systray", true}       // System tray icon
+        {"host", ""}, // MQTT server hostname/IP
+        {"port", 1883}, // MQTT port
+        {"user", ""}, // MQTT username
+        {"password", ""}, // MQTT password
+        {"useSSL", false}, // SSL/TLS
+        {"systray", true} // System tray icon
     };
-    
+
     // Sjekk om general gruppen eksisterer og har alle nødvendige nøkler
     if (!generalGroup.exists()) {
         qCWarning(core) << "General configuration group not found, creating with defaults";
         configValid = false;
     }
-    
+
     // Legg til manglende nøkler med standardverdier
     for (const auto &[key, defaultValue] : generalDefaults) {
         if (!generalGroup.hasKey(key)) {
             generalGroup.writeEntry(key, defaultValue);
             configChanged = true;
             qCDebug(core) << "Added missing config key:" << key << "with default value:" << defaultValue;
-            
+
             // Mark config as invalid if a critical field is missing
             if (key == "host" && defaultValue.toString().isEmpty()) {
                 configValid = false;
             }
-        }
-        else if (generalGroup.hasKey(key))
-        {
-            auto readValue = generalGroup.readEntry(key,"");
-            if(readValue.isEmpty() || readValue == "")
-            {
-                if(key == "host" || key == "port" || key == "user" || key == "password")
+        } else if (generalGroup.hasKey(key)) {
+            auto readValue = generalGroup.readEntry(key, "");
+            if (readValue.isEmpty() || readValue == "") {
+                if (key == "host" || key == "port" || key == "user" || key == "password")
                     configValid = false;
             }
         }
     }
-   
+
     if (configChanged) {
         config->sync();
         qCDebug(core) << "Configuration updated with default values";
     }
-    
+
     if (generalGroup.readEntry("host", "").isEmpty()) {
         qCCritical(core) << "MQTT host is not configured!";
         configValid = false;
     }
-    
+
     return configValid;
 }
 

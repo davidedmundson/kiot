@@ -11,7 +11,7 @@ public:
     Lock(QObject *parent = nullptr);
     void setState(bool state);
 
-    Q_SIGNALS:
+Q_SIGNALS:
     void stateChangeRequested(bool state);
 
 protected:
@@ -19,5 +19,4 @@ protected:
 
 private:
     bool m_state = false;
-
 };

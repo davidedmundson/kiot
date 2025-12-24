@@ -3,18 +3,19 @@
 
 #include "core.h"
 #include "entities/sensor.h"
+#include <KSandbox>
 #include <QCoreApplication>
 #include <QDBusConnection>
 #include <QDBusInterface>
 #include <QDBusReply>
 #include <QFile>
+#include <QDir>
 #include <QJsonDocument>
 #include <QJsonObject>
 #include <QJsonValue>
+#include <QLoggingCategory>
 #include <QStandardPaths>
 #include <QTimer>
-#include <KSandbox>
-#include <QLoggingCategory>
 Q_DECLARE_LOGGING_CATEGORY(aw)
 Q_LOGGING_CATEGORY(aw, "integration.ActiveWindow")
 
@@ -93,17 +94,16 @@ bool ActiveWindowWatcher::registerKWinScript()
         qCWarning(aw) << "ActiveWindowWatcher: installed KWin script not found in data dirs";
         return false;
     }
-    if (KSandbox::isFlatpak()) 
-    {
-        //Create needed kiot path
-        if( !QDir("/var/cache/kiot/").exists())
+    if (KSandbox::isFlatpak()) {
+        // Create needed kiot path
+        if (!QDir("/var/cache/kiot/").exists())
             QDir().mkdir("/var/cache/kiot/");
-   
-        //Copy the script to the cache if its not already there
-        if( !QFile("/var/cache/kiot/activewindow_kwin.js").exists())
+
+        // Copy the script to the cache if its not already there
+        if (!QFile("/var/cache/kiot/activewindow_kwin.js").exists())
             QFile::copy(m_scriptPath, "/var/cache/kiot/activewindow_kwin.js");
-   
-        m_scriptPath =    QStandardPaths::writableLocation(QStandardPaths::CacheLocation) + "/activewindow_kwin.js";
+
+        m_scriptPath = QStandardPaths::writableLocation(QStandardPaths::CacheLocation) + "/activewindow_kwin.js";
     }
     QDBusMessage reply = m_kwinIface->call("loadScript", m_scriptPath, "kiot_activewindow");
     if (reply.type() == QDBusMessage::ErrorMessage) {

@@ -1,25 +1,25 @@
 #include "core.h"
 #include "entities/entities.h"
 
-#include <QNetworkAccessManager>
-#include <QNetworkRequest>
-#include <QNetworkReply>
-#include <QJsonDocument>
-#include <QJsonObject>
-#include <QJsonArray>
-#include <QVariantMap>
-#include <QVariantList>
-#include <QUrl>
-#include <QRegularExpression>
+#include <QDir>
 #include <QEventLoop>
 #include <QFile>
-#include <QDir>
+#include <QJsonArray>
+#include <QJsonDocument>
+#include <QJsonObject>
+#include <QNetworkAccessManager>
+#include <QNetworkReply>
+#include <QNetworkRequest>
+#include <QRegularExpression>
 #include <QTimer>
+#include <QUrl>
+#include <QVariantList>
+#include <QVariantMap>
 
-#include <KSharedConfig>
 #include <KConfigGroup>
 #include <KProcess>
 #include <KSandbox>
+#include <KSharedConfig>
 
 #include <QLoggingCategory>
 
@@ -30,9 +30,9 @@ class FlatpakUpdater : public QObject
 {
     Q_OBJECT
 public:
-    explicit FlatpakUpdater(QObject *parent = nullptr) 
-    : QObject(parent)
-     , m_updateTimer(new QTimer(this))
+    explicit FlatpakUpdater(QObject *parent = nullptr)
+        : QObject(parent)
+        , m_updateTimer(new QTimer(this))
     {
         m_updater = new Update(this);
         m_updater->setName("KIOT Flatpak Updater");
@@ -43,7 +43,7 @@ public:
         // Connects the update entity to the update function
         connect(m_updater, &Update::installRequested, this, &FlatpakUpdater::update);
 
-        //Reads the config file to get the timestamp for last time we checked for å update
+        // Reads the config file to get the timestamp for last time we checked for å update
         config = KSharedConfig::openConfig();
         updaterGroup = config->group("Updater");
         lastCheck = updaterGroup.readEntry("LastCheck", QDateTime());
@@ -55,20 +55,18 @@ public:
         // Grabs the latest release data from github
         lastRepoData = fetchLatestRelease(repo_url);
         // Sets the update entity to latest release info
-        m_updater->setLatestVersion(lastRepoData.value("tag_name",QStringLiteral(KIOT_VERSION)).toString());
-        m_updater->setReleaseSummary(lastRepoData.value("body","No release summary found").toString()); 
-        m_updater->setTitle(lastRepoData.value("name","kiot").toString());
-        m_updater->setReleaseUrl(lastRepoData.value("html_url",repo_url).toString());
+        m_updater->setLatestVersion(lastRepoData.value("tag_name", QStringLiteral(KIOT_VERSION)).toString());
+        m_updater->setReleaseSummary(lastRepoData.value("body", "No release summary found").toString());
+        m_updater->setTitle(lastRepoData.value("name", "kiot").toString());
+        m_updater->setReleaseUrl(lastRepoData.value("html_url", repo_url).toString());
 
-        // Update config with current time 
+        // Update config with current time
         updaterGroup.writeEntry("LastCheck", QDateTime::currentDateTimeUtc());
         config->sync();
     }
 
-
     ~FlatpakUpdater()
     {
-
     }
 
     void update()
@@ -99,7 +97,7 @@ public:
         QNetworkAccessManager mgr;
         QEventLoop loop;
         QNetworkReply *reply = mgr.get(QNetworkRequest(QUrl(downloadUrl)));
-        QObject::connect(reply, &QNetworkReply::downloadProgress, [this](qint64 bytesReceived, qint64 bytesTotal){
+        QObject::connect(reply, &QNetworkReply::downloadProgress, [this](qint64 bytesReceived, qint64 bytesTotal) {
             if (bytesTotal > 0) {
                 int percent = static_cast<int>((bytesReceived * 100) / bytesTotal);
                 m_updater->setUpdatePercentage(percent);
@@ -139,10 +137,10 @@ public:
         m_updater->setUpdatePercentage(-1);
         m_updater->setInProgress(false);
 
-        //Removes the file after we installed the update
+        // Removes the file after we installed the update
         if (QFile(fullFilePath).exists())
             QFile(fullFilePath).remove();
-        
+
         // Starts a new instance of kiot in flatpak to replace our old one
         QStringList runArgs = QProcess::splitCommand(QString("flatpak run org.davidedmundson.kiot"));
         QString runProgram = runArgs.takeFirst();
@@ -157,8 +155,8 @@ public:
         delete runProc;
     }
 
-
-    void checkForUpdates(){
+    void checkForUpdates()
+    {
         lastCheck = updaterGroup.readEntry("LastCheck", QDateTime());
 
         // Check to be sure we dont spam the github api
@@ -167,16 +165,16 @@ public:
             return;
         qCDebug(auf) << "Checking for updates";
         lastRepoData = fetchLatestRelease(repo_url);
-        m_updater->setLatestVersion(lastRepoData.value("tag_name",QStringLiteral(KIOT_VERSION)).toString());
-        m_updater->setReleaseSummary(lastRepoData.value("body","No release summary found").toString()); 
-        m_updater->setTitle(lastRepoData.value("name","kiot").toString());
-        m_updater->setReleaseUrl(lastRepoData.value("html_url",repo_url).toString());
+        m_updater->setLatestVersion(lastRepoData.value("tag_name", QStringLiteral(KIOT_VERSION)).toString());
+        m_updater->setReleaseSummary(lastRepoData.value("body", "No release summary found").toString());
+        m_updater->setTitle(lastRepoData.value("name", "kiot").toString());
+        m_updater->setReleaseUrl(lastRepoData.value("html_url", repo_url).toString());
 
         updaterGroup.writeEntry("LastCheck", QDateTime::currentDateTimeUtc());
         config->sync();
     }
 
-    //Grabs latest release info from github so we can check if there is a new release
+    // Grabs latest release info from github so we can check if there is a new release
     QVariantMap fetchLatestRelease(const QString &repoUrl)
     {
         QNetworkAccessManager manager;
@@ -187,7 +185,7 @@ public:
             return {};
 
         const QString owner = match.captured(1);
-        const QString repo  = match.captured(2);
+        const QString repo = match.captured(2);
 
         const QUrl apiUrl(QStringLiteral("https://api.github.com/repos/%1/%2/releases/latest").arg(owner, repo));
 
@@ -214,11 +212,11 @@ public:
         const QJsonObject obj = doc.object();
 
         QVariantMap result;
-        result["tag_name"]     = obj.value("tag_name").toString();
-        result["name"]         = obj.value("name").toString();
+        result["tag_name"] = obj.value("tag_name").toString();
+        result["name"] = obj.value("name").toString();
         result["published_at"] = obj.value("published_at").toString();
-        result["html_url"]     = obj.value("html_url").toString();
-        result["body"]         = obj.value("body").toString();
+        result["html_url"] = obj.value("html_url").toString();
+        result["body"] = obj.value("body").toString();
 
         QVariantList assetsList;
         const QJsonArray assets = obj.value("assets").toArray();
@@ -227,11 +225,11 @@ public:
             const QJsonObject assetObj = val.toObject();
 
             QVariantMap asset;
-            asset["name"]                 = assetObj.value("name").toString();
-            asset["size"]                 = assetObj.value("size").toInt();
-            asset["content_type"]         = assetObj.value("content_type").toString();
+            asset["name"] = assetObj.value("name").toString();
+            asset["size"] = assetObj.value("size").toInt();
+            asset["content_type"] = assetObj.value("content_type").toString();
             asset["browser_download_url"] = assetObj.value("browser_download_url").toString();
-            asset["download_count"]       = assetObj.value("download_count").toInt();
+            asset["download_count"] = assetObj.value("download_count").toInt();
 
             assetsList.append(asset);
         }
@@ -251,12 +249,9 @@ private:
     Update *m_updater;
 };
 
-
-
 void setupFlatpakUpdater()
 {
-    if (!KSandbox::isFlatpak()) 
-    {
+    if (!KSandbox::isFlatpak()) {
         qCWarning(auf) << "FlatpakUpdater is only supported in Flatpak environments,aborting";
         return;
     }

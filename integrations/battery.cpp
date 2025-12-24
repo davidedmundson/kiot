@@ -13,7 +13,6 @@
 Q_DECLARE_LOGGING_CATEGORY(batter)
 Q_LOGGING_CATEGORY(batter, "integration.Battery")
 
-
 // Helper functions to map the types to human strings
 static QString mapBatteryTechnology(Solid::Battery::Technology tech)
 {

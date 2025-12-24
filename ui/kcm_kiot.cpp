@@ -9,13 +9,13 @@
 
 #include "kiotsettings.h"
 
-#include <QLoggingCategory>
 #include <QFile>
+#include <QLoggingCategory>
 #include <QProcess>
-#include <QTextStream>
-#include <QVariantMap>
-#include <QVariantList>
 #include <QRegularExpression>
+#include <QTextStream>
+#include <QVariantList>
+#include <QVariantMap>
 
 Q_DECLARE_LOGGING_CATEGORY(ui)
 Q_LOGGING_CATEGORY(ui, "kiot.UI.kcm")
@@ -26,7 +26,7 @@ class KCMKiot : public KQuickManagedConfigModule
     Q_PROPERTY(KiotSettings *settings READ settings CONSTANT)
     Q_PROPERTY(QVariantMap configSections READ configSections NOTIFY configSectionsChanged)
     Q_PROPERTY(QVariantList sectionOrder READ sectionOrder NOTIFY sectionOrderChanged)
-    
+
 public:
     explicit KCMKiot(QObject *parent, const KPluginMetaData &metaData, const QVariantList &args)
         : KQuickManagedConfigModule(parent, metaData)
@@ -35,22 +35,28 @@ public:
         Q_UNUSED(args);
         setButtons(Apply | Default);
         qCDebug(ui) << m_settings->host() << m_settings->config()->name();
-        
+
         loadConfigFile();
     }
 
-    KiotSettings *settings() const { return m_settings; }
-    
-    QVariantMap configSections() const { 
-        return m_configSections; 
+    KiotSettings *settings() const
+    {
+        return m_settings;
     }
-    QVariantList sectionOrder() const { 
-        return m_sectionOrder; 
+
+    QVariantMap configSections() const
+    {
+        return m_configSections;
     }
-    
-    Q_INVOKABLE void saveConfigValue(const QString &section, const QString &key, const QVariant &value) {
+    QVariantList sectionOrder() const
+    {
+        return m_sectionOrder;
+    }
+
+    Q_INVOKABLE void saveConfigValue(const QString &section, const QString &key, const QVariant &value)
+    {
         auto config = KSharedConfig::openConfig("kiotrc", KSharedConfig::CascadeConfig);
-        
+
         if (section.contains("][")) {
             QStringList parts = section.split("][");
             if (parts.size() >= 2) {
@@ -64,7 +70,7 @@ public:
             writeEntry(group, key, value);
             group.sync();
         }
-        
+
         if (m_configSections.contains(section)) {
             QVariantMap sectionMap = m_configSections[section].toMap();
             sectionMap[key] = value;
@@ -72,17 +78,17 @@ public:
             emit configSectionsChanged();
         }
     }
-    
-    Q_INVOKABLE void saveNestedConfigValue(const QString &mainSection, const QString &subSection, 
-                                          const QString &key, const QVariant &value) {
-        //qCDebug(ui) << "Saving nested config value:" << mainSection << subSection << key << value;
+
+    Q_INVOKABLE void saveNestedConfigValue(const QString &mainSection, const QString &subSection, const QString &key, const QVariant &value)
+    {
+        // qCDebug(ui) << "Saving nested config value:" << mainSection << subSection << key << value;
         auto config = KSharedConfig::openConfig("kiotrc", KSharedConfig::CascadeConfig);
         KConfigGroup mainGroup(config, mainSection);
         KConfigGroup subGroup(&mainGroup, subSection);
-        
+
         writeEntry(subGroup, key, value);
         subGroup.sync();
-        
+
         QString fullSection = QString("%1][%2").arg(mainSection).arg(subSection);
         if (m_configSections.contains(fullSection)) {
             QVariantMap sectionMap = m_configSections[fullSection].toMap();
@@ -91,10 +97,11 @@ public:
             emit configSectionsChanged();
         }
     }
-    
-    Q_INVOKABLE QVariant getConfigValue(const QString &section, const QString &key, const QVariant &defaultValue = QVariant()) {
+
+    Q_INVOKABLE QVariant getConfigValue(const QString &section, const QString &key, const QVariant &defaultValue = QVariant())
+    {
         auto config = KSharedConfig::openConfig("kiotrc", KSharedConfig::CascadeConfig);
-        
+
         if (section.contains("][")) {
             QStringList parts = section.split("][");
             if (parts.size() >= 2) {
@@ -103,18 +110,19 @@ public:
                 return readEntry(subGroup, key, defaultValue);
             }
         }
-        
+
         KConfigGroup group(config, section);
         return readEntry(group, key, defaultValue);
     }
-    
-    Q_INVOKABLE void deleteNestedConfig(const QString &mainSection, const QString &subSection) {
+
+    Q_INVOKABLE void deleteNestedConfig(const QString &mainSection, const QString &subSection)
+    {
         auto config = KSharedConfig::openConfig("kiotrc", KSharedConfig::CascadeConfig);
         KConfigGroup mainGroup(config, mainSection);
-    
+
         mainGroup.deleteGroup(subSection);
         mainGroup.sync();
-    
+
         QString fullSection = QString("%1][%2").arg(mainSection).arg(subSection);
         if (m_configSections.contains(fullSection)) {
             m_configSections.remove(fullSection);
@@ -131,7 +139,8 @@ public:
     }
 
 private:
-    void writeEntry(KConfigGroup &group, const QString &key, const QVariant &value) {
+    void writeEntry(KConfigGroup &group, const QString &key, const QVariant &value)
+    {
         if (value.typeId() == QMetaType::Bool) {
             group.writeEntry(key, value.toBool());
         } else if (value.typeId() == QMetaType::Int || value.typeId() == QMetaType::LongLong) {
@@ -142,8 +151,9 @@ private:
             group.writeEntry(key, value.toString());
         }
     }
-    
-    QVariant readEntry(KConfigGroup &group, const QString &key, const QVariant &defaultValue) {
+
+    QVariant readEntry(KConfigGroup &group, const QString &key, const QVariant &defaultValue)
+    {
         if (defaultValue.typeId() == QMetaType::Bool) {
             return group.readEntry(key, defaultValue.toBool());
         } else if (defaultValue.typeId() == QMetaType::Int || defaultValue.typeId() == QMetaType::LongLong) {
@@ -154,20 +164,21 @@ private:
             return group.readEntry(key, defaultValue.toString());
         }
     }
-    
-    void loadConfigFile() {
+
+    void loadConfigFile()
+    {
         m_configSections.clear();
         m_sectionOrder.clear();
-        
+
         QString configPath = QStandardPaths::writableLocation(QStandardPaths::ConfigLocation) + "/kiotrc";
         QFile file(configPath);
-        
+
         if (!file.open(QIODevice::ReadOnly | QIODevice::Text)) {
             qCWarning(ui) << "Could not open config file:" << configPath;
             loadFromKConfig();
             return;
         }
-        
+
         QTextStream in(&file);
         QString currentSection;
         QString currentSubSection;
@@ -175,45 +186,41 @@ private:
         QRegularExpression mainSectionRegex("^\\[([^\\]]+)\\]$");
         QRegularExpression nestedSectionRegex("^\\[([^\\]]+)\\]\\[([^\\]]+)\\]$");
         QRegularExpression keyValueRegex("^([^=]+)=(.*)$");
-        
+
         while (!in.atEnd()) {
             QString line = in.readLine().trimmed();
             if (line.isEmpty() || line.startsWith("#") || line.startsWith(";")) {
                 continue;
             }
-            
+
             QRegularExpressionMatch nestedSectionMatch = nestedSectionRegex.match(line);
             if (nestedSectionMatch.hasMatch()) {
                 if (!currentSection.isEmpty()) {
-                    QString fullSectionName = currentSubSection.isEmpty() 
-                        ? currentSection 
-                        : QString("%1][%2").arg(currentSection).arg(currentSubSection);
+                    QString fullSectionName = currentSubSection.isEmpty() ? currentSection : QString("%1][%2").arg(currentSection).arg(currentSubSection);
                     m_configSections[fullSectionName] = currentSectionData;
                     m_sectionOrder.append(fullSectionName);
                     currentSectionData.clear();
                 }
-                
+
                 currentSection = nestedSectionMatch.captured(1);
                 currentSubSection = nestedSectionMatch.captured(2);
                 continue;
             }
-            
+
             QRegularExpressionMatch mainSectionMatch = mainSectionRegex.match(line);
             if (mainSectionMatch.hasMatch()) {
                 if (!currentSection.isEmpty()) {
-                    QString fullSectionName = currentSubSection.isEmpty() 
-                        ? currentSection 
-                        : QString("%1][%2").arg(currentSection).arg(currentSubSection);
+                    QString fullSectionName = currentSubSection.isEmpty() ? currentSection : QString("%1][%2").arg(currentSection).arg(currentSubSection);
                     m_configSections[fullSectionName] = currentSectionData;
                     m_sectionOrder.append(fullSectionName);
                     currentSectionData.clear();
                 }
-                
+
                 currentSection = mainSectionMatch.captured(1);
                 currentSubSection = QString();
                 continue;
             }
-            
+
             QRegularExpressionMatch kvMatch = keyValueRegex.match(line);
             if (kvMatch.hasMatch() && !currentSection.isEmpty()) {
                 QString key = kvMatch.captured(1).trimmed();
@@ -225,53 +232,49 @@ private:
                 } else {
                     currentSectionData[key] = value;
                 }
-           
             }
         }
-        
+
         if (!currentSection.isEmpty()) {
-            QString fullSectionName = currentSubSection.isEmpty() 
-                ? currentSection 
-                : QString("%1][%2").arg(currentSection).arg(currentSubSection);
+            QString fullSectionName = currentSubSection.isEmpty() ? currentSection : QString("%1][%2").arg(currentSection).arg(currentSubSection);
             m_configSections[fullSectionName] = currentSectionData;
             m_sectionOrder.append(fullSectionName);
         }
-        
+
         if (m_sectionOrder.contains("general")) {
             m_sectionOrder.removeAll("general");
             m_sectionOrder.prepend("general");
         }
-        
+
         groupNestedSections();
-        
+
         for (const QVariant &sectionVar : m_sectionOrder) {
             QString sectionStr = sectionVar.toString();
             QVariant sectionData = m_configSections.value(sectionStr);
         }
-        
+
         emit configSectionsChanged();
         emit sectionOrderChanged();
     }
-    
-    void groupNestedSections() {
+
+    void groupNestedSections()
+    {
         QVariantList newOrder;
         QVariantMap newSections = m_configSections;
-        
+
         if (m_sectionOrder.contains("general")) {
             newOrder.append("general");
         }
-        
+
         for (const QVariant &sectionVar : m_sectionOrder) {
             QString section = sectionVar.toString();
-            
-            if (section == "general" || 
-                section.startsWith("Scripts][") || 
-                section.startsWith("Shortcuts][")) {
+
+            if (section == "general" || section.startsWith("Scripts][") || section.startsWith("Shortcuts][")) {
                 continue;
             }
             newOrder.append(section);
         }
-        
+
         QVariantMap scriptsData;
         for (const QVariant &sectionVar : m_sectionOrder) {
             QString section = sectionVar.toString();
@@ -280,10 +283,10 @@ private:
                 newSections.remove(section);
             }
         }
-        
+
         newOrder.append("Scripts");
         newSections["Scripts"] = scriptsData;
-        
+
         QVariantMap shortcutsData;
         for (const QVariant &sectionVar : m_sectionOrder) {
             QString section = sectionVar.toString();
@@ -292,27 +295,28 @@ private:
                 newSections.remove(section);
             }
         }
-        
+
         newOrder.append("Shortcuts");
         newSections["Shortcuts"] = shortcutsData;
-        
+
         m_sectionOrder = newOrder;
         m_configSections = newSections;
     }
-    
-    void loadFromKConfig() {
+
+    void loadFromKConfig()
+    {
         auto config = KSharedConfig::openConfig("kiotrc", KSharedConfig::CascadeConfig);
-        
+
         const auto groupList = config->groupList();
-        
+
         for (const QString &groupName : groupList) {
             KConfigGroup group(config, groupName);
             QVariantMap sectionData;
-            
+
             const auto keyList = group.keyList();
             for (const QString &key : keyList) {
                 QString valueStr = group.readEntry(key, QString());
-                
+
                 if (valueStr == "true") {
                     sectionData[key] = true;
                 } else if (valueStr == "false") {
@@ -321,17 +325,17 @@ private:
                     sectionData[key] = valueStr;
                 }
             }
-            
+
             const auto subGroupList = group.groupList();
             for (const QString &subGroupName : subGroupList) {
                 KConfigGroup subGroup(&group, subGroupName);
                 QString fullSectionName = QString("%1][%2").arg(groupName).arg(subGroupName);
                 QVariantMap subSectionData;
-                
+
                 const auto subKeyList = subGroup.keyList();
                 for (const QString &key : subKeyList) {
                     QString valueStr = subGroup.readEntry(key, QString());
-                    
+
                     QString lowerValue = valueStr.toLower();
                     if (lowerValue == "true" || lowerValue == "false") {
                         subSectionData[key] = (lowerValue == "true");
@@ -339,25 +343,25 @@ private:
                         subSectionData[key] = valueStr;
                     }
                 }
-                
+
                 m_configSections[fullSectionName] = subSectionData;
                 m_sectionOrder.append(fullSectionName);
             }
-            
+
             if (!keyList.isEmpty()) {
                 m_configSections[groupName] = sectionData;
                 m_sectionOrder.append(groupName);
             }
         }
-        
+
         // Always ensure general is first
         if (m_sectionOrder.contains("general")) {
             m_sectionOrder.removeAll("general");
             m_sectionOrder.prepend("general");
         }
-        
+
         groupNestedSections();
-        
+
         emit configSectionsChanged();
         emit sectionOrderChanged();
     }

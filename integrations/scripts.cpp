@@ -6,8 +6,8 @@
 #include "entities/text.h"
 #include <KConfigGroup>
 #include <KProcess>
-#include <KSharedConfig>
 #include <KSandbox>
+#include <KSharedConfig>
 
 #include <QAction>
 #include <QCoreApplication>
@@ -20,19 +20,19 @@ void registerScripts()
 {
     auto scriptConfigToplevel = KSharedConfig::openConfig()->group("Scripts");
     const QStringList scriptIds = scriptConfigToplevel.groupList();
-    Textbox *textb = nullptr;
+    Text *textb = nullptr;
     for (const QString &scriptId : scriptIds) {
         auto scriptConfig = scriptConfigToplevel.group(scriptId);
         const QString name = scriptConfig.readEntry("Name", scriptId);
         const QString exec = scriptConfig.readEntry("Exec");
-        const QString icon = scriptConfig.readEntry("icon","mdi:script-text");
+        const QString icon = scriptConfig.readEntry("icon", "mdi:script-text");
         if (exec.isEmpty()) {
             qCWarning(scripts) << "Could not find script Exec entry for" << scriptId;
             continue;
         }
-        //Creates a shared textbox for input variables to script only if user has defined {arg} in the Exec line
+        // Creates a shared textbox for input variables to script only if user has defined {arg} in the Exec line
         if (exec.contains("{arg}") && textb == nullptr) {
-            textb = new Textbox(qApp);
+            textb = new Text(qApp);
             textb->setId("scripts_arguments");
             textb->setName("arguments");
             textb->setDiscoveryConfig("icon", "mdi:console");
@@ -43,19 +43,19 @@ void registerScripts()
         button->setDiscoveryConfig("icon", icon);
         // Home assistant integration supports payloads, which we could expose as args
         // maybe via some substitution in the exec line
-        QObject::connect(button, &Button::triggered, qApp, [exec, scriptId]() {
+        QObject::connect(button, &Button::triggered, qApp, [exec, scriptId,textb]() {
             qCInfo(scripts) << "Running script " << scriptId;
-            if(exec.contains("{arg}")  && textb != nullptr)
-            {
-                ex = ex.replace("{arg}",textb->state());
-                textb->setState(""); //Clears the textbox after use, should it be kept?
+            QString ex = exec;
+            if (ex.contains("{arg}") && textb != nullptr) {
+                ex = ex.replace("{arg}", textb->state());
+                textb->setState(""); // Clears the textbox after use, should it be kept?
             }
-            QStringList args = QProcess::splitCommand(exec); 
-            if (args.isEmpty()) {                            
+            QStringList args = QProcess::splitCommand(ex);
+            if (args.isEmpty()) {
                 qCWarning(scripts) << "Could not parse script Exec entry for" << scriptId;
                 return;
             }
-            QString program = args.takeFirst();           
+            QString program = args.takeFirst();
 
             KProcess *p = new KProcess();
             p->setProgram(program);
@@ -71,7 +71,7 @@ void registerScripts()
             delete p;
         });
     }
-    if( scriptIds.length() >= 1 )
+    if (scriptIds.length() >= 1)
         qCInfo(scripts) << "Loaded" << scriptIds.length() << " scripts:" << scriptIds.join(", ");
 }
 REGISTER_INTEGRATION("Scripts", registerScripts, true)

@@ -1,10 +1,10 @@
 #pragma once
 
-#include <QObject>
-#include <QSystemTrayIcon>
-#include <QMenu>
 #include <QAction>
 #include <QIcon>
+#include <QMenu>
+#include <QObject>
+#include <QSystemTrayIcon>
 
 #include <QMqttClient>
 
@@ -31,7 +31,7 @@ private slots:
 
 private:
     /**
-     * @brief Creates icons for different connection states 
+     * @brief Creates icons for different connection states
      */
     void createIcons();
 
@@ -40,12 +40,11 @@ private:
      */
     void setupMenu();
 
-
     /**
      * @brief Opens Kiot settings with fallback to configuration file
      * @details Tries to open the settings with kcmshell6, if that fails it will try to open the configuration file directly
-     * 
-     * @note This is a fallback for when the settings dialog is not available, 
+     *
+     * @note This is a fallback for when the settings dialog is not available,
      *
      */
     void openSettings();
@@ -53,10 +52,9 @@ private:
     /**
      * @brief Opens Kiot config file
      * @details Tries to open the configuration file directly
-     * 
+     *
      */
     void openConfig();
-
 
 private:
     QSystemTrayIcon *m_trayIcon = nullptr;
