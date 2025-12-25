@@ -16,7 +16,6 @@ All notable changes to this experimental branch of Kiot will be documented in th
   - Added support for standard subtypes: turn_on, turn_off, button_1 through button_6
   - Added `triggerWithPayload()` method for custom trigger types (enables future extensions like file/directory watchers, system events, etc.)
   - Maintains full backward compatibility with existing configurations
-  - UI now provides dropdown selection for trigger types and subtypes
 
 #### Integrations
 - **Docker Integration**: Expose selected Docker containers as switches with attributes showing image name, status, and container ID
@@ -35,14 +34,14 @@ All notable changes to this experimental branch of Kiot will be documented in th
   - Improved tab navigation with adaptive layout (dropdown for narrow windows, tabs for wide windows)
 - **System Tray Icon**: 
   - Green/yellow/red icon based on MQTT client connection state
-  - Menu for opening settings, config file, and reconnecting
+  - Menu for opening settings, config file, restarting and reconnecting
 
 #### Core Improvements
 - **Auto-start Management**: Completely redesigned auto-start system
   - Replaced .desktop file autostart with systemd user services
   - Universal solution that works for both native and Flatpak installations
   - Added "Autostart" toggle in General settings (autostart=true/false in config)
-  - Uses D-Bus API for service management (no shell commands required)
+  - Uses D-Bus API for service management
   - Automatic validation and synchronization between config and service state
 - **Service Manager**: Added ServiceManager class for handling systemd user service lifecycle
 - **Version Management**: Updated CMakeLists to make project version available throughout codebase
@@ -83,11 +82,7 @@ All notable changes to this experimental branch of Kiot will be documented in th
 - **Config Sync**: Automatic synchronization between kiotrc config and systemd service state
 - **Cross-platform**: Works identically on native and Flatpak installations
 
-### Event Entity Enhancements
-- **Type Safety**: Added support for all Home Assistant standard trigger types
-- **Custom Triggers**: `triggerWithPayload()` method enables custom automation triggers
-- **UI Integration**: Dropdown selection for types and subtypes in KCM interface
-- **Backward Compatible**: Existing configurations continue to work without changes
+
 
 ## Notes
 - This branch is highly experimental and intended for testing purposes
@@ -97,4 +92,3 @@ All notable changes to this experimental branch of Kiot will be documented in th
 
 ---
 
-*Last updated: December 2025*
