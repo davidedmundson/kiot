@@ -24,7 +24,7 @@ if exec line contains "{arg}", it exposes a textbox in HA and replaces {arg} wit
 
 #### User Interface
 - **KCM Improvements**: 
-  - Dynamic tabs based on config file content
+  - Dynamic tabs based on config file content (Uses a dropdown menu when window with is to low to show all tabs)
   - Support for creating/deleting scripts and shortcuts directly from UI
   - Auto-restart Kiot after pressing OK/Apply to ensure new configurations are used
 - **System Tray Icon**: 
