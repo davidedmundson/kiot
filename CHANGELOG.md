@@ -11,7 +11,12 @@ All notable changes to this experimental branch of Kiot will be documented in th
 - **Notify Entity**: Added notification entity for sending notifications via Home Assistant
 - **Update Entity**: Added update entity for tracking and managing software updates
 - **MediaPlayer Entity**: Added media player entity for audio/video playback control (requires custom integration)
-- **Event Entity**: Changed to support every type from https://www.home-assistant.io/integrations/device_trigger.mqtt/ , still works as before with everything using it atm, and it now support custom triggers for say å file/directory watcher in the future to allow for more complex triggers and automations
+- **Event Entity**: Enhanced to fully support Home Assistant MQTT device trigger integration
+  - Added support for all standard trigger types: button_short_press, button_short_release, button_long_press, button_long_release, button_double_press, button_triple_press, button_quadruple_press, button_quintuple_press
+  - Added support for standard subtypes: turn_on, turn_off, button_1 through button_6
+  - Added `triggerWithPayload()` method for custom trigger types (enables future extensions like file/directory watchers, system events, etc.)
+  - Maintains full backward compatibility with existing configurations
+  - UI now provides dropdown selection for trigger types and subtypes
 
 #### Integrations
 - **Docker Integration**: Expose selected Docker containers as switches with attributes showing image name, status, and container ID
@@ -20,29 +25,37 @@ All notable changes to this experimental branch of Kiot will be documented in th
 - **GameLauncher Integration**: Detect installed Steam/Heroic games and expose them as a dropdown menu in Home Assistant for voice-assisted game launching
 - **Flatpak Updater Integration** (Flatpak only): Check for latest releases on GitHub and enable automatic installation via user-installed Flatpak setup
 - **ActiveWindow Integration**: Updated to work in flatpak
-- **Scripts Integration**: Added support for custom input variables, 
-if exec line contains "{arg}", it exposes a textbox in HA and replaces {arg} with the input value
+- **Scripts Integration**: Added support for custom input variables, if exec line contains "{arg}", it exposes a textbox in HA and replaces {arg} with the input value
 
 #### User Interface
 - **KCM Improvements**: 
-  - Dynamic tabs based on config file content (Uses a dropdown menu when window with is to low to show all tabs)
+  - Dynamic tabs based on config file content (Uses a dropdown menu when window width is too low to show all tabs)
   - Support for creating/deleting scripts and shortcuts directly from UI
   - Auto-restart Kiot after pressing OK/Apply to ensure new configurations are used
+  - Improved tab navigation with adaptive layout (dropdown for narrow windows, tabs for wide windows)
 - **System Tray Icon**: 
   - Green/yellow/red icon based on MQTT client connection state
   - Menu for opening settings, config file, and reconnecting
+
+#### Core Improvements
+- **Auto-start Management**: Completely redesigned auto-start system
+  - Replaced .desktop file autostart with systemd user services
+  - Universal solution that works for both native and Flatpak installations
+  - Added "Autostart" toggle in General settings (autostart=true/false in config)
+  - Uses D-Bus API for service management (no shell commands required)
+  - Automatic validation and synchronization between config and service state
+- **Service Manager**: Added ServiceManager class for handling systemd user service lifecycle
+- **Version Management**: Updated CMakeLists to make project version available throughout codebase
+- **Year Display**: Changed KAboutData from static "2024" to dynamic "2024-CurrentYear"
+- **Config Validation**: Added config validator that opens KCM module and notifies user if configuration has issues
+- **Auto-config Creation**: Basic config file creation and KCM module opening when required keys are missing
+
 
 #### Helper Scripts
 - **Main Helper Menu** (`helper.sh`): Interactive menu for easy installation and setup
 - **Dependency Installer** (`scripts/dependencies.sh`): Automatic dependency installation for multiple distributions (apt/pacman)
 - **Native Installer** (`scripts/native.sh`): Interactive menu for native build and installation
 - **Flatpak Installer** (`scripts/flatpak.sh`): Interactive menu for Flatpak build and installation
-
-#### Core Improvements
-- **Version Management**: Updated CMakeLists to make project version available throughout codebase
-- **Year Display**: Changed KAboutData from static "2024" to dynamic "2024-CurrentYear"
-- **Config Validation**: Added config validator that opens KCM module and notifies user if configuration has issues
-- **Auto-config Creation**: Basic config file creation and KCM module opening when required keys are missing
 
 ### Build System
 - **Flatpak Support**: Added complete Flatpak build system with dedicated folder
@@ -52,18 +65,36 @@ if exec line contains "{arg}", it exposes a textbox in HA and replaces {arg} wit
 
 ### Fixes and Improvements
 - **Code Organization**: Removed monolithic entities.h and updated each file to include relevant headers
-- **KCM Debugging**: Reduced excessive debug output from KCM module
 - **Gitignore**: Updated to exclude build artifacts and temporary files
 - **Flatpak Manifest**: Updated to provide necessary permissions for all integrations
+- **UI Responsiveness**: Improved window resizing behavior and tab navigation
 
 ### Documentation
 - Updated README.md with new integrations and features
 - Added comprehensive documentation for helper scripts
 - Added this changelog file for tracking changes
 
+## Technical Details
+
+### Auto-start Implementation
+- **Service Files**: Dynamically generated systemd user service files
+- **Path Handling**: Automatic detection of Flatpak vs native environment
+- **D-Bus Integration**: Uses org.freedesktop.systemd1 D-Bus API for service management
+- **Config Sync**: Automatic synchronization between kiotrc config and systemd service state
+- **Cross-platform**: Works identically on native and Flatpak installations
+
+### Event Entity Enhancements
+- **Type Safety**: Added support for all Home Assistant standard trigger types
+- **Custom Triggers**: `triggerWithPayload()` method enables custom automation triggers
+- **UI Integration**: Dropdown selection for types and subtypes in KCM interface
+- **Backward Compatible**: Existing configurations continue to work without changes
+
 ## Notes
 - This branch is highly experimental and intended for testing purposes
 - Some features (like MediaPlayer and MPRIS) require custom Home Assistant integrations
 - Helper scripts provide simplified installation for new users
+- Auto-start now uses systemd user services which require systemd to be running (standard on most modern Linux distributions)
 
 ---
+
+*Last updated: December 2025*
