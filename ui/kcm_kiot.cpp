@@ -129,15 +129,26 @@ public:
             emit configSectionsChanged();
         }
     }
-
-    Q_INVOKABLE void save() override
+    bool isSaveNeeded() const override
+    {
+        // Returner alltid true for å tvinge save() på OK
+        // eller implementer din egen logikk for å sjekke om noe er endret
+        return true;
+    }
+    void save() override
     {
         KQuickManagedConfigModule::save();
 
         qCDebug(ui) << "Settings applied, restarting Kiot";
         QProcess::startDetached("kiot");
     }
-
+    void defaults() override
+    {
+        KQuickManagedConfigModule::defaults();
+    
+        qCDebug(ui) << "Defaults applied, restarting Kiot";
+        QProcess::startDetached("kiot");
+    }
 private:
     void writeEntry(KConfigGroup &group, const QString &key, const QVariant &value)
     {

@@ -65,6 +65,8 @@ set(SOURCES
     dbusproperty.cpp
     dbusproperty.h
     systray.cpp
+    servicemanager.cpp
+    servicemanager.h
     entities/entity.cpp
     entities/binarysensor.cpp
     entities/button.cpp
@@ -112,7 +114,8 @@ install(TARGETS kiot ${KDE_INSTALL_TARGETS_DEFAULT_ARGS})
 
 # Installs the desktop files if we are not under flatpak, the flatpak subfolder got a desktop file working with flatpak
 if(NOT BUILD_FLATPAK)
-    ecm_install_configured_files(INPUT org.davidedmundson.kiot.desktop.in @ONLY DESTINATION ${KDE_INSTALL_AUTOSTARTDIR})
+#Moved autostart over to user based services for flatpak/native suport   
+# ecm_install_configured_files(INPUT org.davidedmundson.kiot.desktop.in @ONLY DESTINATION ${KDE_INSTALL_AUTOSTARTDIR})
     ecm_install_configured_files(INPUT org.davidedmundson.kiot.desktop.in @ONLY DESTINATION ${KDE_INSTALL_APPDIR})
 endif()
 feature_summary(WHAT ALL INCLUDE_QUIET_PACKAGES FATAL_ON_MISSING_REQUIRED_PACKAGES)

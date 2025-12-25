@@ -148,6 +148,7 @@ user=mqtt_user
 password=secure_password
 useSSL=false
 systray=true #To enable/disable the systray icon
+autostart=true #To enable/disable autostart, installs itself as a user service
 ```
 
 #### Scripts Configuration
@@ -246,9 +247,6 @@ or directly:
 ```bash
 ./scripts/flatpak.sh
 ```
-
-### Flatpak Notes
-- The Flatpak version does not autostart automatically, but supports auto start from system-settings
 
 
 

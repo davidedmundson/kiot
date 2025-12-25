@@ -3,6 +3,7 @@
 
 #pragma once
 #include "systray.h"
+#include "servicemanager.h"
 #include <KSharedConfig>
 #include <QCoreApplication>
 #include <QMqttSubscription>
@@ -18,6 +19,8 @@ struct IntegrationFactory {
     bool onByDefault = true; // ny flag for default enabled
 };
 
+
+
 class HaControl : public QObject
 {
     Q_OBJECT
@@ -25,6 +28,7 @@ public:
     HaControl();
     ~HaControl();
 
+    void validateStartup();
     static QMqttClient *mqttClient()
     {
         return s_self->m_client;
@@ -41,6 +45,7 @@ private:
     QMqttClient *m_client;
     ConnectedNode *m_connectedNode;
     SystemTray *m_systemTray;
+    ServiceManager *m_serviceManager;
 };
 
 // clang-format off

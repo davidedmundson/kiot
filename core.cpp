@@ -11,7 +11,7 @@
 #include <QMqttClient>
 #include <QProcess>
 #include <QTimer>
-
+#include <KSandbox>
 #include <QLoggingCategory>
 Q_DECLARE_LOGGING_CATEGORY(core)
 Q_LOGGING_CATEGORY(core, "kiot.HaControl")
@@ -29,21 +29,31 @@ public:
     void init() override;
 };
 
+
 HaControl::HaControl()
 {
+
     s_self = this;
     auto config = KSharedConfig::openConfig();
     // Checks that config is valid and opens the kcm module if its not
     if (!ensureConfigDefaults(config)) {
-        QProcess::startDetached("kcmshell6", {"kcm_kiot"});
         KNotification::event(KNotification::Notification,
                              QString("Invalid Config"),
                              QString("Config file is not valid, please fill out everything in the general tab"));
-        // This timer was added to give the notification time to show before we close down and direct users at what needs to be done
+        QProcess::startDetached("kcmshell6", {"kcm_kiot"});
+        
+        // This timer was added to give the notification time to show 
+        // before we close down and direct users at what needs to be done
         QTimer::singleShot(5000, this, [this]() {
-            qCFatal(core) << "Config file is invalid please fill it correctly";
+            qCCritical(core) << "Config file is invalid please fill it correctly";
+            QApplication::quit();
         });
     }
+    // Setup the service manager and makes sure our user service is correct
+    m_serviceManager = new ServiceManager(this);
+    validateStartup();
+
+    // Setup the mqtt client
     auto group = config->group("general");
     m_client = new QMqttClient(this);
     m_client->setHostname(group.readEntry("host"));
@@ -98,7 +108,24 @@ HaControl::~HaControl()
 {
     delete m_connectedNode;
 }
-
+// To make sure the user based service is installed if enabled and removed if not
+void HaControl::validateStartup() {
+    // Les config
+    auto config = KSharedConfig::openConfig("kiotrc", KSharedConfig::CascadeConfig);
+    KConfigGroup generalGroup(config, "general");
+    bool autostartEnabled = generalGroup.readEntry("autostart", false);
+    
+    // Sjekk om service er riktig konfigurert
+    bool serviceEnabled = m_serviceManager->isAutostartEnabled();
+    
+    if (autostartEnabled != serviceEnabled) {
+        qCInfo(core) << "Autostart config mismatch. Config:" << autostartEnabled 
+                     << "Service:" << serviceEnabled << "- Syncing...";
+        
+        m_serviceManager->setupAutostart(autostartEnabled);
+    }
+}
+// A function to check and validate needed config values
 bool HaControl::ensureConfigDefaults(KSharedConfigPtr config)
 {
     bool configValid = true;
@@ -114,7 +141,8 @@ bool HaControl::ensureConfigDefaults(KSharedConfigPtr config)
         {"user", ""}, // MQTT username
         {"password", ""}, // MQTT password
         {"useSSL", false}, // SSL/TLS
-        {"systray", true} // System tray icon
+        {"systray", true}, // System tray icon
+        {"autostart", true} // Autostart
     };
 
     // Sjekk om general gruppen eksisterer og har alle nødvendige nøkler

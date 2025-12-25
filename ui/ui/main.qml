@@ -419,6 +419,17 @@ KCM.SimpleKCM {
                     checked: kcm.getConfigValue("general", "systray", true)
                     onCheckedChanged: kcm.saveConfigValue("general", "systray", checked)
                 }
+                QQC2.Label {
+                    text: "Autostart (systemd service):"
+                    Layout.alignment: Qt.AlignRight
+                }
+                QQC2.CheckBox {
+                    id: autostartCheckbox
+                    checked: kcm.getConfigValue("general", "autostart", false)
+                    onCheckedChanged: {
+                        kcm.saveConfigValue("general", "autostart", checked)
+                    }
+                }
             }
         }
     }
