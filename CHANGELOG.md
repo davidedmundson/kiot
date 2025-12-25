@@ -11,6 +11,7 @@ All notable changes to this experimental branch of Kiot will be documented in th
 - **Notify Entity**: Added notification entity for sending notifications via Home Assistant
 - **Update Entity**: Added update entity for tracking and managing software updates
 - **MediaPlayer Entity**: Added media player entity for audio/video playback control (requires custom integration)
+- **Event Entity**: Changed to support every type from https://www.home-assistant.io/integrations/device_trigger.mqtt/ , still works as before with everything using it atm, and it now support custom triggers for say å file/directory watcher in the future to allow for more complex triggers and automations
 
 #### Integrations
 - **Docker Integration**: Expose selected Docker containers as switches with attributes showing image name, status, and container ID
