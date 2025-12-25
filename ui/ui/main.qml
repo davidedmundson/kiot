@@ -7,6 +7,8 @@ import org.kde.kcmutils as KCM
 KCM.SimpleKCM {
     id: root
     
+
+    
     // New Script Dialog
     Kirigami.Dialog {
         id: newScriptDialog
@@ -189,33 +191,37 @@ KCM.SimpleKCM {
             newShortcutDisplayNameField.text = ""
         }
     }
-    // Top level tab bar   
+
+    // Top level tab bar - Use dropdown when window is too narrow for tabs
     ColumnLayout {
         anchors.fill: parent
         spacing: Kirigami.Units.largeSpacing
         
-        QQC2.TabBar {
-            id: tabBar
+        property int currentTabIndex: 0
+        
+        // Show dropdown instead of tabs when window is narrow
+        Loader {
+            id: tabSelectorLoader
             Layout.fillWidth: true
-            
-            Repeater {
-                model: kcm.sectionOrder
+            sourceComponent: {
+                // Calculate if we have enough width for all tabs
+                // TODO find a way to calculate exact tab bar widht without hardcoding
+                var estimatedTabWidth = 130 // Approximate width per tab
+                var neededWidth = kcm.sectionOrder.length * estimatedTabWidth
+                var availableWidth = root.width - Kirigami.Units.largeSpacing * 2
                 
-                QQC2.TabButton {
-                    text: {
-                        var section = modelData
-                        // Format section name for display
-                        if (section === "general") return "General"
-                        if (section === "Integrations") return "Integrations"
-                        if (section === "Scripts") return "Scripts"
-                        if (section === "Shortcuts") return "Shortcuts"
-                        if (section === "docker") return "Docker"
-                        if (section === "heroic") return "Heroic Games"
-                        if (section === "steam") return "Steam"
-                        if (section === "systemd") return "Systemd Services"
-                        // Capitalize first letter
-                        return section.charAt(0).toUpperCase() + section.slice(1)
-                    }
+                // Use dropdown if window is too narrow for all tabs
+                if (availableWidth < neededWidth) {
+                    return dropdownSelectorComponent
+                } else {
+                    return tabBarComponent
+                }
+            }
+            
+            onLoaded: {
+                // Sync the current index when loader changes
+                if (item) {
+                    item.currentIndex = Qt.binding(function() { return parent.currentTabIndex })
                 }
             }
         }
@@ -224,7 +230,7 @@ KCM.SimpleKCM {
             id: stackLayout
             Layout.fillWidth: true
             Layout.fillHeight: true
-            currentIndex: tabBar.currentIndex
+            currentIndex: parent.currentTabIndex
             
             Repeater {
                 model: kcm.sectionOrder
@@ -248,6 +254,87 @@ KCM.SimpleKCM {
         }
     }
     
+    // Component for tab bar (used when window is wide enough)
+    Component {
+        id: tabBarComponent
+        
+        QQC2.TabBar {
+            id: tabBar
+            Layout.fillWidth: true
+            
+            onCurrentIndexChanged: {
+                // Update the parent's currentTabIndex when tab changes
+                if (parent && parent.parent) {
+                    parent.parent.currentTabIndex = currentIndex
+                }
+            }
+            
+            Repeater {
+                model: kcm.sectionOrder
+                
+                QQC2.TabButton {
+                    text: {
+                        var section = modelData
+                        // Format section name for display
+                        if (section === "general") return "General"
+                        if (section === "Integrations") return "Integrations"
+                        if (section === "Scripts") return "Scripts"
+                        if (section === "Shortcuts") return "Shortcuts"
+                        if (section === "docker") return "Docker"
+                        if (section === "heroic") return "Heroic Games"
+                        if (section === "steam") return "Steam"
+                        if (section === "systemd") return "Systemd Services"
+                        // Capitalize first letter
+                        return section.charAt(0).toUpperCase() + section.slice(1)
+                    }
+                }
+            }
+        }
+    }
+    
+    // Component for dropdown selector (used when window is too narrow)
+    Component {
+        id: dropdownSelectorComponent
+        
+        QQC2.ComboBox {
+            id: tabBar
+            Layout.fillWidth: true
+            model: kcm.sectionOrder
+            
+            // Custom display text formatter
+            property string currentSection: kcm.sectionOrder[currentIndex]
+            
+            // Function to format section name for display
+            function formatSectionName(section) {
+                if (section === "general") return "General"
+                if (section === "Integrations") return "Integrations"
+                if (section === "Scripts") return "Scripts"
+                if (section === "Shortcuts") return "Shortcuts"
+                if (section === "docker") return "Docker"
+                if (section === "heroic") return "Heroic Games"
+                if (section === "steam") return "Steam"
+                if (section === "systemd") return "Systemd Services"
+                // Capitalize first letter
+                return section.charAt(0).toUpperCase() + section.slice(1)
+            }
+            
+            // Display the formatted text
+            displayText: formatSectionName(currentSection)
+            
+            onCurrentIndexChanged: {
+                // Update the parent's currentTabIndex when dropdown changes
+                if (parent && parent.parent) {
+                    parent.parent.currentTabIndex = currentIndex
+                }
+            }
+            
+            delegate: QQC2.ItemDelegate {
+                width: parent.width
+                text: formatSectionName(modelData)
+                highlighted: tabBar.currentIndex === index
+            }
+        }
+    }
     // General settings component
     Component {
         id: generalSettingsComponent
@@ -335,8 +422,7 @@ KCM.SimpleKCM {
             }
         }
     }
-    
-    // Generic settings component for boolean/value sections
+    // Generic settings component used to generate dynamic pages
     Component {
         id: genericSettingsComponent
         
@@ -418,7 +504,6 @@ KCM.SimpleKCM {
             }
         }
     }
-    
     // Scripts group component
     Component {
         id: scriptsGroupComponent
@@ -558,8 +643,7 @@ KCM.SimpleKCM {
                 }
             }
         }
-    }
-    
+    } 
     // Shortcuts group component
     Component {
         id: shortcutsGroupComponent
