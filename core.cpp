@@ -238,6 +238,7 @@ ConnectedNode::ConnectedNode(QObject *parent)
     setDiscoveryConfig("payload_on", "on");
     setDiscoveryConfig("payload_off", "off");
     setDiscoveryConfig("device_class", "power");
+    setDiscoveryConfig("entity_category","diagnostic");
     setDiscoveryConfig("device",
                        QVariantMap({{"name", hostname()},
                                     {"identifiers", "linux_ha_bridge_" + hostname()},

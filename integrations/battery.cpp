@@ -168,6 +168,7 @@ void BatteryWatcher::registerBattery(const QString &udi)
     Sensor *sensor = new Sensor(this);
     sensor->setDiscoveryConfig("device_class", "battery");
     sensor->setDiscoveryConfig("unit_of_measurement", "%");
+    sensor->setDiscoveryConfig("entity_category","diagnostic");
     sensor->setId("battery_" + name.replace(' ', '_'));
     sensor->setName(name);
 

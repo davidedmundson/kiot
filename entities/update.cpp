@@ -26,7 +26,7 @@ void Update::init()
     setDiscoveryConfig("state_topic", baseTopic());
     setDiscoveryConfig("command_topic", baseTopic() + "/set");
     setDiscoveryConfig("payload_install", "install");
-
+    setDiscoveryConfig("entity_category","diagnostic");
     // Send registration to Home Assistant
     sendRegistration();
 
