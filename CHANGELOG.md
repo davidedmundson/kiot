@@ -32,6 +32,13 @@ All notable changes to this experimental branch of Kiot will be documented in th
   - Automatically returns to "Default" state after execution
   - Works in both native and Flatpak installations
   - Eliminates need for external tools like ydotool for shortcut automation
+- **AccentColour Integration**: Completely rewritten and fixed
+  - Now correctly reads KDE accent color from kdeglobals config file
+  - Properly handles both native and Flatpak environments
+  - Exposes color in multiple formats: hex (#RRGGBB), RGB tuple, and individual RGB components
+  - Includes attributes for source (wallpaper/custom/theme), last used color, and wallpaper detection flag
+  - Real-time updates when accent color changes in KDE System Settings
+
 
 #### User Interface
 - **KCM Improvements**: 
@@ -56,6 +63,10 @@ All notable changes to this experimental branch of Kiot will be documented in th
 - **Config Validation**: Added config validator that opens KCM module and notifies user if configuration has issues
 - **Auto-config Creation**: Basic config file creation and KCM module opening when required keys are missing
 
+#### Entity Categories
+- **Standardized entity categorization**: Added some  entity_category configuration to make home assistant easier to navigate
+  - Diagnostic category: Battery, Update, ConnectedNode, 
+  - Improves Home Assistant UI organization and user experience
 
 #### Helper Scripts
 - **Main Helper Menu** (`helper.sh`): Interactive menu for easy installation and setup
@@ -75,6 +86,7 @@ All notable changes to this experimental branch of Kiot will be documented in th
 - **Flatpak Manifest**: Updated to provide necessary permissions for all integrations
 - **UI Responsiveness**: Improved window resizing behavior and tab navigation
 
+
 ### Documentation
 - Updated README.md with new integrations and features
 - Added comprehensive documentation for helper scripts
@@ -86,17 +98,25 @@ All notable changes to this experimental branch of Kiot will be documented in th
 - **Service Files**: Dynamically generated systemd user service files
 - **Path Handling**: Automatic detection of Flatpak vs native environment
 - **D-Bus Integration**: Uses org.freedesktop.systemd1 D-Bus API for service management
-- **Config Sync**: Automatic synchronization between kiotrc config and systemd service state
 - **Cross-platform**: Works identically on native and Flatpak installations
 
 ### Shortcuts Integration Implementation
+- **Registration**: kept the registerShortcuts function as it was, but added a new function to handle the shortcuts
 - **KGlobalAccel DBus Integration**: Uses org.kde.kglobalaccel DBus interface to discover and trigger system shortcuts
 - **Component Discovery**: Automatically detects available KDE components (kwin, krunner, plasmashell, etc.)
 - **Fallback Mechanism**: Tries multiple components if primary component fails
 - **Select Entity**: Exposes shortcuts as a dropdown menu with "Default" as first option
 - **Automatic Reset**: Returns to "Default" state after shortcut execution
-- **Cross-platform**: Works in both native and Flatpak environments
-- **Logging**: Comprehensive logging for debugging and monitoring
+- **Cross-platform**: Works in both native and Flatpak 
+
+### AccentColour Integration Implementation
+- **Config File Handling**: Correctly reads from ~/.config/kdeglobals instead of kiotrc
+- **Cross-platform Support**: Different file watching strategies for native (KConfigWatcher) and Flatpak (QFileSystemWatcher)
+- **Atomic Write Handling**: Properly handles KDE's atomic file replacement with remove/add file watching pattern
+- **Multiple Formats**: Exposes color in hex (#RRGGBB), RGB tuple (r,g,b), and individual RGB components
+- **Metadata Attributes**: Includes source (wallpaper/custom/theme), last used color, and wallpaper detection
+- **Real-time Updates**: Monitors config file changes and updates Home Assistant immediately
+- **Fallback Values**: Provides KDE default blue (#3DAEE9) when no custom accent is set
 
 
 ## Notes
@@ -105,6 +125,7 @@ All notable changes to this experimental branch of Kiot will be documented in th
 - Helper scripts provide simplified installation for new users
 - Auto-start now uses systemd user services which require systemd to be running (standard on most modern Linux distributions)
 - Shortcuts integration eliminates dependency on external automation tools like ydotool for KDE shortcut automation
+- AccentColour integration now provides useful color data for Home Assistant automations (e.g., sync lights with desktop accent color)
 
 ---
 
