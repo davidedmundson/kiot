@@ -25,6 +25,13 @@ All notable changes to this experimental branch of Kiot will be documented in th
 - **Flatpak Updater Integration** (Flatpak only): Check for latest releases on GitHub and enable automatic installation via user-installed Flatpak setup
 - **ActiveWindow Integration**: Updated to work in flatpak
 - **Scripts Integration**: Added support for custom input variables, if exec line contains "{arg}", it exposes a textbox in HA and replaces {arg} with the input value
+- **Shortcuts Integration**: Enhanced to expose system shortcuts via KGlobalAccel DBus interface
+  - Automatically discovers all available system shortcuts from KDE components (kwin, krunner, plasmashell, etc.)
+  - Exposes shortcuts as a select entity dropdown in Home Assistant
+  - Allows triggering any system shortcut directly from Home Assistant
+  - Automatically returns to "Default" state after execution
+  - Works in both native and Flatpak installations
+  - Eliminates need for external tools like ydotool for shortcut automation
 
 #### User Interface
 - **KCM Improvements**: 
@@ -82,6 +89,14 @@ All notable changes to this experimental branch of Kiot will be documented in th
 - **Config Sync**: Automatic synchronization between kiotrc config and systemd service state
 - **Cross-platform**: Works identically on native and Flatpak installations
 
+### Shortcuts Integration Implementation
+- **KGlobalAccel DBus Integration**: Uses org.kde.kglobalaccel DBus interface to discover and trigger system shortcuts
+- **Component Discovery**: Automatically detects available KDE components (kwin, krunner, plasmashell, etc.)
+- **Fallback Mechanism**: Tries multiple components if primary component fails
+- **Select Entity**: Exposes shortcuts as a dropdown menu with "Default" as first option
+- **Automatic Reset**: Returns to "Default" state after shortcut execution
+- **Cross-platform**: Works in both native and Flatpak environments
+- **Logging**: Comprehensive logging for debugging and monitoring
 
 
 ## Notes
@@ -89,6 +104,7 @@ All notable changes to this experimental branch of Kiot will be documented in th
 - Some features (like MediaPlayer and MPRIS) require custom Home Assistant integrations
 - Helper scripts provide simplified installation for new users
 - Auto-start now uses systemd user services which require systemd to be running (standard on most modern Linux distributions)
+- Shortcuts integration eliminates dependency on external automation tools like ydotool for KDE shortcut automation
 
 ---
 

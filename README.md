@@ -209,7 +209,7 @@ Shortcuts=true
 | Power Control | Button | Suspend, hibernate, power off, and restart |
 | Camera Activity | Binary Sensor | Detects when camera is in use |
 | Accent Colour | Sensor | Current desktop accent color |
-| Shortcuts | Device Trigger | Global keyboard shortcuts for HA automations |
+| Shortcuts | Select + Device Trigger | Register custom shortcuts for HA automations AND trigger any KDE system shortcut via DBus |
 | Night Mode | Binary Sensor | Night mode/blue light filter status |
 | Active Window | Sensor | Currently focused application window |
 | Audio Controller | Number + Select | Volume control and device selection |
