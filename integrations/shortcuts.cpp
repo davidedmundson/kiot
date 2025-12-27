@@ -16,6 +16,10 @@
 #include <QDBusInterface>
 #include <QDBusReply>
 #include <QDBusMessage>
+#include <QString>
+#include <QCollator>
+#include <algorithm>
+#include <QLocale>
 
 Q_DECLARE_LOGGING_CATEGORY(shortcut)
 Q_LOGGING_CATEGORY(shortcut, "integration.Shortcut")
@@ -45,7 +49,7 @@ private slots:
         qCDebug(shortcut) << "Executing shortcut" << sc.shortcutName << "from component" << sc.componentName;
         // Execute shortcut via DBus
         QDBusInterface kglobalaccel("org.kde.kglobalaccel", 
-                                     QString("/component/" + sc.componentName), 
+                                     QString(sc.componentName), 
                                      "org.kde.kglobalaccel.Component",
                                      QDBusConnection::sessionBus());
         
@@ -70,12 +74,28 @@ private slots:
 
 private:
     struct ShortcutDbus {
+        QString componentId;
         QString componentName;
         QString shortcutName;
         QString keyCombo;
     };
 
 
+    QList<QString> sortAlphabetically(const QList<QString> &input)
+    {
+        QList<QString> sorted = input;
+
+        QCollator collator(QLocale::system());
+        collator.setCaseSensitivity(Qt::CaseInsensitive);
+        collator.setNumericMode(true);
+
+        std::sort(sorted.begin(), sorted.end(),
+                  [&collator](const QString &a, const QString &b) {
+                      return collator.compare(a, b) < 0;
+                  });
+
+        return sorted;
+    }
 
     // Expose shortcuts as a select entity
     void exposeShortcuts()
@@ -85,12 +105,12 @@ private:
         m_shortcutSelect->setName("Shortcuts");
         
         QStringList shortcutIds;
-        shortcutIds.append("Default");
+        
         
 
         // Try to get shortcuts from all available components
         QStringList components = getGlobalAccelComponents();
-        for (const QString &component : components) {
+        for (QString component : components) {
             QDBusInterface componentInterface("org.kde.kglobalaccel", 
                                             QString("%1").arg(component), 
                                        "org.kde.kglobalaccel.Component",
@@ -101,16 +121,18 @@ private:
                     QStringList componentShortcuts = componentReply.value();
                     for (const QString &shortcut : componentShortcuts) {
                         ShortcutDbus dd;
-                        dd.componentName = component;
+                        dd.componentName = component.contains("/component/") ? component : "/component/" + component;
                         dd.shortcutName = shortcut;
-                        m_shortcuts[shortcut] = dd;
-                        shortcutIds.append(QString("%1").arg(shortcut));
+                        dd.componentId = component.replace("/component/","") + " - " + shortcut;
+                        m_shortcuts[dd.componentId] = dd;
+                        shortcutIds.append(QString("%1").arg(dd.componentId ));
                     }
                     qCDebug(shortcut) << "Found" << componentShortcuts.size() << "shortcuts in component" << component;
                 }
             }
         }
-        
+        shortcutIds = sortAlphabetically(shortcutIds);
+        shortcutIds.prepend("Default");
         m_shortcutSelect->setOptions(shortcutIds);
         m_shortcutSelect->setState("Default");
         
