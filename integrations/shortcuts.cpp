@@ -39,37 +39,22 @@ private slots:
         if (newOption == "Default" || !m_shortcutSelect) {
             return;
         }
-
-        qCDebug(shortcut) << "Executing shortcut:" << newOption;
-        
+        if(!m_shortcuts.contains(newOption))
+            return;
+        auto sc = m_shortcuts[newOption];
+        qCDebug(shortcut) << "Executing shortcut" << sc.shortcutName << "from component" << sc.componentName;
         // Execute shortcut via DBus
         QDBusInterface kglobalaccel("org.kde.kglobalaccel", 
-                                     "/component/kwin", 
+                                     QString("/component/" + sc.componentName), 
                                      "org.kde.kglobalaccel.Component",
                                      QDBusConnection::sessionBus());
         
         if (kglobalaccel.isValid()) {
-            QDBusReply<void> reply = kglobalaccel.call("invokeShortcut", newOption);
-            if (!reply.isValid()) {
-                qCWarning(shortcut) << "Failed to execute shortcut" << newOption << ":" << reply.error().message();
-                
-                // Try other common components
-                QStringList components = {"kwin", "krunner", "plasmashell", "org.kde.kglobalaccel"};
-                for (const QString &component : components) {
-                    QDBusInterface altInterface("org.kde.kglobalaccel", 
-                                                QString("/component/%1").arg(component), 
-                                                "org.kde.kglobalaccel.Component",
-                                                QDBusConnection::sessionBus());
-                    if (altInterface.isValid()) {
-                        QDBusReply<void> altReply = altInterface.call("invokeShortcut", newOption);
-                        if (altReply.isValid()) {
-                            qCDebug(shortcut) << "Executed shortcut" << newOption << "via component" << component;
-                            break;
-                        }
-                    }
-                }
+            QDBusReply<void> reply = kglobalaccel.call("invokeShortcut", sc.shortcutName);
+            if (reply.isValid()) {
+                qCDebug(shortcut) << "Successfully executed shortcut:" << sc.shortcutName << "from component" << sc.componentName;
             } else {
-                qCDebug(shortcut) << "Successfully executed shortcut:" << newOption;
+                qCDebug(shortcut) << "Failed to execute shortcut:" << sc.shortcutName << "from component" << sc.componentName;
             }
         } else {
             qCWarning(shortcut) << "Could not connect to org.kde.kglobalaccel";
@@ -84,6 +69,14 @@ private slots:
     }
 
 private:
+    struct ShortcutDbus {
+        QString componentName;
+        QString shortcutName;
+        QString keyCombo;
+    };
+
+
+
     // Expose shortcuts as a select entity
     void exposeShortcuts()
     {
@@ -94,42 +87,28 @@ private:
         QStringList shortcutIds;
         shortcutIds.append("Default");
         
-        // Get all shortcuts from DBus
-        QDBusInterface kglobalaccel("org.kde.kglobalaccel", 
-                                     "/component/kwin", 
-                                     "org.kde.kglobalaccel.Component",
-                                     QDBusConnection::sessionBus());
-        
-        if (kglobalaccel.isValid()) {
-            QDBusReply<QStringList> reply = kglobalaccel.call("shortcutNames");
-            if (reply.isValid()) {
-                QStringList systemShortcuts = reply.value();
-                shortcutIds.append(systemShortcuts);
-                qCDebug(shortcut) << "Found" << systemShortcuts.size() << "system shortcuts";
-            } else {
-                qCWarning(shortcut) << "Failed to get shortcut names:" << reply.error().message();
-                
-                // Try to get shortcuts from all available components
-                QStringList components = getGlobalAccelComponents();
-                for (const QString &component : components) {
-                    QDBusInterface componentInterface("org.kde.kglobalaccel", 
-                                                      QString("/component/%1").arg(component), 
-                                                      "org.kde.kglobalaccel.Component",
-                                                      QDBusConnection::sessionBus());
-                    if (componentInterface.isValid()) {
-                        QDBusReply<QStringList> componentReply = componentInterface.call("shortcutNames");
-                        if (componentReply.isValid()) {
-                            QStringList componentShortcuts = componentReply.value();
-                            for (const QString &shortcut : componentShortcuts) {
-                                shortcutIds.append(QString("%1/%2").arg(component).arg(shortcut));
-                            }
-                            qCDebug(shortcut) << "Found" << componentShortcuts.size() << "shortcuts in component" << component;
-                        }
+
+        // Try to get shortcuts from all available components
+        QStringList components = getGlobalAccelComponents();
+        for (const QString &component : components) {
+            QDBusInterface componentInterface("org.kde.kglobalaccel", 
+                                            QString("%1").arg(component), 
+                                       "org.kde.kglobalaccel.Component",
+                                      QDBusConnection::sessionBus());
+            if (componentInterface.isValid()) {
+                QDBusReply<QStringList> componentReply = componentInterface.call("shortcutNames");
+                if (componentReply.isValid()) {
+                    QStringList componentShortcuts = componentReply.value();
+                    for (const QString &shortcut : componentShortcuts) {
+                        ShortcutDbus dd;
+                        dd.componentName = component;
+                        dd.shortcutName = shortcut;
+                        m_shortcuts[shortcut] = dd;
+                        shortcutIds.append(QString("%1").arg(shortcut));
                     }
+                    qCDebug(shortcut) << "Found" << componentShortcuts.size() << "shortcuts in component" << component;
                 }
             }
-        } else {
-            qCWarning(shortcut) << "Could not connect to org.kde.kglobalaccel";
         }
         
         m_shortcutSelect->setOptions(shortcutIds);
@@ -145,20 +124,25 @@ private:
         QStringList components;
         
         QDBusInterface kglobalaccel("org.kde.kglobalaccel", 
-                                     "/", 
-                                     "org.kde.kglobalaccel",
+                                     "/kglobalaccel", 
+                                     "org.kde.KGlobalAccel",
                                      QDBusConnection::sessionBus());
         
         if (kglobalaccel.isValid()) {
-            QDBusReply<QStringList> reply = kglobalaccel.call("components");
+            QDBusReply<QList<QDBusObjectPath>> reply = kglobalaccel.call("allComponents");
             if (reply.isValid()) {
-                components = reply.value();
+                for (const QDBusObjectPath& path : reply.value()) 
+                {
+                    if(path.path().isEmpty()) continue;
+                    components.append(path.path());
+                }
             }
         }
-        
+           
         // Fallback to common components
         if (components.isEmpty()) {
-            components = {"kwin", "krunner", "plasmashell", "org.kde.kglobalaccel"};
+             components = {"kwin", "krunner", "plasmashell", "org.kde.kglobalaccel", "com_obsproject_Studio"};
+        
         }
         
         return components;
@@ -189,6 +173,7 @@ private:
     }
 
     Select *m_shortcutSelect;
+    QMap<QString, ShortcutDbus> m_shortcuts;
 };
 
 void setupShortcuts()
