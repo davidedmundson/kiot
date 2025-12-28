@@ -17,6 +17,8 @@ NOTE: This is a highly experimental branch, and is not recommended if you do not
 - [Contributing](#contributing)
 - [Troubleshooting](#troubleshooting)
 
+- [DEVELOPMENT](DEVELOPMENT.md)
+- [Entities](entities/README.md)
 ## About
 
 Kiot (KDE Internet Of Things) is a background daemon that exposes useful information and actions from your local desktop session to a home automation controller like Home Assistant.

@@ -95,9 +95,10 @@ All notable changes to this experimental branch of Kiot will be documented in th
 
 
 ### Documentation
-- Updated README.md with new integrations and features
+- Updated [README.md](README.md) with new integrations and features
 - Added comprehensive documentation for helper scripts
 - Added this changelog file for tracking changes
+- Updated [DEVELOPMENT.md](DEVELOPMENT.md) for new developers
 
 ## Technical Details
 
