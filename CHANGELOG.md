@@ -21,7 +21,7 @@ All notable changes to this experimental branch of Kiot will be documented in th
 - **Docker Integration**: Expose selected Docker containers as switches with attributes showing image name, status, and container ID
 - **SystemD Integration**: Expose selected systemd user services as switches for start/stop control
 - **MPRIS Integration**: Expose MPRIS media players over MQTT, automatically tracks currently active player (requires custom integration)
-- **GameLauncher Integration**: Detect installed Steam/Heroic games and expose them as a dropdown menu in Home Assistant for voice-assisted game launching
+- **GameLauncher Integration**: Detect installed Steam/Heroic/lutris games and expose them as a dropdown menu in Home Assistant for voice-assisted game launching and such
 - **Flatpak Updater Integration** (Flatpak only): Check for latest releases on GitHub and enable automatic installation via user-installed Flatpak setup
 - **ActiveWindow Integration**: Updated to work in flatpak
 - **Scripts Integration**: Added support for custom input variables, if exec line contains "{arg}", it exposes a textbox in HA and replaces {arg} with the input value

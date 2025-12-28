@@ -221,7 +221,7 @@ Shortcuts=true
 | Docker | Switch | Docker container control and status as attributes |
 | SystemD | Switch | Systemd service control|
 | MPRIS | Media Player | MPRIS media player control [Custom Integration](https://github.com/TheOddPirate/mqtt_media_player)|Button
-| Game Launcher | Select | Game launcher for steam/heroic games|
+| Game Launcher | Select | Game launcher for steam/heroic/lutris games|
 
 ### Flatpak Only Integrations
 | Feature | Entity Type | Description |
