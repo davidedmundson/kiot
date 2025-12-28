@@ -1,5 +1,4 @@
 // SPDX-FileCopyrightText: 2025 David Edmundson <davidedmundson@kde.org>
-// SPDX-FileCopyrightText: 2025 Odd Østlie <theoddpirate@gmail.com>
 // SPDX-License-Identifier: LGPL-2.1-or-later
 
 #include "core.h"
