@@ -16,7 +16,6 @@ NOTE: This is a highly experimental branch, and is not recommended if you do not
 - [Future Development](#future-development)
 - [Contributing](#contributing)
 - [Troubleshooting](#troubleshooting)
-
 - [DEVELOPMENT](DEVELOPMENT.md)
 - [Entities](entities/README.md)
 ## About
