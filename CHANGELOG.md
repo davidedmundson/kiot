@@ -38,7 +38,9 @@ All notable changes to this experimental branch of Kiot will be documented in th
   - Exposes color in multiple formats: hex (#RRGGBB), RGB tuple, and individual RGB components
   - Includes attributes for source (wallpaper/custom/theme), last used color, and wallpaper detection flag
   - Real-time updates when accent color changes in KDE System Settings
-
+- **DnDState Integration**: Rewriten as a DnDManager that exposes a switch
+ - Uses DBusProperty to monitor and control Do Not Disturb state
+ 
 
 #### User Interface
 - **KCM Improvements**: 

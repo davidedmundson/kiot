@@ -215,7 +215,7 @@ Shortcuts=true
 | Active Window | Sensor | Currently focused application window |
 | Audio Controller | Number + Select | Volume control and device selection |
 | Battery Status | Sensor | Battery charge level and attributes |
-| Do Not Disturb | Binary Sensor | DnD mode status |
+| Do Not Disturb | Switch| DnD manager  |
 | Gamepad Connected | Binary Sensor | Gamepad/joystick connection detection |
 | Scripts | Button | Execute custom scripts |
 | Bluetooth | Switch | Bluetooth adapter control and device connection management |
