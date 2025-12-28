@@ -77,6 +77,13 @@ All notable changes to this experimental branch of Kiot will be documented in th
 ### Build System
 - **Flatpak Support**: Added complete Flatpak build system with dedicated folder
 - **CMake Options**: Added `BUILD_FLATPAK` option for conditional inclusion of Flatpak-only content
+- **AUR Support**: Added PKGBUILD for Arch User Repository (AUR) package management.
+  The existing [AUR package](https://aur.archlinux.org/packages/kiot-git) is outdated and missing dependencies.
+  Updated PKGBUILD includes all required dependencies for current version.
+  Exploring GitHub Actions workflow for automatic AUR updates on version increments in CMakeLists.txt.
+  Also investigating user package installation via PKGBUILD_USERINSTALL to eliminate sudo requirements
+  and enable Home Assistant update integration for both native and Flatpak installations.
+
 - **DBus Interfaces**: Automatic generation of DBus interface files during build
 - **CI/CD**: Added auto-release pipeline for Flatpak builds
 

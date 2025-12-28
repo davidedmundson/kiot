@@ -1,0 +1,40 @@
+_pkgbase=kiot
+pkgname=kiot-git
+pkgver=r104.1b51625
+pkgrel=1
+pkgdesc="A background daemon that exposes information and actions of the KDE
+Plasma session to a home automation controller like Home Assistant"
+arch=(x86_64)
+url="https://github.com/davidedmundson/kiot"
+license=(MIT)
+depends=(qt6-base qt6-declarative qt6-mqtt
+         kconfig kcoreaddons kdbusaddons knotifications kidletime
+         kglobalaccel kcmutils ki18n solid bluez-qt pulseaudio-qt
+         systemd-libs)
+makedepends=(cmake extra-cmake-modules git)
+provides=(kiot)
+conflicts=(kiot)
+source=("git+$url.git")
+md5sums=('SKIP')
+
+pkgver() {
+	cd "$srcdir/$_pkgbase"
+	printf "r%s.%s" "$(git rev-list --count HEAD)" "$(git rev-parse --short=7 HEAD)"
+}
+
+build() {
+	cd "$srcdir/$_pkgbase"
+	local cmake_options=(
+		-B build
+		-DCMAKE_INSTALL_PREFIX=/usr
+		-DCMAKE_BUILD_TYPE=None
+		-Wno-dev
+	)
+	cmake "${cmake_options[@]}"
+	cmake --build build -j$(nproc)
+}
+
+package() {
+	cd "$srcdir/$_pkgbase"
+	DESTDIR="$pkgdir" cmake --install build
+}
