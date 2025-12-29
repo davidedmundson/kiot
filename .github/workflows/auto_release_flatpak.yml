@@ -4,6 +4,7 @@ on:
     branches: [ the_odd_experiments ]
 env:
   BRANCH: the_odd_experiments
+
 jobs:
   release:
     runs-on: ubuntu-latest
@@ -48,17 +49,17 @@ jobs:
             echo "publish=false" >> "$GITHUB_OUTPUT"
           fi
 
-
       - name: Cancel workflow if no changes
         if: steps.version_check.outputs.publish != 'true'
         uses: actions/github-script@v6
         with:
           script: |
             github.rest.actions.cancelWorkflowRun({
-            owner: context.repo.owner,
-            repo: context.repo.repo,
-            run_id: context.runId
-            });
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              run_id: context.runId
+            })
+
       - name: Install Flatpak tooling
         run: |
           sudo apt-get update
@@ -68,23 +69,34 @@ jobs:
         run: |
           flatpak remote-add --if-not-exists --user flathub https://flathub.org/repo/flathub.flatpakrepo
 
+      - name: Cache Flatpak runtime and sdk
+        uses: actions/cache@v5
+        with:
+          path: |
+            ~/.var/app
+            ~/.local/share/flatpak
+            ~/.cache/flatpak
+          key: ${{ runner.os }}-flatpak-${{ hashFiles('.flatpak-manifest.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-flatpak-
+
       - name: Build Flatpak
         run: |
           flatpak-builder --user --install-deps-from=flathub --force-clean build-dir .flatpak-manifest.yaml
           rm -rf repo
           flatpak-builder --user --repo=repo --force-clean build-dir .flatpak-manifest.yaml
           flatpak build-bundle repo kiot-${{ env.BRANCH }}-${{ steps.cmake_version.outputs.version }}.flatpak org.davidedmundson.kiot master
-      
-      - name: Build Changelog
-        uses: mikepenz/release-changelog-builder-action@v5
-        id: build_changelog
-        with:
-          mode: "COMMIT"
+
+   #   - name: Build Changelog
+   #     uses: mikepenz/release-changelog-builder-action@v5
+   #     id: build_changelog
+   #     with:
+   #       mode: "COMMIT"
 
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
         with:
           tag_name: ${{ steps.cmake_version.outputs.version }}
-          body: ${{ steps.build_changelog.outputs.changelog }}
+         # body: ${{ steps.build_changelog.outputs.changelog }}
           name: kiot ${{ env.BRANCH }} V ${{ steps.cmake_version.outputs.version }}
           files: kiot-${{ env.BRANCH }}-${{ steps.cmake_version.outputs.version }}.flatpak
