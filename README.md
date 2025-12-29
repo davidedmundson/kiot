@@ -150,6 +150,7 @@ password=secure_password
 useSSL=false
 systray=true #To enable/disable the systray icon
 autostart=true #To enable/disable autostart, installs itself as a user service
+discoveryPrefix=homeassistant #Optional discovery prefix if needed, defaults to homeassistant
 ```
 
 #### Scripts Configuration

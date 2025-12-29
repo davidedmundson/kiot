@@ -24,6 +24,8 @@
 #include <QJsonObject>
 #include <QMqttClient>
 
+#include <KConfigGroup>
+
 #include <QLoggingCategory>
 Q_DECLARE_LOGGING_CATEGORY(base)
 Q_LOGGING_CATEGORY(base, "entities.Entity")
@@ -103,8 +105,10 @@ void Entity::init()
 /** @private Static discovery prefix for Home Assistant MQTT discovery
  *  @note Should this be moved to the config file? to support custom prefixes
  */
-static QString s_discoveryPrefix = "homeassistant";
-
+static QString s_discoveryPrefix = []{
+    KSharedConfig::Ptr cfg = KSharedConfig::openConfig();
+    return cfg->group("general").readEntry("discoveryPrefix", "homeassistant");
+}();
 void Entity::sendRegistration()
 {
     if (haType().isEmpty()) {
