@@ -253,11 +253,35 @@ private:
 void setupFlatpakUpdater()
 {
     if (!KSandbox::isFlatpak()) {
-        qCWarning(auf) << "FlatpakUpdater is only supported in Flatpak environments,aborting";
+        qCWarning(auf) << "FlatpakUpdater is only supported in Flatpak environments, aborting";
         return;
     }
+
+    // Check if we are installed as --user or system
+    KProcess proc;
+    proc.setProgram("flatpak-spawn");
+    proc.setArguments(QStringList() << "--host" << "flatpak" << "info" << "--show-location" << "org.davidedmundson.kiot");
+
+    proc.setOutputChannelMode(KProcess::MergedChannels);
+    proc.start();
+    if (!proc.waitForFinished()) {
+        qCWarning(auf) << "Failed to check Flatpak install location";
+    } else {
+        const QString output = QString::fromUtf8(proc.readAll());
+        if (output.startsWith("/var/lib")) {
+            qCWarning(auf) << "Detected system-wide Flatpak installation. The updater expects --user installation.";
+            return;
+        } else if (output.startsWith(QDir::homePath())) {
+            qCDebug(auf) << "User installation detected. Updater can safely reinstall updates as --user.";
+        } else {
+            qCWarning(auf) << "Unknown Flatpak installation path:" << output.trimmed() << "Aborting updater";
+            return;
+        }
+    }
+
     new FlatpakUpdater(qApp);
 }
+
 
 REGISTER_INTEGRATION("UpdaterFlatpak", setupFlatpakUpdater, true)
 #include "updater_flatpak.moc"

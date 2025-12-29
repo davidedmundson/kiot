@@ -202,7 +202,7 @@ bool HaControl::registerIntegrationFactory(const QString &name, std::function<vo
     return true;
 }
 
-// Kjør integrasjoner
+// Start the integrations
 void HaControl::loadIntegrations(KSharedConfigPtr config)
 {
     auto integrationconfig = config->group("Integrations");
@@ -227,6 +227,8 @@ void HaControl::loadIntegrations(KSharedConfigPtr config)
         }
     }
 }
+
+// ConnectedNode start
 
 ConnectedNode::ConnectedNode(QObject *parent)
     : Entity(parent)

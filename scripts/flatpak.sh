@@ -27,9 +27,7 @@ while true; do
     echo "0 Quit (runs a cleanup before closing)"
     echo "1 Install as user (--user flag, no sudo needed)"
     echo "2 Uninstall as user (--user flag, no sudo needed)"
-    echo "3 Install as system(--system flag, sudo needed)"
-    echo "4 Uninstall as system(--system flag, sudo needed)"
-    echo "5 Cleanup files"
+    echo "3 Cleanup files"
     echo
     echo "======================================="
     read -rp "Select an option: " choice
@@ -52,17 +50,6 @@ while true; do
             pause
             ;;
         3)
-            build
-            echo "Installing as system..."
-            sudo flatpak install --system  -y ./build/kiot.flatpak
-            pause
-            ;;
-        4)
-            echo "Uninstalling as system..."
-            sudo flatpak uninstall --system  -y org.davidedmundson.kiot
-            pause
-            ;;
-        5)
             echo "Deleting build and repo folders..."
             cleanup
             pause

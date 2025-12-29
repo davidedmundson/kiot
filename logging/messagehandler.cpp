@@ -1,5 +1,6 @@
 #include "messagehandler.h"
 
+#include <KNotification>
 #include <QDateTime>
 #include <QStandardPaths>
 
@@ -46,7 +47,9 @@ void kiotMessageHandler(QtMsgType type, const QMessageLogContext &context, const
     }
 
     QString line = QString("[%1] [%2] [%3] %4").arg(timestamp, level, context.category, msg);
-
+    if (type == QtWarningMsg || type == QtCriticalMsg || type == QtFatalMsg) {
+        KNotification::event(KNotification::Notification, QStringLiteral("Kiot %1").arg(level), msg);
+    }
     // 1. Print to the terminal
     fprintf(stderr, "%s%s%s\n", color, line.toUtf8().constData(), reset);
 
