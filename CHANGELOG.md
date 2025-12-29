@@ -87,7 +87,7 @@ All notable changes to this experimental branch of Kiot will be documented in th
   and enable Home Assistant update integration for both native and Flatpak installations.
 
 - **DBus Interfaces**: Automatic generation of DBus interface files during build
-- **CI/CD**: Added auto-release pipeline for Flatpak builds
+- **CI/CD**: Added auto-release pipeline for Flatpak builds and added cache to original ci for faster finishing
 
 ### Fixes and Improvements
 - **Code Organization**: Removed monolithic entities.h and updated each file to include relevant headers
