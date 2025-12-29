@@ -23,7 +23,18 @@ jobs:
         run: |
           flatpak --version
           flatpak remote-add --if-not-exists --user flathub https://flathub.org/repo/flathub.flatpakrepo
-
+      
+      - name: Cache Flatpak SDK/Runtimes
+        uses: actions/cache@v5
+        with:
+          path: |
+            ~/.var/app
+            ~/.local/share/flatpak
+            ~/.cache/flatpak
+          key: Linux-flatpak-${{ runner.os }}-${{ hashFiles('.flatpak-manifest.yaml') }}
+          restore-keys: |
+            Linux-flatpak-${{ runner.os }}-
+      
       - name: Build (resolve SDK/Platform deps from Flathub)
         run: |
           flatpak-builder --user --install-deps-from=flathub --force-clean build-dir .flatpak-manifest.yaml
