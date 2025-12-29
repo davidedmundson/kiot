@@ -11,7 +11,7 @@
 #include <QDBusPendingCall>
 #include <QDBusPendingReply>
 
-#include <QCoreApplication>
+#include <QApplication>
 
 class LockedState : public QObject
 {

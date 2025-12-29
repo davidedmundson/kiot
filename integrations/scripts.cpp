@@ -10,7 +10,7 @@
 #include <KSharedConfig>
 
 #include <QAction>
-#include <QCoreApplication>
+#include <QApplication>
 
 #include <QLoggingCategory>
 Q_DECLARE_LOGGING_CATEGORY(scripts)

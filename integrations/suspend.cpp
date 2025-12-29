@@ -4,7 +4,7 @@
 #include "core.h"
 #include "entities/button.h"
 #include "login1_manager_interface.h"
-#include <QCoreApplication>
+#include <QApplication>
 #include <QDBusConnection>
 
 void setupSuspend()

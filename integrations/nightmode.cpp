@@ -6,7 +6,7 @@
 #include "entities/binarysensor.h"
 #include "entities/switch.h"
 
-#include <QCoreApplication>
+#include <QApplication>
 
 #include <QDBusConnection>
 #include <QDBusMessage>

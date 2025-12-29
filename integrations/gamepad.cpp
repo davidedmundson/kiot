@@ -3,7 +3,7 @@
 
 #include "core.h"
 #include "entities/binarysensor.h"
-#include <QCoreApplication>
+#include <QApplication>
 #include <QSocketNotifier>
 #include <QTimer>
 #include <libudev.h>

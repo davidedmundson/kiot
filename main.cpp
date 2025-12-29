@@ -20,10 +20,8 @@
 int main(int argc, char **argv)
 {
     QApplication app(argc, argv);
-
-    initLogging();
-
-    qCInfo(main_cpp) << "Starting kiot version " << QStringLiteral(KIOT_VERSION);
+   // app.setApplicationName("org.davidedmundson.kiot");
+  //  app.setApplicationDisplayName("Kiot");
     KAboutData aboutData(QStringLiteral("kiot"),
                          "KDE IOT",
                          QStringLiteral(KIOT_VERSION),
@@ -32,7 +30,10 @@ int main(int argc, char **argv)
                          "© 2024-" + QString::number(QDate::currentDate().year()));
 
     KDBusService service(KDBusService::Unique | KDBusService::Replace);
+    initLogging();
 
+    qCInfo(main_cpp) << "Starting kiot version " << QStringLiteral(KIOT_VERSION);
+    
     HaControl appControl;
 
     KSignalHandler::self()->watchSignal(SIGTERM);

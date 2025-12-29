@@ -4,7 +4,7 @@
 #include "core.h"
 #include "entities/entity.h"
 
-#include <QCoreApplication>
+#include <QApplication>
 #include <QMqttClient>
 
 #include <QJsonDocument>

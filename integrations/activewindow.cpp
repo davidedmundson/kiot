@@ -4,7 +4,7 @@
 #include "core.h"
 #include "entities/sensor.h"
 #include <KSandbox>
-#include <QCoreApplication>
+#include <QApplication>
 #include <QDBusConnection>
 #include <QDBusInterface>
 #include <QDBusReply>

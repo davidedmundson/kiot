@@ -23,9 +23,7 @@
 #include <QJsonDocument>
 #include <QJsonObject>
 #include <QMqttClient>
-
 #include <KConfigGroup>
-
 #include <QLoggingCategory>
 Q_DECLARE_LOGGING_CATEGORY(base)
 Q_LOGGING_CATEGORY(base, "entities.Entity")
@@ -105,10 +103,16 @@ void Entity::init()
 /** @private Static discovery prefix for Home Assistant MQTT discovery
  *  @note Should this be moved to the config file? to support custom prefixes
  */
-static QString s_discoveryPrefix = []{
-    KSharedConfig::Ptr cfg = KSharedConfig::openConfig();
-    return cfg->group("general").readEntry("discoveryPrefix", "homeassistant");
-}();
+const QString &discoveryPrefix() {
+    static QString prefix;
+    if (prefix.isEmpty()) {
+        KSharedConfig::Ptr cfg = KSharedConfig::openConfig();
+        prefix = cfg->group("general").readEntry("discoveryPrefix", "homeassistant");
+    }
+    return prefix;
+}
+
+
 void Entity::sendRegistration()
 {
     if (haType().isEmpty()) {
@@ -132,7 +136,7 @@ void Entity::sendRegistration()
         config["device"] = QVariantMap({{"identifiers", "linux_ha_bridge_" + hostname()}});
     }
     config["unique_id"] = "linux_ha_control_" + hostname() + "_" + id();
-    HaControl::mqttClient()->publish(s_discoveryPrefix + "/" + haType() + "/" + hostname() + "/" + id() + "/config",
+    HaControl::mqttClient()->publish(discoveryPrefix() + "/" + haType() + "/" + hostname() + "/" + id() + "/config",
                                      QJsonDocument(QJsonObject::fromVariantMap(config)).toJson(QJsonDocument::Compact),
                                      0,
                                      true);

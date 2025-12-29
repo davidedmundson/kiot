@@ -5,7 +5,7 @@
 #include "systray.h"
 #include "servicemanager.h"
 #include <KSharedConfig>
-#include <QCoreApplication>
+#include <QApplication>
 #include <QMqttSubscription>
 #include <QObject>
 #include <QVariantMap>

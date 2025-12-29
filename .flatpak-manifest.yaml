@@ -19,7 +19,6 @@ finish-args:
   - "--filesystem=home:rw"
   - "--filesystem=/run/docker.sock"
   - "--filesystem=xdg-config/:rw"
-  - "--filesystem=xdg-config/autostart:create"
   - "--own-name=org.davidedmundson.kiot"
   - "--own-name=org.kde.StatusNotifierItem-2-2"
   - "--talk-name=org.kde.StatusNotifierWatcher"

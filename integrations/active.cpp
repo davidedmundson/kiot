@@ -4,7 +4,7 @@
 #include "core.h"
 #include "entities/binarysensor.h"
 #include <KIdleTime>
-#include <QCoreApplication>
+#include <QApplication>
 
 void setupActiveSensor()
 {
