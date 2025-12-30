@@ -139,6 +139,7 @@ void BatteryWatcher::deviceRemoved(const QString &udi)
     auto it = m_udiToSensor.find(udi);
     if (it != m_udiToSensor.end()) {
         qCDebug(batter) << "Battery removed:" << udi;
+        it.value()->unRegister();
         // TODO find a way to set sensor as unavailable when battery disconnects so HA shows the correct state of the battery
         it.value()->deleteLater();
         m_udiToSensor.erase(it);
@@ -171,7 +172,7 @@ void BatteryWatcher::registerBattery(const QString &udi)
     sensor->setDiscoveryConfig("entity_category","diagnostic");
     sensor->setId("battery_" + name.replace(' ', '_'));
     sensor->setName(name);
-
+    sensor->runtimeRegistration();
     // Set initial state and attributes
     sensor->setState(QString::number(battery->chargePercent()));
 

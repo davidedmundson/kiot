@@ -107,7 +107,17 @@ public:
      * @return QString Entity display name
      */
     QString name() const;
+    
+    /**
+     * @brief Registers this entity with Home Assistant via MQTT at runtime
+     */
+    void runtimeRegistration();
 
+    /**
+     * @brief Unregisters this entity from Home Assistant
+     */
+    void unRegister();
+    
     /**
      * @brief Sets the Home Assistant icon for this entity
      * @param newHaIcon Material Design icon name (e.g., "mdi:lightbulb")

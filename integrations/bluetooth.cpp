@@ -27,6 +27,7 @@ public:
         m_switch->setId("bluetooth_device_" + device->address().replace(':', '_'));
         m_switch->setName(device->name());
         m_switch->setDiscoveryConfig("icon", "mdi:bluetooth");
+        m_switch->runtimeRegistration();
         update();
 
         // Connect signals
@@ -58,6 +59,14 @@ public:
         qCInfo(bt) << "Bluetooth device added: " << device->name() << " (" << device->address() << ")";
     }
 
+    ~BluetoothDeviceSwitch()
+    {
+        if(m_switch && m_device)
+        {
+            if (!m_device->isPaired())
+                m_switch->unRegister();
+        }
+    }
 private:
     BluezQt::DevicePtr m_device;
     Switch *m_switch = nullptr;
@@ -67,9 +76,10 @@ private:
         if (!m_device)
             return;
         if (!m_device->isPaired()) {
-            // TODO set entity as unavailable in HA and delete this
             qCDebug(bt) << m_device->name() << " is not paired anymore";
-            m_switch->setState(false);
+            m_switch->unRegister();
+            this->deleteLater();
+            return;
         }
         // Only update state and icon if actually changed to avoid unnecessary re registreations with mqtt
         if (m_device->isConnected() && !m_switch->state()) {

@@ -101,7 +101,6 @@ void Entity::init()
 }
 
 /** @private Static discovery prefix for Home Assistant MQTT discovery
- *  @note Should this be moved to the config file? to support custom prefixes
  */
 const QString &discoveryPrefix() {
     static QString prefix;
@@ -145,6 +144,33 @@ void Entity::sendRegistration()
     }
 }
 
+
+//================ Code to allow runtime adding/removing of entities =======================//
+void Entity::runtimeRegistration()
+{
+    if (HaControl::mqttClient()->state() != QMqttClient::Connected) {
+        return;
+    }
+    
+    qCDebug(base) << "Runtime registration of entity:" << id() << "(" << name() << ")";
+    init();
+
+}
+
+void Entity::unRegister()
+{
+    if (HaControl::mqttClient()->state() != QMqttClient::Connected) {
+        qCWarning(base) << "Cannot unregister entity" << id() << "(" << name() << ")" 
+                        << "- MQTT client not connected";
+        return;
+    }
+    
+    qCDebug(base) << "Unregistering entity:" << id() << "(" << name() << ")";
+    HaControl::mqttClient()->publish(discoveryPrefix() + "/" + haType() + "/" + hostname() + "/" + id() + "/config",
+    QByteArray(), 0,true);
+}
+
+//========== Code to set Attributes ===================//
 void Entity::setAttributes(const QVariantMap &attrs)
 {
     m_attributes = attrs;
