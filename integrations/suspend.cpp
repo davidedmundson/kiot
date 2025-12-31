@@ -39,7 +39,7 @@ void setupSuspend()
         Button *button = new Button(qApp);
         button->setId("poweroff");
         button->setName("Poweroff");
-
+        button->setDiscoveryConfig("icon", "mdi:power");
         QObject::connect(button, &Button::triggered, qApp, []() {
             OrgFreedesktopLogin1ManagerInterface logind(QStringLiteral("org.freedesktop.login1"),
                                                         QStringLiteral("/org/freedesktop/login1"),
@@ -52,7 +52,7 @@ void setupSuspend()
         Button *button = new Button(qApp);
         button->setId("restart");
         button->setName("Restart");
-
+        button->setDiscoveryConfig("icon", "mdi:restart");
         QObject::connect(button, &Button::triggered, qApp, []() {
             OrgFreedesktopLogin1ManagerInterface logind(QStringLiteral("org.freedesktop.login1"),
                                                         QStringLiteral("/org/freedesktop/login1"),

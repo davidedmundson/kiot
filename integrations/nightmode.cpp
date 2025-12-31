@@ -34,6 +34,7 @@ NightMode::NightMode(QObject *parent)
     m_sensor = new BinarySensor(this);
     m_sensor->setId("nightmode_inhibited");
     m_sensor->setName("Night Mode Inhibited");
+    m_sensor->setDiscoveryConfig("icon", "mdi:lightbulb-night");
 
     auto nightmodeInhibited = new DBusProperty("org.kde.KWin", "/org/kde/KWin/NightLight", "org.kde.KWin.NightLight", "inhibited", this);
     QObject::connect(nightmodeInhibited, &DBusProperty::valueChanged, this, [this](const QVariant &value) {
@@ -44,6 +45,7 @@ NightMode::NightMode(QObject *parent)
     m_switch = new Switch(this);
     m_switch->setId("nightmode_inhibit");
     m_switch->setName("Night Mode Inhibit");
+    m_switch->setDiscoveryConfig("icon", "mdi:lightbulb-night");
     m_switch->setState(false); // the state is whether this switch is inhibiting the night mode, the sensor is if /anything/ is
     QObject::connect(m_switch, &Switch::stateChangeRequested, this, [this](bool state) {
         if (state) {

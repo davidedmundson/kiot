@@ -37,6 +37,7 @@ Gamepad::Gamepad(QObject *parent)
     m_sensor = new BinarySensor(this);
     m_sensor->setId("gamepad_connected");
     m_sensor->setName("Gamepad Connected");
+    m_sensor->setDiscoveryConfig("icon", "mdi:gamepad-variant");
     // Sett opp udev
     m_udev = udev_new();
     if (!m_udev) {

@@ -51,6 +51,7 @@ CameraWatcher::CameraWatcher(QObject *parent)
     m_sensor = new BinarySensor(this);
     m_sensor->setId("camera");
     m_sensor->setName("Camera Active");
+    m_sensor->setDiscoveryConfig("icon", "mdi:camera");
     m_sensor->setState(false);
 
     m_hysterisisDelay->setInterval(1000);
