@@ -26,7 +26,7 @@ public:
         auto sensor = new Sensor(this);
         sensor->setId("accentcolor");
         sensor->setName("Accent Color");
-
+        sensor->setDiscoveryConfig("icon","mdi:format-color-fill");
 
         // Load initial state
         updateAccentColor(sensor);

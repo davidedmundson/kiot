@@ -13,7 +13,7 @@ void setupSuspend()
         Button *button = new Button(qApp);
         button->setId("suspend");
         button->setName("Suspend");
-
+        button->setDiscoveryConfig("icon", "mdi:snowflake");
         QObject::connect(button, &Button::triggered, qApp, []() {
             OrgFreedesktopLogin1ManagerInterface logind(QStringLiteral("org.freedesktop.login1"),
                                                         QStringLiteral("/org/freedesktop/login1"),
@@ -26,7 +26,7 @@ void setupSuspend()
         Button *button = new Button(qApp);
         button->setId("hibernate");
         button->setName("Hibernate");
-
+        button->setDiscoveryConfig("icon", "mdi:sleep");
         QObject::connect(button, &Button::triggered, qApp, []() {
             OrgFreedesktopLogin1ManagerInterface logind(QStringLiteral("org.freedesktop.login1"),
                                                         QStringLiteral("/org/freedesktop/login1"),

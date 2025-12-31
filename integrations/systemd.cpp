@@ -117,6 +117,7 @@ void SystemDWatcher::performInit()
         auto *sw = new Switch(this);
         sw->setId("systemd_" + sanitizeServiceId(svc));
         sw->setName(sanitizeServiceId(svc));
+        sw->setDiscoveryConfig("icon", "mdi:account-wrench");
         sw->setState(false); // temp
         // Query initial state from D-Bus
         QDBusReply<QDBusObjectPath> unitPathReply = m_systemdUser->call("LoadUnit", svc);
