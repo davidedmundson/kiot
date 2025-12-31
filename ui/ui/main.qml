@@ -395,11 +395,19 @@ KCM.SimpleKCM {
                 QQC2.TextField {
                     id: passwordField
                     Layout.fillWidth: true
-                    echoMode: QQC2.TextInput.Password
                     text: kcm.settings && kcm.settings.password !== undefined ? kcm.settings.password : ""
                     onEditingFinished: if (kcm.settings) kcm.settings.password = text
                 }
-                
+                QQC2.Label {
+                    text: "Discovery:"
+                    Layout.alignment: Qt.AlignRight
+                }
+                QQC2.TextField {
+                    id: discoveryField
+                    Layout.fillWidth: true
+                    text: kcm.settings && kcm.settings.discoveryPrefix !== undefined ? kcm.settings.discoveryPrefix : "homeassistant"
+                    onEditingFinished: if (kcm.settings) kcm.settings.discoveryPrefix = text
+                }                
                 QQC2.Label {
                     text: "Use SSL:"
                     Layout.alignment: Qt.AlignRight

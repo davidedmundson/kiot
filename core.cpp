@@ -142,7 +142,8 @@ bool HaControl::ensureConfigDefaults(KSharedConfigPtr config)
         {"password", ""}, // MQTT password
         {"useSSL", false}, // SSL/TLS
         {"systray", true}, // System tray icon
-        {"autostart", true} // Autostart
+        {"autostart", true}, // Autostart
+        {"discoveryPrefix", "homeassistant"}, // MQTT discovery prefix
     };
 
     // Sjekk om general gruppen eksisterer og har alle nødvendige nøkler
