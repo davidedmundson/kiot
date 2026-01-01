@@ -37,8 +37,7 @@ HaControl::HaControl()
     auto config = KSharedConfig::openConfig();
     // Checks that config is valid and opens the kcm module if its not
     if (!ensureConfigDefaults(config)) {
-        KNotification::event(KNotification::Notification,
-                             QString("Invalid Config"),
+        KNotification::event(KNotification::Notification , QString("Invalid Config"),
                              QString("Config file is not valid, please fill out everything in the general tab"));
         QProcess::startDetached("kcmshell6", {"kcm_kiot"});
         
@@ -110,6 +109,10 @@ HaControl::~HaControl()
 }
 // To make sure the user based service is installed if enabled and removed if not
 void HaControl::validateStartup() {
+    if(!m_serviceManager){
+        qCWarning(core) << "Service manager not initialized";
+        return;
+    }
     // Les config
     auto config = KSharedConfig::openConfig("kiotrc", KSharedConfig::CascadeConfig);
     KConfigGroup generalGroup(config, "general");
