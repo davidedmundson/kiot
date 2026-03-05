@@ -8,45 +8,10 @@
 #include <Solid/Device>
 #include <Solid/DeviceInterface>
 #include <Solid/DeviceNotifier>
+
 #include <QLoggingCategory>
 Q_DECLARE_LOGGING_CATEGORY(batter)
 Q_LOGGING_CATEGORY(batter, "integration.Battery")
-
-
-
-
-static QString sanitizeForMqttTopic(const QString &input)
-{
-    QString result = input;
-    // Replace spaces with underscores
-    result = result.replace(' ', '_');
-    // Remove or replace other problematic characters
-    for (int i = 0; i < result.length(); ++i) {
-        QChar c = result.at(i);
-        if (!c.isLetterOrNumber() && c != '_' && c != '-') {
-            result[i] = '_';
-        }
-    }
-    // Remove consecutive underscores
-    while (result.contains("__")) {
-        result = result.replace("__", "_");
-    }
-    // Trim underscores from start and end
-    while (result.startsWith('_')) {
-        result = result.mid(1);
-    }
-    while (result.endsWith('_')) {
-        result.chop(1);
-    }    
-    // Ensure it's not empty
-    // Should probably add something extra at det end to make sure we dont use same topic multiple times
-    if (result.isEmpty()) {
-        result = "battery";
-    }    
-    // Convert to lowercase for consistency (MQTT topics are case-sensitive but lowercase is conventional)
-    result = result.toLower();
-    return result;
-}
 
 
 // Helper functions to map the types to human strings
@@ -204,7 +169,7 @@ void BatteryWatcher::registerBattery(const QString &udi)
     Sensor *sensor = new Sensor(this);
     sensor->setDiscoveryConfig("device_class", "battery");
     sensor->setDiscoveryConfig("unit_of_measurement", "%");
-    sensor->setId("battery_" + sanitizeForMqttTopic(name));
+    sensor->setId("battery_" + name.replace(' ', '_'));
     sensor->setName(name);
 
     // Set initial state and attributes

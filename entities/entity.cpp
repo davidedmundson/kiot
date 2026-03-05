@@ -28,6 +28,40 @@
 Q_DECLARE_LOGGING_CATEGORY(base)
 Q_LOGGING_CATEGORY(base, "entities.Entity")
 
+
+static QString sanitizeForMqttTopic(const QString &input)
+{
+    QString result = input;
+    // Replace spaces with underscores
+    result = result.replace(' ', '_');
+    // Remove or replace other problematic characters
+    for (int i = 0; i < result.length(); ++i) {
+        QChar c = result.at(i);
+        if (!c.isLetterOrNumber() && c != '_' && c != '-') {
+            result[i] = '_';
+        }
+    }
+    // Remove consecutive underscores
+    while (result.contains("__")) {
+        result = result.replace("__", "_");
+    }
+    // Trim underscores from start and end
+    while (result.startsWith('_')) {
+        result = result.mid(1);
+    }
+    while (result.endsWith('_')) {
+        result.chop(1);
+    }    
+    // Ensure it's not empty
+    // Should probably add something extra at det end to make sure we dont use same topic multiple times
+    if (result.isEmpty()) {
+        result = "empty_entity_id_detected_integration_error";
+    }    
+    // Convert to lowercase for consistency (MQTT topics are case-sensitive but lowercase is conventional)
+    result = result.toLower();
+    return result;
+}
+
 Entity::Entity(QObject *parent):
     QObject(parent)
 {
@@ -89,7 +123,7 @@ QString Entity::id() const
         qCWarning(base) << "Entity ID not set for entity" << name()
                    << " remember to use setId(IDstring)";
     }
-    return m_id;
+    return sanitizeForMqttTopic(m_id);
 }
 
 void Entity::setId(const QString &newId)
