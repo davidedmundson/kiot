@@ -40,7 +40,7 @@ public:
         connect(m_timer, &QTimer::timeout, this, &CustomSensor::poll);
         m_timer->start();
 
-        // Publish initial value, don't for the first interval
+        // Publish initial value, don't wait for the first interval
         poll();
     }
 
@@ -95,13 +95,13 @@ void registerCustomSensors()
     for (const QString &sensorId : sensorIds) {
         const KConfigGroup group = sensorConfigToplevel.group(sensorId);
 
-        const QString command = group.readEntry("Command");
+        const QString command = group.readEntry("command");
         if (command.isEmpty()) {
             qCWarning(customSensors) << "Skipping custom sensor" << sensorId << "- missing command";
             continue;
         }
 
-        const QString name = group.readEntry("Name", sensorId);
+        const QString name = group.readEntry("name", sensorId);
         const int intervalSec = group.readEntry("every_sec", DefaultIntervalSec);
 
         auto customSensor = new CustomSensor(sensorId, name, command, intervalSec, qApp);

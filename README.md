@@ -146,8 +146,8 @@ state_class=measurement
 unit_of_measurement=W
 
 [CustomSensors][cpu_power]
-Name=Cpu power draw
-Command=bash -c 'F=/sys/class/powercap/intel-rapl/intel-rapl:0/energy_uj; E1=$(cat $F); sleep 1; E2=$(cat $F); awk "BEGIN {print ($E2 - $E1) / 1000000}"'
+name=Cpu power draw
+command=bash -c 'F=/sys/class/powercap/intel-rapl/intel-rapl:0/energy_uj; E1=$(cat $F); sleep 1; E2=$(cat $F); awk "BEGIN {print ($E2 - $E1) / 1000000}"'
 device_class=power
 every_sec=10
 state_class=measurement
