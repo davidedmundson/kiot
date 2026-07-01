@@ -134,6 +134,26 @@ Name=Do a thing
 # Appears as a trigger in Home Assistant for keyboard-driven automations
 ```
 
+#### Custom sensors configuration
+
+```ini
+[CustomSensors][gpu_power]
+name=Gpu power draw
+command=nvidia-smi -q -d POWER | grep "Instantaneous Power Draw" -m 1 | cut -d':' -f2 | cut -d' ' -f2
+device_class=power
+every_sec=10
+state_class=measurement
+unit_of_measurement=W
+
+[CustomSensors][cpu_power]
+name=Cpu power draw
+command=bash -c 'F=/sys/class/powercap/intel-rapl/intel-rapl:0/energy_uj; E1=$(cat $F); sleep 1; E2=$(cat $F); awk "BEGIN {print ($E2 - $E1) / 1000000}"'
+device_class=power
+every_sec=10
+state_class=measurement
+unit_of_measurement=W
+```
+
 #### Integration Management
 ```ini
 [Integrations]

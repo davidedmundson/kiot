@@ -8,6 +8,7 @@ set(KIOT_INTEGRATIONS_SRC
     active.cpp
     notifications.cpp
     scripts.cpp
+    customsensors.cpp
     lockedstate.cpp
     shortcuts.cpp
     suspend.cpp
