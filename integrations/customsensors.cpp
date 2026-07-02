@@ -10,24 +10,83 @@
 #include <KSharedConfig>
 
 #include <QCoreApplication>
+#include <QHash>
 #include <QString>
+#include <QStringList>
+#include <QStringView>
 #include <QTimer>
 
 #include <QLoggingCategory>
 Q_DECLARE_LOGGING_CATEGORY(customSensors)
 Q_LOGGING_CATEGORY(customSensors, "integration.CustomSensors")
 
-namespace
+constexpr qint64 MinimumIntervalMs = 1000;
+constexpr qint64 DefaultIntervalMs = 10 * 1000;
+
+static const QHash<QString, double> unitToMs = {
+    {QStringLiteral("s"), 1000.0},
+    {QStringLiteral("sec"), 1000.0},
+    {QStringLiteral("second"), 1000.0},
+    {QStringLiteral("seconds"), 1000.0},
+    {QStringLiteral("m"), 60000.0},
+    {QStringLiteral("min"), 60000.0},
+    {QStringLiteral("minute"), 60000.0},
+    {QStringLiteral("minutes"), 60000.0},
+    {QStringLiteral("h"), 3600000.0},
+    {QStringLiteral("hr"), 3600000.0},
+    {QStringLiteral("hour"), 3600000.0},
+    {QStringLiteral("hours"), 3600000.0},
+    {QStringLiteral("d"), 86400000.0},
+    {QStringLiteral("day"), 86400000.0},
+    {QStringLiteral("days"), 86400000.0},
+};
+
+// Parse a systemd.time style time span ("1m 30s", "2h").
+// NOTE: Some units are deliberately not supported (microseconds, milliseconds, weeks, months, years).
+// NOTE: Only whitespace-delimited style is supported (e.g. "1m 30s", not "1m30s").
+// A bare number without a unit is interpreted as seconds
+qint64 parseTimeSpanToMs(const QString &text)
 {
-constexpr int MinimumIntervalSec = 1;
-constexpr int DefaultIntervalSec = 10;
+    const QString trimmed = text.trimmed();
+    if (trimmed.isEmpty()) {
+        return -1;
+    }
+
+    bool parsedAsBareNumber = false;
+    const double bareSeconds = trimmed.toDouble(&parsedAsBareNumber);
+    if (parsedAsBareNumber) {
+        return (qint64)(bareSeconds * 1000.0);
+    }
+
+    // Each whitespace-separated token is a number directly followed by a unit,
+    // e.g. "1m 30s".
+    double totalMs = 0.0;
+    for (const QString &token : trimmed.simplified().split(u' ', Qt::SkipEmptyParts)) {
+        const auto unitStart = std::find_if(token.cbegin(), token.cend(), [](QChar c) {
+            return !c.isDigit() && c != u'.';
+        });
+        const auto splitAt = unitStart - token.cbegin();
+        if (splitAt == 0 || splitAt == token.size()) {
+            return -1; // Missing number or missing unit
+        }
+
+        bool numberParsedSuccessfully = false;
+        const double value = QStringView(token).first(splitAt).toDouble(&numberParsedSuccessfully);
+        const auto unitMsMultiplier = unitToMs.constFind(token.sliced(splitAt));
+        if (!numberParsedSuccessfully || unitMsMultiplier == unitToMs.constEnd()) {
+            return -1; // Invalid number or unknown unit
+        }
+        totalMs += value * unitMsMultiplier.value();
+    }
+
+    return (qint64)totalMs;
 }
 
 class CustomSensor : public QObject
 {
     Q_OBJECT
 public:
-    CustomSensor(const QString &id, const QString &name, const QString &command, int intervalSec, QObject *parent)
+    CustomSensor(const QString &id, const QString &name, const QString &command, qint64 intervalMs, QObject *parent)
         : QObject(parent)
         , m_command(command)
     {
@@ -36,7 +95,7 @@ public:
         m_sensor->setName(name);
 
         m_timer = new QTimer(this);
-        m_timer->setInterval(std::max(intervalSec, MinimumIntervalSec) * 1000);
+        m_timer->setInterval(std::max(intervalMs, MinimumIntervalMs));
         connect(m_timer, &QTimer::timeout, this, &CustomSensor::poll);
         m_timer->start();
 
@@ -97,14 +156,24 @@ void registerCustomSensors()
 
         const QString command = group.readEntry("command");
         if (command.isEmpty()) {
-            qCWarning(customSensors) << "Skipping custom sensor" << sensorId << "- missing command";
+            qCWarning(customSensors) << "Skipping custom sensor '" << sensorId << "'. Missing command";
             continue;
         }
 
         const QString name = group.readEntry("name", sensorId);
-        const int intervalSec = group.readEntry("every_sec", DefaultIntervalSec);
 
-        auto customSensor = new CustomSensor(sensorId, name, command, intervalSec, qApp);
+        qint64 intervalMs = DefaultIntervalMs;
+        const QString intervalStr = group.readEntry("interval");
+        if (!intervalStr.isEmpty()) {
+            const qint64 parsedMs = parseTimeSpanToMs(intervalStr);
+            if (parsedMs > 0) {
+                intervalMs = parsedMs;
+            } else {
+                qCWarning(customSensors) << "Failed to parse interval '" << intervalStr << "' for custom sensor '" << sensorId << "'. Using default";
+            }
+        }
+
+        auto customSensor = new CustomSensor(sensorId, name, command, intervalMs, qApp);
         Sensor *sensor = customSensor->sensor();
 
         const QString deviceClass = group.readEntry("device_class");
