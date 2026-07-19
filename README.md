@@ -106,7 +106,7 @@ host=192.168.1.100
 port=1883
 user=mqtt_user
 password=secure_password
-useSSL=false
+tls=false
 ```
 
 #### Scripts Configuration
