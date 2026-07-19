@@ -30,7 +30,7 @@ KCM.SimpleKCM {
 
         QQC2.TextField {
             Kirigami.FormData.label: i18n("Password:")
-            echoMode: QQC2.TextInput.Password
+            echoMode: TextInput.Password
             text: kcm.settings.password
             onTextChanged: kcm.settings.password = text
         }
