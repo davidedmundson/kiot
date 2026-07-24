@@ -28,6 +28,7 @@
 Q_DECLARE_LOGGING_CATEGORY(base)
 Q_LOGGING_CATEGORY(base, "entities.Entity")
 
+static QString s_topicPrefix = "kiot";
 
 static QString sanitizeForMqttTopic(const QString &input)
 {
@@ -75,7 +76,8 @@ QString Entity::hostname() const
 
 QString Entity::baseTopic() const
 {
-    return hostname() + "/" + id();
+    return s_topicPrefix + "/" + hostname() + "/" + id();
+
 }
 
 QString Entity::haType() const
@@ -148,7 +150,7 @@ void Entity::sendRegistration()
     config["name"] = name();
     
     if (id() != "connected") { //special case
-        config["availability_topic"] = hostname() + "/connected";
+        config["availability_topic"] = s_topicPrefix + "/" + hostname() + "/connected";
         config["payload_available"] = "on";
         config["payload_not_available"] = "off";
         const QString icon = haIcon();
@@ -164,7 +166,7 @@ void Entity::sendRegistration()
     config["unique_id"] = "linux_ha_control_"+ hostname() + "_" + id();
     HaControl::mqttClient()->publish(s_discoveryPrefix + "/" + haType() + "/" + hostname() + "/" + id() + "/config", QJsonDocument(QJsonObject::fromVariantMap(config)).toJson(QJsonDocument::Compact), 0, true);
     if (id() != "connected") { //special case
-        HaControl::mqttClient()->publish(hostname() + "/connected", "on", 0, false);
+        HaControl::mqttClient()->publish(s_topicPrefix + "/" + hostname() + "/connected", "on", 0, false);
     }
 }
 
