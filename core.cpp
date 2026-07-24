@@ -83,7 +83,7 @@ void HaControl::doConnect()
 {
     auto config = KSharedConfig::openConfig();
     auto group = config->group("general");
-    if (group.readEntry("useSSL", false)) {
+    if (group.readEntry("tls", false)) {
         QSslConfiguration sslConfig = QSslConfiguration::defaultConfiguration();
         m_client->connectToHostEncrypted(sslConfig);
     } else {

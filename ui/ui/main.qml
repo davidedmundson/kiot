@@ -34,6 +34,12 @@ KCM.SimpleKCM {
             text: kcm.settings.password
             onTextChanged: kcm.settings.password = text
         }
+
+        QQC2.CheckBox {
+            Kirigami.FormData.label: i18n("Use TLS:")
+            checked: kcm.settings.tls
+            onToggled: kcm.settings.tls = checked
+        }
     }
 }
 

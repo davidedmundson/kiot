@@ -18,6 +18,10 @@
             <label>MQTT password</label>
             <default></default>
         </entry>
+        <entry name="tls" type="Bool">
+            <label>Use TLS</label>
+            <default>false</default>
+        </entry>
     </group>
 </kcfg>
 
