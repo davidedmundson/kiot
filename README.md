@@ -141,7 +141,11 @@ Name=Do a thing
 name=Gpu power draw
 command=nvidia-smi -q -d POWER | grep "Instantaneous Power Draw" -m 1 | cut -d':' -f2 | cut -d' ' -f2
 device_class=power
-every_sec=10
+# Interval syntax is like the systemd time span syntax (man systemd.time).
+# NOTE: Some units are deliberately not supported (microseconds, milliseconds, weeks, months, years).
+# NOTE: Only whitespace-delimited style is supported (e.g. "1m 30s", not "1m30s").
+# Examples: "10s", "1m 30s", "2h". A bare number is in seconds. Defaults is 10s.
+interval=10s
 state_class=measurement
 unit_of_measurement=W
 
@@ -149,7 +153,7 @@ unit_of_measurement=W
 name=Cpu power draw
 command=bash -c 'F=/sys/class/powercap/intel-rapl/intel-rapl:0/energy_uj; E1=$(cat $F); sleep 1; E2=$(cat $F); awk "BEGIN {print ($E2 - $E1) / 1000000}"'
 device_class=power
-every_sec=10
+interval=1m 30s
 state_class=measurement
 unit_of_measurement=W
 ```
