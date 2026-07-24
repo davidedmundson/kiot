@@ -13,6 +13,10 @@ public:
     int value();
     // Optional customization for integrations before init()
     void setRange(int min, int max, int step = 1, const QString &unit = "%");
+    //returns the max value set
+    int max();
+    //returns the min value set
+    int min();
 
 protected:
     void init() override;

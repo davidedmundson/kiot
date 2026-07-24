@@ -158,7 +158,17 @@ public:
      * multiple systems on the same network.
      */
     QString hostname() const;
+
     
+    /**
+     * @brief Registers this entity with Home Assistant via MQTT at runtime
+     */
+    void runtimeRegistration();
+
+    /**
+     * @brief Unregisters this entity from Home Assistant
+     */
+    void unRegister();
     /**
      * @brief Constructs the base MQTT topic for this entity
      * @return QString Full MQTT topic path

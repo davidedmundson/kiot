@@ -2,7 +2,8 @@
 // SPDX-License-Identifier: LGPL-2.1-or-later
 
 #include "core.h"
-#include "entities/entities.h"
+#include "entities/number.h"
+#include "entities/select.h"
 
 #include <PulseAudioQt/Context>
 #include <PulseAudioQt/Server>
@@ -10,10 +11,12 @@
 #include <PulseAudioQt/Source>
 #include <PulseAudioQt/VolumeObject>
 
+#include <QFileSystemWatcher>
+#include <QFile>
+#include <QDir>
 #include <QLoggingCategory>
 Q_DECLARE_LOGGING_CATEGORY(audio)
-Q_LOGGING_CATEGORY(audio, "integration.Audio")
-
+Q_LOGGING_CATEGORY(audio, "integrations.Audio")
 
 class Audio : public QObject
 {
@@ -32,11 +35,15 @@ private slots:
 
     void setSinkVolume(int v);
     void setSourceVolume(int v);
+    
 
 private:
+    bool checkIfRaiseMaxVolumeEnabled();
+    bool raiseMaximumVolumeEnabled = false;
     int paToPercent(qint64 v) const;
     qint64 percentToPa(int percent) const;
 
+    QFileSystemWatcher *watcher = nullptr;
     Number *m_sinkVolume = nullptr;
     Number *m_sourceVolume = nullptr;
     Select *m_sinkSelector = nullptr;
@@ -55,10 +62,30 @@ Audio::Audio(QObject *parent)
     m_sinkVolume->setId("output_volume");
     m_sinkVolume->setName("Output Volume");
     m_sinkVolume->setDiscoveryConfig("icon", "mdi:knob");
-    m_sinkVolume->setRange(0, 100, 1, "%");
-
+    raiseMaximumVolumeEnabled = checkIfRaiseMaxVolumeEnabled();
+    if (raiseMaximumVolumeEnabled)
+        m_sinkVolume->setRange(0, 150, 1, "%");
+    else
+        m_sinkVolume->setRange(0, 100, 1, "%");
+    
     connect(m_sinkVolume, &Number::valueChangeRequested, this, &Audio::setSinkVolume);
 
+    QString configPath = QDir::homePath() + "/.config/plasmaparc";
+    if (QFile::exists(configPath))
+    {
+        watcher = new QFileSystemWatcher(this);
+        watcher->addPath(configPath);
+        connect(watcher, &QFileSystemWatcher::fileChanged, this, [this,configPath](const QString &){
+            if (!this->watcher->files().contains(configPath)) {
+                this->watcher->addPath(configPath);
+            }
+            if (QFile::exists(configPath)) {
+                raiseMaximumVolumeEnabled = checkIfRaiseMaxVolumeEnabled();
+                m_sinkVolume->setRange(0, raiseMaximumVolumeEnabled ? 150 : 100, 1, "%");
+                m_sinkVolume->runtimeRegistration();
+            }
+        });
+    }
     m_sourceVolume = new Number(this);
     m_sourceVolume->setId("input_volume");
     m_sourceVolume->setName("Input Volume");
@@ -196,7 +223,22 @@ void Audio::onSinkVolumeChanged()
     int percent = paToPercent(m_sink->volume());
     if (percent == m_sinkVolume->value())
         return;
-
+    int currentMax = m_sinkVolume->max();
+    if(percent > 100 && currentMax == 100)
+    {
+        m_sinkVolume->setRange(0, 150, 1, "%");
+        m_sinkVolume->runtimeRegistration();
+    }
+    else if (percent <= 100 && currentMax == 150 && !raiseMaximumVolumeEnabled)
+    {
+        m_sinkVolume->setRange(0, 100, 1, "%");
+        m_sinkVolume->runtimeRegistration();       
+    }
+    if(percent > 150)
+    {
+        qCCritical(audio) << "Volume above 150% is not supported by kiot, you are trying to use" << percent << "%, if you want to blow the speaker, please change the source yourself";
+        return;
+    }
     m_sinkVolume->setValue(percent);
     qCDebug(audio) << "Updated volume from system:" << percent << "%";
 }
@@ -236,7 +278,26 @@ void Audio::setSourceVolume(int v)
     m_source->setVolume(paVol);
     qCDebug(audio) << "Set volume to" << v << "%";
 }
+bool Audio::checkIfRaiseMaxVolumeEnabled()
+{
+    // Universal path til alle brukere
+    QString path = QStringLiteral("%1/.config/plasmaparc").arg(qgetenv("HOME"));
+    QFile file(path);
 
+    if (!file.exists() || !file.open(QIODevice::ReadOnly | QIODevice::Text)) {
+        return false; // fil finnes ikke eller kan ikke åpnes
+    }
+
+    QTextStream in(&file);
+    while (!in.atEnd()) {
+        QString line = in.readLine().trimmed();
+        if (line == QLatin1String("RaiseMaximumVolume=true")) {
+            return true;
+        }
+    }
+
+    return false;
+}
 int Audio::paToPercent(qint64 v) const
 {
     double p = (double)v / PulseAudioQt::normalVolume() * 100.0;

@@ -58,6 +58,16 @@ void Number::setValue(int value)
     }
 }
 
+int Number::min()
+{
+    return  m_min;
+}
+
+int Number::max()
+{
+    return  m_max;
+}
+
 int Number::value()
 {
     return m_value;
