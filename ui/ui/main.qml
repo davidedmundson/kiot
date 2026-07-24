@@ -17,9 +17,9 @@ KCM.SimpleKCM {
 
         QQC2.TextField {
             Kirigami.FormData.label: i18n("Port:")
-            inputMask: "99999999"
+            validator: IntValidator { bottom: 1; top: 65535 }
             text: kcm.settings.port
-            onTextChanged: kcm.settings.port = value
+            onTextChanged: kcm.settings.port = text
         }
 
         QQC2.TextField {
@@ -30,7 +30,7 @@ KCM.SimpleKCM {
 
         QQC2.TextField {
             Kirigami.FormData.label: i18n("Password:")
-            echoMode: QQC2.TextInput.Password
+            echoMode: TextInput.Password
             text: kcm.settings.password
             onTextChanged: kcm.settings.password = text
         }
