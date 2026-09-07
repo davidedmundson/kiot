@@ -212,6 +212,7 @@ Shortcuts=true
 | Scripts | Button | Execute custom scripts |
 | Bluetooth | Switch | Bluetooth adapter control and device connection management |
 | Applauncher| Select | Launch applications from HA, scans for installed apps |
+| CustomSensors | Sensor | Custom sensor integration with output from terminal command|
 
 ## Flatpak Build
 
