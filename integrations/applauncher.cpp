@@ -3,7 +3,6 @@
 
 #include "core.h"
 #include "entities/select.h"
-#include "platformhelper.h"
 
 #include <KService>
 #include <KServiceGroup>
@@ -16,17 +15,19 @@
 
 #include <QVariantMap>
 #include <QTimer>
+#include <KConfigGroup>
+#include <KSharedConfig>
 
 #include <QCollator>
 #include <QLocale>
-#include <QSettings>
+
 #include <QSet>
 #include <QDateTime>
 #include <QRegularExpression>
 
 #include <QLoggingCategory>
-Q_DECLARE_LOGGING_CATEGORY(aw)
-Q_LOGGING_CATEGORY(aw, "integration.AppLauncher")
+Q_DECLARE_LOGGING_CATEGORY(appla_logger)
+Q_LOGGING_CATEGORY(appla_logger, "integration.AppLauncher")
 
 namespace
 {
@@ -186,34 +187,32 @@ private:
             }
         }
 
-        // 2. Les og oppdater INI-filen
-        QString configFile = PlatformHelper::configFilePath();
-        QSettings settings(configFile, QSettings::IniFormat);
-        settings.beginGroup("AppLauncher");
-
+        auto config = KSharedConfig::openConfig();
+        KConfigGroup group(config, "AppLauncher");
+     
         bool configChanged = false;
         QStringList allowedCategories;
 
         // Legg til nye oppdagede kategorier uten å overskrive eksisterende valg (default = true)
         for (const QString &cat : systemCategories) {
             QString configKey = sanitizeCategoryName(cat);
-            if (!settings.contains(configKey)) {
-                settings.setValue(configKey, true);
+            if (!group.hasKey(configKey)) {
+                group.writeEntry(configKey, true);
                 configChanged = true;
                 qCDebug(appla_logger) << "Added new application category to config:" << configKey << "= true";
             }
 
             // Sjekk om kategorien er aktivert
-            if (settings.value(configKey, true).toBool()) {
+            if (group.readEntry(configKey, true)) {
                 allowedCategories.append(cat);
             }
         }
 
         if (configChanged) {
-            settings.sync();
+            group.sync(); 
             qCInfo(appla_logger) << "AppLauncher config updated with system categories.";
         }
-        settings.endGroup();
+        
 
         return allowedCategories;
     }

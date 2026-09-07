@@ -44,6 +44,8 @@ find_package(KF6 ${KF6_MIN_VERSION} REQUIRED COMPONENTS
     I18n
     Solid
     BluezQt
+    Service
+    KIO
 )
 
 find_package(KF6 "1.7.0" REQUIRED COMPONENTS
