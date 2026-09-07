@@ -211,6 +211,7 @@ Shortcuts=true
 | Gamepad Connected | Binary Sensor | Gamepad/joystick connection detection |
 | Scripts | Button | Execute custom scripts |
 | Bluetooth | Switch | Bluetooth adapter control and device connection management |
+| Applauncher| Select | Launch applications from HA, scans for installed apps |
 
 ## Flatpak Build
 
