@@ -109,11 +109,11 @@ private slots:
 
 private:
     struct AppData {
-        QString name;            // Lokalisert visningsnavn
-        QString desktopFileName; // Skrivebordsfil-ID uten .desktop
-        QString execCommand;     // Exec-kommando
-        QString iconName;        // Freedesktop ikon-navn
-        QStringList categories;  // Applikasjonskategorier
+        QString name;           
+        QString desktopFileName;
+        QString execCommand;    
+        QString iconName;        
+        QStringList categories;  
 
         QVariantMap toVariantMap() const {
             QVariantMap map;
@@ -173,7 +173,7 @@ private:
      */
     QStringList ensureConfigAndGetAllowedCategories()
     {
-        // 1. Samle alle unike kategorier fra tilgjengelige KServices
+        
         QSet<QString> systemCategories;
         const KService::List services = KService::allServices();
         for (const KService::Ptr &service : services) {
@@ -193,7 +193,7 @@ private:
         bool configChanged = false;
         QStringList allowedCategories;
 
-        // Legg til nye oppdagede kategorier uten å overskrive eksisterende valg (default = true)
+        
         for (const QString &cat : systemCategories) {
             QString configKey = sanitizeCategoryName(cat);
             if (!group.hasKey(configKey)) {
@@ -202,7 +202,7 @@ private:
                 qCDebug(appla_logger) << "Added new application category to config:" << configKey << "= true";
             }
 
-            // Sjekk om kategorien er aktivert
+            
             if (group.readEntry(configKey, true)) {
                 allowedCategories.append(cat);
             }
