@@ -86,6 +86,8 @@ if [ "$PM" = "apt" ]; then
         libkf6solid-dev
         libkf6bluezqt-dev
         libkf6pulseaudioqt-dev
+        libkf6service-dev
+        libkf6kio-dev
     )
     
     system_packages=(
@@ -94,7 +96,7 @@ if [ "$PM" = "apt" ]; then
     )
     
 elif [ "$PM" = "pacman" ]; then
-    # Arch/Manjaro package names
+    # Arch/Manjaro/CachyOS package names
     qt6_packages=(
         qt6-base
         qt6-mqtt
@@ -113,6 +115,8 @@ elif [ "$PM" = "pacman" ]; then
         solid
         bluez-qt
         pulseaudio-qt
+        kservice
+        kio
     )
     
     system_packages=(
