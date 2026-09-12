@@ -191,7 +191,7 @@ void Entity::unRegister()
     }
     
     qCDebug(base) << "Unregistering entity:" << id() << "(" << name() << ")";
-    HaControl::mqttClient()->publish(discoveryPrefix() + "/" + haType() + "/" + hostname() + "/" + id() + "/config",
+    HaControl::mqttClient()->publish(s_discoveryPrefix + "/" + haType() + "/" + hostname() + "/" + id() + "/config",
     QByteArray(), 0,true);
 }
 
