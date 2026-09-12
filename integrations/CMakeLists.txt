@@ -56,6 +56,23 @@ target_link_libraries(KIOTIntegrations
 )
 
 
+# Auto generates dbus interfaces on build
+set_source_files_properties(
+   ../dbus/org.freedesktop.DBus.Properties.xml
+   ../dbus/org.mpris.MediaPlayer2.Player.xml
+   ../dbus/org.mpris.MediaPlayer2.xml
+   ../dbus/org.freedesktop.UPower.Device.xml
+   ../dbus/org.freedesktop.UPower.xml  
+   PROPERTIES
+   NO_NAMESPACE ON)
+   
+qt_add_dbus_interface(KIOT_INTEGRATIONS_SRC ../dbus/org.freedesktop.DBus.Properties.xml dbusproperties)
+qt_add_dbus_interface(KIOT_INTEGRATIONS_SRC ../dbus/org.mpris.MediaPlayer2.Player.xml mprisplayer)
+qt_add_dbus_interface(KIOT_INTEGRATIONS_SRC ../dbus/org.mpris.MediaPlayer2.xml mprisroot)
+qt_add_dbus_interface(KIOT_INTEGRATIONS_SRC ../dbus/org.freedesktop.UPower.Device.xml upowerdevice)
+qt_add_dbus_interface(KIOT_INTEGRATIONS_SRC ../dbus/org.freedesktop.UPower.xml upower)
+
+
 # Link libudev if found
 if(LIBUDEV_FOUND)
     target_link_libraries(KIOTIntegrations ${LIBUDEV_LIBRARIES})
