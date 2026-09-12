@@ -1,0 +1,156 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<component type="desktop-application">
+  <id>org.davidedmundson.kiot</id>
+  
+  <name>Kiot</name>
+  <summary>KDE Internet of Things: desktop integration for Home Automation</summary>
+  
+  <metadata_license>FSFAP</metadata_license>
+  <project_license>LGPL-2.1-or-later</project_license>
+  
+  <description>
+    <p>
+      Kiot is a background daemon that bridges your KDE desktop session with home automation platforms like Home Assistant. 
+      It exposes device sensors, system information, and controls, allowing your home automation system to interact seamlessly 
+      with your local environment.
+    </p>
+    <p>
+      With Kiot, you can:
+    </p>
+    <ul>
+      <li>Monitor system status </li>
+      <li>Control media players via MPRIS</li>
+      <li>Manage Docker containers</li>
+      <li>Control systemd services</li>
+      <li>Launch games from Steam/Heroic/Lutris</li>
+      <li>Send notifications to your desktop</li>
+      <li>Track active window and user activity</li>
+      <li>And so much more</li>
+    </ul>
+    <p>
+      All data is exposed via MQTT to Home Assistant, where you can create powerful automations that integrate your desktop with your smart home.
+    </p>
+  </description>
+  
+  <url type="homepage">https://github.com/davidedmundson/kiot</url>
+  <url type="bugtracker">https://github.com/davidedmundson/kiot/issues</url>
+  <url type="help">https://github.com/davidedmundson/kiot/blob/master/README.md</url>
+  <url type="donation">https://kde.org/community/donations</url>
+  <url type="translate">https://github.com/davidedmundson/kiot</url>
+  <url type="vcs-browser">https://github.com/davidedmundson/kiot</url>
+  
+  <developer>
+    <name>David Edmundson &amp; Odd Østlie</name>
+  </developer>
+  <update_contact>davidedmundson@kde.org</update_contact>
+
+  <screenshots>
+    <screenshot type="default">
+      <caption>System Settings Integration</caption>
+      <image>https://github.com/davidedmundson/kiot/blob/b870b1f23a9c03d8a9e27349bafc114a375d8a4e/flatpak/images/settings.png?raw=true</image>
+    </screenshot>
+    <screenshot type="other">
+      <caption>Systray icon and menu</caption>
+      <image>https://github.com/davidedmundson/kiot/blob/b870b1f23a9c03d8a9e27349bafc114a375d8a4e/flatpak/images/systray.png?raw=true</image>
+    </screenshot>
+    <screenshot type="other">
+      <caption>Device Sensors Overview</caption>
+      <image>https://github.com/davidedmundson/kiot/blob/b870b1f23a9c03d8a9e27349bafc114a375d8a4e/flatpak/images/sensors.png?raw=true</image>
+    </screenshot>
+    <screenshot type="other">
+      <caption>Device Controls Panel</caption>
+      <image>https://github.com/davidedmundson/kiot/blob/b870b1f23a9c03d8a9e27349bafc114a375d8a4e/flatpak/images/controls.png?raw=true</image>
+    </screenshot>
+    <screenshot type="other">
+      <caption>Media Player Integration</caption>
+      <image>https://github.com/davidedmundson/kiot/blob/b870b1f23a9c03d8a9e27349bafc114a375d8a4e/flatpak/images/media_player.png?raw=true</image>
+    </screenshot>
+  </screenshots>
+
+
+  <content_rating type="oars-1.1">
+    <content_attribute id="violence-cartoon">none</content_attribute>
+    <content_attribute id="violence-fantasy">none</content_attribute>
+    <content_attribute id="violence-realistic">none</content_attribute>
+    <content_attribute id="violence-bloodshed">none</content_attribute>
+    <content_attribute id="violence-sexual">none</content_attribute>
+    <content_attribute id="violence-desecration">none</content_attribute>
+    <content_attribute id="violence-slavery">none</content_attribute>
+    <content_attribute id="violence-worship">none</content_attribute>
+    <content_attribute id="drugs-alcohol">none</content_attribute>
+    <content_attribute id="drugs-narcotics">none</content_attribute>
+    <content_attribute id="drugs-tobacco">none</content_attribute>
+    <content_attribute id="sex-nudity">none</content_attribute>
+    <content_attribute id="sex-themes">none</content_attribute>
+    <content_attribute id="sex-homosexuality">none</content_attribute>
+    <content_attribute id="sex-prostitution">none</content_attribute>
+    <content_attribute id="sex-adultery">none</content_attribute>
+    <content_attribute id="sex-appearance">none</content_attribute>
+    <content_attribute id="language-profanity">none</content_attribute>
+    <content_attribute id="language-humor">none</content_attribute>
+    <content_attribute id="language-discrimination">none</content_attribute>
+    <content_attribute id="social-chat">none</content_attribute>
+    <content_attribute id="social-info">none</content_attribute>
+    <content_attribute id="social-audio">none</content_attribute>
+    <content_attribute id="social-location">none</content_attribute>
+    <content_attribute id="social-contacts">none</content_attribute>
+    <content_attribute id="money-purchasing">none</content_attribute>
+    <content_attribute id="money-gambling">none</content_attribute>
+  </content_rating>
+  
+  <releases>
+    <release version="0.0.1" date="2024-12-7">
+      <description>
+        <p>Initial experimental release with Flatpak support</p>
+        <ul>
+          <li>MQTT integration with Home Assistant</li>
+          <li>System monitoring (battery, activity, windows)</li>
+          <li>Media player control via MPRIS</li>
+          <li>Docker container management</li>
+          <li>Systemd service control</li>
+          <li>Game launcher integration</li>
+          <li>Flatpak auto-updater</li>
+        </ul>
+      </description>
+    </release>
+  </releases>
+  
+  <categories>
+    <category>System</category>
+    <category>KDE</category>
+    <category>Utility</category>
+  </categories>
+  
+  <keywords>
+    <keyword>iot</keyword>
+    <keyword>home automation</keyword>
+    <keyword>kde</keyword>
+    <keyword>sensors</keyword>
+    <keyword>mqtt</keyword>
+    <keyword>media player</keyword>
+    <keyword>daemon</keyword>
+    <keyword>desktop integration</keyword>
+  </keywords>
+  
+  <icon type="local">org.davidedmundson.kiot</icon>
+  
+  <kudos>
+    <kudo>ModernToolkit</kudo>
+    <kudo>Qt</kudo>
+    <kudo>KDE</kudo>
+    <kudo>NetworkTransparent</kudo>
+  </kudos>
+  
+  <launchable type="desktop-id">org.davidedmundson.kiot.desktop</launchable>
+
+  <provides>
+    <binary>kiot</binary>
+  </provides>
+
+
+  <custom>
+    <value key="Flathub::automerge">true</value>
+    <value key="Flathub::runtime-version">6.10</value>
+    <value key="Flathub::suggested-version">0.0.1</value>
+  </custom>
+</component>

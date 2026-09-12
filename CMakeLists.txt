@@ -1,6 +1,37 @@
 cmake_minimum_required(VERSION 3.16)
 
-project(kiot)
+# ------------------------------------------------------------------------------
+# PROJECT INFO, sets the variables used in src to identify everything
+# ------------------------------------------------------------------------------
+project(kiot VERSION 0.0.1 DESCRIPTION "KDE Internet of Things desktop integration for Home Automation" HOMEPAGE_URL "https://github.com/davidedmundson/kiot" LANGUAGES CXX )
+
+# ------------------------------------------------------------------------------
+# PROSJEKT DEVELOPERS Shown under device info in HA with version and more
+# ------------------------------------------------------------------------------
+set(PROJECT_DEVELOPERS "David Edmundson & Odd Østlie" CACHE STRING "List of developers")
+
+
+# ------------------------------------------------------------------------------
+# Generates app_id/servicename from HOMEPAGE_URL
+# ------------------------------------------------------------------------------
+string(REGEX REPLACE "^https?://(www\\.)?" "" CLEAN_URL "${PROJECT_HOMEPAGE_URL}")
+string(REGEX REPLACE "/.*$" "" CLEAN_DOMAIN "${CLEAN_URL}")
+
+#Removed if to force match with app id since not a domain match
+#if(NOT CLEAN_DOMAIN)
+set(CLEAN_DOMAIN "davidedmundson.org")
+#endif()
+
+string(REPLACE "." ";" DOMAIN_PARTS "${CLEAN_DOMAIN}")
+list(REVERSE DOMAIN_PARTS)
+string(REPLACE ";" "." REVERSED_DOMAIN "${DOMAIN_PARTS}")
+set(APP_ID "${REVERSED_DOMAIN}.${PROJECT_NAME}" CACHE STRING "Reverse-DNS App ID" FORCE)
+
+message(STATUS "[CMake] Using app_id: APP_ID: ${APP_ID}")
+
+#USed to make sure we do it right with flatpak builds
+option(BUILD_FLATPAK "Build for flatpak" OFF)
+
 set(PROJECT_VERSION "0.1")
 set(PROJECT_VERSION_MAJOR 0)
 
@@ -79,7 +110,13 @@ set(SOURCES
 add_subdirectory(integrations)
 add_subdirectory(ui)
 
+if(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/appdata/CMakeLists.txt")
+    add_subdirectory(appdata)
+endif()
+
 add_executable(kiot ${SOURCES})
+
+
 
 target_link_libraries(
     kiot
@@ -90,13 +127,21 @@ target_link_libraries(
     KF6::CoreAddons
     KF6::DBusAddons
 )
-target_compile_definitions(kiot PRIVATE
+
+#Adds the variables from cmakelist so its usable from cpp
+target_compile_definitions(${PROJECT_NAME} PRIVATE
+    PROJECT_NAME="${PROJECT_NAME}"
+    PROJECT_VERSION="${PROJECT_VERSION}"
+    PROJECT_DESCRIPTION="${PROJECT_DESCRIPTION}"
+    PROJECT_DOMAIN="${PROJECT_HOMEPAGE_URL}"
+    PROJECT_DEVELOPERS="${PROJECT_DEVELOPERS}"
+    APP_ID="${APP_ID}"
     $<$<CONFIG:Release>:QT_NO_DEBUG_OUTPUT>
 )
 
 install(TARGETS kiot ${KDE_INSTALL_TARGETS_DEFAULT_ARGS})
 
-ecm_install_configured_files(INPUT org.davidedmundson.kiot.desktop.in @ONLY DESTINATION ${KDE_INSTALL_AUTOSTARTDIR})
-ecm_install_configured_files(INPUT org.davidedmundson.kiot.desktop.in @ONLY DESTINATION ${KDE_INSTALL_APPDIR})
+#ecm_install_configured_files(INPUT org.davidedmundson.kiot.desktop.in @ONLY DESTINATION ${KDE_INSTALL_AUTOSTARTDIR})
+#ecm_install_configured_files(INPUT org.davidedmundson.kiot.desktop.in @ONLY DESTINATION ${KDE_INSTALL_APPDIR})
 
 feature_summary(WHAT ALL INCLUDE_QUIET_PACKAGES FATAL_ON_MISSING_REQUIRED_PACKAGES)

@@ -58,3 +58,5 @@ modules:
     sources:
       - type: dir
         path: "."
+    config-opts:
+      - -DBUILD_FLATPAK=ON

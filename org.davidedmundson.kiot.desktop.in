@@ -1,8 +1,0 @@
-[Desktop Entry]
-Name=KDE IOT
-Icon=plasmashell
-OnlyShowIn=KDE;
-Type=Application
-X-KDE-StartupNotify=false
-NoDisplay=true
-Exec=@KDE_INSTALL_FULL_BINDIR@/kiot

@@ -1,0 +1,14 @@
+[Desktop Entry]
+Name=KDE IOT
+Comment=KDE Internet of Things desktop integration for Home Automation
+Icon=org.davidedmundson.kiot
+Type=Application
+Categories=Utility;
+X-KDE-StartupNotify=false
+NoDisplay=false
+Exec=kiot
+
+# Autostart specific
+X-KDE-autostart-phase=2
+X-KDE-autostart-after=panel
+OnlyShowIn=KDE;
