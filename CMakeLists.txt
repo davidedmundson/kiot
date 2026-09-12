@@ -117,6 +117,11 @@ endif()
 
 add_executable(kiot ${SOURCES})
 
+# Include resources for kwin script used by ActiveWindowWatcher
+qt_add_resources(INTEGRATIONS_RESOURCES
+    integrations/resources.qrc
+)
+target_sources(${PROJECT_NAME} PRIVATE ${INTEGRATIONS_RESOURCES})
 
 
 target_link_libraries(
