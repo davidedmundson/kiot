@@ -45,25 +45,17 @@
   <update_contact>davidedmundson@kde.org</update_contact>
 
   <screenshots>
-    <screenshot type="default">
-      <caption>System Settings Integration</caption>
-      <image>https://github.com/TheOddPirate/kiot/blob/b870b1f23a9c03d8a9e27349bafc114a375d8a4e/flatpak/images/settings.png?raw=true</image>
-    </screenshot>
-    <screenshot type="other">
-      <caption>Systray icon and menu</caption>
-      <image>https://github.com/TheOddPirate/kiot/blob/b870b1f23a9c03d8a9e27349bafc114a375d8a4e/flatpak/images/systray.png?raw=true</image>
-    </screenshot>
     <screenshot type="other">
       <caption>Device Sensors Overview</caption>
-      <image>https://github.com/TheOddPirate/kiot/blob/b870b1f23a9c03d8a9e27349bafc114a375d8a4e/flatpak/images/sensors.png?raw=true</image>
+      <image>https://raw.githubusercontent.com/davidedmundson/kiot/refs/heads/master/appdata/images/sensors.png?raw=true</image>
     </screenshot>
     <screenshot type="other">
       <caption>Device Controls Panel</caption>
-      <image>https://github.com/TheOddPirate/kiot/blob/b870b1f23a9c03d8a9e27349bafc114a375d8a4e/flatpak/images/controls.png?raw=true</image>
+      <image>https://raw.githubusercontent.com/davidedmundson/kiot/refs/heads/master/appdata/images/controls.png</image>
     </screenshot>
     <screenshot type="other">
       <caption>Media Player Integration</caption>
-      <image>https://github.com/TheOddPirate/kiot/blob/b870b1f23a9c03d8a9e27349bafc114a375d8a4e/flatpak/images/media_player.png?raw=true</image>
+      <image>https://raw.githubusercontent.com/davidedmundson/kiot/refs/heads/master/appdata/images/media_player.png</image>
     </screenshot>
   </screenshots>
 
