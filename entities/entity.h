@@ -304,6 +304,15 @@ protected:
      * all attribute values are in Home Assistant-compatible formats.
      */
     QVariant convertForHomeAssistant(const QVariant &value);
+    /**
+     * @brief Registers this entity with Home Assistant via MQTT at runtime
+     */
+    void runtimeRegistration();
+
+    /**
+     * @brief Unregisters this entity from Home Assistant
+     */
+    void unRegister();
 
 private:
     /** @private Unique identifier for this entity */
