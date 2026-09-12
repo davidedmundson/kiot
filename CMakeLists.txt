@@ -103,6 +103,7 @@ set(SOURCES
     entities/sensor.cpp
     entities/text.cpp
     entities/lock.cpp
+    entities/mediaplayer.cpp
     logging/messagehandler.cpp
     logging/messagehandler.h
 )
