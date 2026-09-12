@@ -80,9 +80,6 @@ if(LIBUDEV_FOUND)
 endif()
 
 
-# Include resources for kwin script used by ActiveWindowWatcher
-qt_add_resources(INTEGRATIONS_RESOURCES
-    ${CMAKE_CURRENT_SOURCE_DIR}/resources.qrc
-)
+
 
 
