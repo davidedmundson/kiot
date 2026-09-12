@@ -425,6 +425,7 @@ qint64 Audio::percentToPa(int percent) const
 
 void setupAudio()
 {
+    //TODO implement sandbox .flatpak-info parser to validate rights and give helpfull instructions for fix with flatseal
     new Audio(qApp);
 }
 

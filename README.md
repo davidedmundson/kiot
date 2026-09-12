@@ -205,7 +205,7 @@ Shortcuts=true
 | Shortcuts | Device Trigger | Global keyboard shortcuts for HA automations |
 | Night Mode | Binary Sensor | Night mode/blue light filter status |
 | Active Window | Sensor | Currently focused application window |
-| Audio Controller | Number + Select | Volume control and device selection |
+| Audio Controller | Number + Select | Volume control and device/app selection |
 | Battery Status | Sensor | Battery charge level and attributes |
 | Do Not Disturb | Binary Sensor | DnD mode status |
 | Gamepad Connected | Binary Sensor | Gamepad/joystick connection detection |
