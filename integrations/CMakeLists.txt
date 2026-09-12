@@ -79,8 +79,10 @@ if(LIBUDEV_FOUND)
     add_definitions(${LIBUDEV_CFLAGS_OTHER})
 endif()
 
-# Install KWin script used by ActiveWindowWatcher
-install(FILES
-    ${CMAKE_CURRENT_SOURCE_DIR}/activewindow_kwin.js
-    DESTINATION ${KDE_INSTALL_DATADIR}/kiot
+
+# Include resources for kwin script used by ActiveWindowWatcher
+qt_add_resources(INTEGRATIONS_RESOURCES
+    ${CMAKE_CURRENT_SOURCE_DIR}/resources.qrc
 )
+
+
