@@ -1,0 +1,14 @@
+[Desktop Entry]
+Name=KDE IOT
+Comment=@PROJECT_DESCRIPTION@
+Icon=@APP_ID@
+Type=Application
+Categories=Utility;
+X-KDE-StartupNotify=false
+NoDisplay=false
+Exec=@KDE_INSTALL_FULL_BINDIR@/@PROJECT_NAME@
+
+# Autostart specific
+X-KDE-autostart-phase=2
+X-KDE-autostart-after=panel
+OnlyShowIn=KDE;
