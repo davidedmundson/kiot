@@ -33,7 +33,8 @@ modules:
     sources:
       - type: git
         url: https://invent.kde.org/frameworks/extra-cmake-modules
-        tag: v6.21.0
+        tag: v6.30.0
+        commit: 68483132b87f4d7b953aec94ef51d1234d41f937
 
   - name: qtmqtt
     buildsystem: cmake-ninja
@@ -41,20 +42,23 @@ modules:
       - type: git
         url: https://github.com/qt/qtmqtt.git
         tag: 6.10.0
+        commit: d18c7571f295cd17e32ca084e8b05c50f21feba0
 
   - name: pulseaudio-qt
     buildsystem: cmake-ninja
     sources:
       - type: git
         url: https://invent.kde.org/libraries/pulseaudio-qt
-        tag: v1.7.0
+        tag: v1.8.1
+        commit: 10786fe31e640858f4f5db5366aed9c56d77bfab
 
   - name: bluez-qt
     buildsystem: cmake-ninja
     sources:
       - type: git
         url: https://invent.kde.org/frameworks/bluez-qt
-        tag: v6.21.0
+        tag: v6.30.0
+        commit: 3f4f7ee54d560b6e46b84bc8467048d318f58afa
 
   - name: kiot
     buildsystem: cmake-ninja

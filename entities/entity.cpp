@@ -185,8 +185,7 @@ void Entity::runtimeRegistration()
 void Entity::unRegister()
 {
     if (HaControl::mqttClient()->state() != QMqttClient::Connected) {
-        qCWarning(base) << "Cannot unregister entity" << id() << "(" << name() << ")" 
-                        << "- MQTT client not connected";
+        qCWarning(base) << "Cannot unregister entity" << id() << "(" << name() << ")"  << "- MQTT client not connected";
         return;
     }
     
