@@ -9,6 +9,9 @@
 #include <Solid/DeviceInterface>
 #include <Solid/DeviceNotifier>
 
+#include <KSharedConfig>
+#include <KConfigGroup>
+
 #include <QLoggingCategory>
 Q_DECLARE_LOGGING_CATEGORY(batter)
 Q_LOGGING_CATEGORY(batter, "integration.Battery")
@@ -100,15 +103,18 @@ private slots:
     void deviceRemoved(const QString &udi);
 
 private:
+    void ensureConfig();
     void setupSolidWatching();
     void registerBattery(const QString &udi);
     void updateBatteryAttributes(const QString &udi);
     QHash<QString, Sensor *> m_udiToSensor;
+    bool m_autoRemove = false;
 };
 
 BatteryWatcher::BatteryWatcher(QObject *parent)
     : QObject(parent)
 {
+    ensureConfig(); 
     setupSolidWatching();
 }
 
@@ -139,11 +145,15 @@ void BatteryWatcher::deviceRemoved(const QString &udi)
 {
     auto it = m_udiToSensor.find(udi);
     if (it != m_udiToSensor.end()) {
-        qCDebug(batter) << "Battery removed:" << udi;
-        // TODO find a way to set sensor as unavailable when battery disconnects so HA shows the correct state of the battery
+        qCInfo(batter) << "Device removed:" << udi;
+        if(m_autoRemove)
+            it.value()->unRegister();
         it.value()->deleteLater();
         m_udiToSensor.erase(it);
     }
+
+
+ 
 }
 
 void BatteryWatcher::registerBattery(const QString &udi)
@@ -171,7 +181,7 @@ void BatteryWatcher::registerBattery(const QString &udi)
     sensor->setDiscoveryConfig("unit_of_measurement", "%");
     sensor->setId("battery_" + name.replace(' ', '_'));
     sensor->setName(name);
-
+    sensor->runtimeRegistration();
     // Set initial state and attributes
     sensor->setState(QString::number(battery->chargePercent()));
 
@@ -260,6 +270,26 @@ void BatteryWatcher::updateBatteryAttributes(const QString &udi)
     it.value()->setAttributes(attributes);
 }
 
+void BatteryWatcher::ensureConfig()
+{
+    auto config = KSharedConfig::openConfig();
+    auto group = KConfigGroup(config, "Battery");
+    if (group.hasKey("RemoveDevices")){
+        bool value = group.readEntry("RemoveDevices", false);
+        m_autoRemove = value;
+        qCDebug(batter) << "Setting RemoveDevices to " << value;
+        return;
+    }
+    else{
+        group.writeEntry("RemoveDevices", true);
+        m_autoRemove = true;
+        config->sync();
+        qCDebug(batter) << "Config was empty, writing default RemoveDevices as true";
+        return;
+
+    }
+
+}
 void setupBattery()
 {
     new BatteryWatcher(qApp);
