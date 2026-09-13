@@ -169,16 +169,15 @@ BluetoothAdapterWatcher::BluetoothAdapterWatcher(QObject *parent)
                 }
             });
             connect(m_manager, &BluezQt::Manager::deviceRemoved, this, [this](const BluezQt::DevicePtr &device) {
-                if(m_autoRemove )
-                {
                     const auto key = device->address();
                     if (m_btSwitches.contains(key)) {
                         auto *sw = m_btSwitches.take(key);
-                        sw->unregisterSwitch();
+                        if(m_autoRemove )
+                            sw->unregisterSwitch();
                         qCDebug(bt) << "Device removed from HA (unpaired via deviceChanged):" << device->name();
                         delete sw;
                     }
-                }
+                
             });
 
             connect(m_manager, &BluezQt::Manager::deviceChanged, this, [this](const BluezQt::DevicePtr &device) {
@@ -193,15 +192,13 @@ BluetoothAdapterWatcher::BluetoothAdapterWatcher(QObject *parent)
                         qCDebug(bt) << "Device added as switch in HA:" << device->name();
                     }
                 } else {
-                    if(m_autoRemove)
-                    {
                         if (m_btSwitches.contains(key)) {
                             auto *sw = m_btSwitches.take(key);
-                            sw->unregisterSwitch();
+                            if(m_autoRemove)
+                                sw->unregisterSwitch();
                             qCDebug(bt) << "Device removed from HA (unpaired via deviceChanged):" << device->name();
                             delete sw;
                         }
-                    }
                 }
             });
             // connect to adapter signals for updates
