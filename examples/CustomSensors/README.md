@@ -17,7 +17,7 @@
   - [CPU Usage](#5-cpu-usage)
   - [Disk Free Space](#6-disk-free-space)
 
-  
+
 ## About
 
 This is a collection of example configs for the CustomSensors Integration to help you get started
@@ -172,8 +172,8 @@ using the command "free"
 <summary>Click to Expand Example</summary>
 
 ```toml
-[CustomSensors][free_ram]
-name=Available RAM
+[CustomSensors][total_ram]
+name=Total RAM
 command=free -h | awk '/^Mem:/ {print $2}' | cut -d'G' -f1
 interval=60000s
 unit_of_measurement=GiB
