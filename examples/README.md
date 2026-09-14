@@ -9,13 +9,16 @@
 
 ## About
 
-This directory contains integration examples, helper generators, and setup guides to help you get the most out of Kiot and Home Assistant without needing custom C++ development and hopefully be of inspiration for you to start building your own custom scripts/sensor and share them with us all. =)
+So i dont know what the plan is here but lets try...
 
-The grammer has been worked on by AI to fix my bad grammer, it should be better now. If you find any errors, please let me know. 
+This directory contains integration config examples, some helper scripts to genrate for your computer, and setup guides to help you get the most out of Kiot and hopefully be of inspiration for you to start building your own custom scripts/sensor and share them with us all. =)
+
+The grammer has been worked on by AI to fix my bad grammer, it should be better now. 
+If you find any errors, please let me know. 
 
 ## Scripts
 
-Examples and automated tools for generating command configurations (like display control, volume, and app launchers) compatible with Kiot.
+Examples and automated tools for generating command configurations (like display control) compatible with Kiot.
 
 * Directory: [`examples/Scripts/`](/examples/Scripts/README.md)
 

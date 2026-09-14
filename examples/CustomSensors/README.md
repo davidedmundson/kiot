@@ -12,8 +12,12 @@
 - [System](#system)
   - [CPU Temperature](#1-cpu-temperature)
   - [Uptime](#2-uptime)
+  - [Free RAM](#3-free-ram)
+  - [Total RAM](#4-total-ram)
+  - [CPU Usage](#5-cpu-usage)
+  - [Disk Free Space](#6-disk-free-space)
 
-
+  
 ## About
 
 This is a collection of example configs for the CustomSensors Integration to help you get started
@@ -110,16 +114,13 @@ unit_of_measurement=C
 
 ## System
 
-Here we are using the package [lm-sensors](https://github.com/lm-sensors/lm-sensors) to get the temperatures from the system. You can install it with your package manager.
-
-This will need customization to your system, but here are some examples of how to get the temperatures from your system.
-
-We also use some other packages to get the information from the system, more info to come
+Here we are using some difrent packages to get the information we need, you can use the ones you have installed or install the ones you need.
 
 ### 1. **CPU temperature**
 This is a simple example of how to get the cpu temperature from your system. this was made with a amd9950x3d
 for intel something like this "sensors | grep 'Core 0' |  cut -d'+' -f 2 | cut -d'°' -f1"
 
+using the command "sensors" part of the "lm-sensors" package
 <details>
 <summary>Click to Expand Example</summary>
 
@@ -150,6 +151,7 @@ unit_of_measurement=min
 
 ### 3. **Free RAM**
 This is a simple example of how to get the available free ram in GiB.
+using the command "free"
 <details>
 <summary>Click to Expand Example</summary>
 
@@ -165,6 +167,7 @@ unit_of_measurement=GiB
 
 ### 4. **Total RAM**
 This is a simple example of how to get the total ram in GiB.
+using the command "free"
 <details>
 <summary>Click to Expand Example</summary>
 
@@ -179,7 +182,8 @@ unit_of_measurement=GiB
 
 
 ### 5. **CPU usage**
-This is a simple example of how to get the total cpu usage in %.
+This is a simple example of how to get the total cpu usage in %. 
+using the command "top"
 <details>
 <summary>Click to Expand Example</summary>
 
@@ -191,6 +195,24 @@ interval=300s
 unit_of_measurement=%
 ```
 </details>
+
+### 6. **Disk free space**
+This is a simple example of how to get the free space from a disk
+modify the "/mnt/Games" to match your disk mount path
+<details>
+<summary>Click to Expand Example</summary>
+
+```toml
+[CustomSensors][free_space_games]
+name=Free space Games disk
+command=df -h /mnt/Games  | grep "/dev" | awk '{print $4}' | cut -d'G' -f1
+interval=300s
+unit_of_measurement=G
+```
+</details>
+
+
+
 
 
 More to come
