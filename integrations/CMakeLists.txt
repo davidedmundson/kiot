@@ -39,7 +39,7 @@ set_source_files_properties(
 qt_add_dbus_interface(KIOT_INTEGRATIONS_SRC ../dbus/org.freedesktop.DBus.Properties.xml dbusproperties)
 qt_add_dbus_interface(KIOT_INTEGRATIONS_SRC ../dbus/org.mpris.MediaPlayer2.Player.xml mprisplayer)
 qt_add_dbus_interface(KIOT_INTEGRATIONS_SRC ../dbus/org.mpris.MediaPlayer2.xml mprisroot)
-
+qt_add_dbus_interface(KIOT_INTEGRATIONS_SRC ../dbus/org.kde.KWin.NightLight.xml kwinnightlight)
 
 
 # Include gamepad.cpp only when libudev library is found

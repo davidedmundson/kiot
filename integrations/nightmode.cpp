@@ -1,11 +1,10 @@
 // SPDX-FileCopyrightText: 2025 David Edmundson <davidedmundson@kde.org>
 // SPDX-License-Identifier: LGPL-2.1-or-later
-
 #include "core.h"
-#include "dbusproperty.h"
 #include "entities/entities.h"
 #include <QCoreApplication>
-
+#include "dbusproperties.h"
+#include "kwinnightlight.h"
 #include <QDBusConnection>
 #include <QDBusMessage>
 #include <QDBusReply>
@@ -19,11 +18,14 @@ class NightMode : public QObject
     Q_OBJECT
 public:
     NightMode(QObject *parent);
-
+    void updateAttributes();
 private:
     BinarySensor *m_sensor;
     Switch *m_switch;
     std::optional<uint32_t> m_inhibitCookie;
+
+    OrgKdeKWinNightLightInterface *m_nightLightIface;
+    OrgFreedesktopDBusPropertiesInterface *m_propsIface;
 };
 
 NightMode::NightMode(QObject *parent)
@@ -33,40 +35,67 @@ NightMode::NightMode(QObject *parent)
     m_sensor->setId("nightmode_inhibited");
     m_sensor->setName("Night Mode Inhibited");
 
-    auto nightmodeInhibited = new DBusProperty("org.kde.KWin", "/org/kde/KWin/NightLight", "org.kde.KWin.NightLight", "inhibited", this);
-    QObject::connect(nightmodeInhibited, &DBusProperty::valueChanged, this, [this](const QVariant &value) {
-        m_sensor->setState(value.toBool());
-    });
-    m_sensor->setState(nightmodeInhibited->value().toBool());
+    m_nightLightIface = new OrgKdeKWinNightLightInterface(QStringLiteral("org.kde.KWin"), QStringLiteral("/org/kde/KWin/NightLight"), QDBusConnection::sessionBus(),this);
+    if (!m_nightLightIface->isValid()) {
+        qCWarning(nightmode) << "Failed to connect to KWin NightLight D-Bus interface!";
+    }
 
+
+    m_propsIface = new OrgFreedesktopDBusPropertiesInterface(QStringLiteral("org.kde.KWin"), QStringLiteral("/org/kde/KWin/NightLight"), QDBusConnection::sessionBus(), this);
+    connect(m_propsIface, &OrgFreedesktopDBusPropertiesInterface::PropertiesChanged, this, [this](const QString &interfaceName, const QVariantMap &changed, const QStringList &invalidated) {
+        Q_UNUSED(invalidated)
+        Q_UNUSED(changed)
+        Q_UNUSED(interfaceName)
+        m_sensor->setState(m_nightLightIface->inhibited());
+        updateAttributes();
+        
+    });
+    
     m_switch = new Switch(this);
     m_switch->setId("nightmode_inhibit");
     m_switch->setName("Night Mode Inhibit");
-    m_switch->setState(false); // the state is whether this switch is inhibiting the night mode, the sensor is if /anything/ is
     QObject::connect(m_switch, &Switch::stateChangeRequested, this, [this](bool state) {
         if (state) {
-            QDBusMessage inhibitCall = QDBusMessage::createMethodCall(QStringLiteral("org.kde.KWin.NightLight"),
-                                                                      QStringLiteral("/org/kde/KWin/NightLight"),
-                                                                      QStringLiteral("org.kde.KWin.NightLight"),
-                                                                      QStringLiteral("inhibit"));
-            QDBusReply<uint32_t> reply = QDBusConnection::sessionBus().call(inhibitCall);
+            QDBusReply<uint32_t> reply = m_nightLightIface->inhibit();
             if (!reply.isValid()) {
                 qCWarning(nightmode) << "Failed to inhibit nightmode";
                 return;
             }
             m_inhibitCookie = reply.value();
         } else if (m_inhibitCookie.has_value()) {
-            QDBusMessage uninhibitCall = QDBusMessage::createMethodCall(QStringLiteral("org.kde.KWin.NightLight"),
-                                                                        QStringLiteral("/org/kde/KWin/NightLight"),
-                                                                        QStringLiteral("org.kde.KWin.NightLight"),
-                                                                        QStringLiteral("uninhibit"));
-            uninhibitCall << m_inhibitCookie.value();
-            QDBusConnection::sessionBus().call(uninhibitCall);
+            m_nightLightIface->uninhibit(m_inhibitCookie.value());
         }
         m_switch->setState(state);
     });
-}
+    m_sensor->setState(m_nightLightIface->inhibited());
+    m_switch->setState(m_nightLightIface->inhibited());
 
+    updateAttributes();
+
+
+}
+void NightMode::updateAttributes()
+{
+    if(!m_nightLightIface->isValid())
+        return;
+    if(!m_sensor)
+        return;
+    QVariantMap attributes;
+    attributes["available"] = m_nightLightIface->available();
+    attributes["enabled"] = m_nightLightIface->enabled();
+    attributes["temperature"] = m_nightLightIface->currentTemperature();
+    attributes["daylight"] = m_nightLightIface->daylight();
+    attributes["mode"] = m_nightLightIface->mode();
+    attributes["previousTransitionDateTime"] = m_nightLightIface->previousTransitionDateTime();
+    attributes["previousTransitionDuration"] = m_nightLightIface->previousTransitionDuration();
+    attributes["scheduledTransitionDateTime"] = m_nightLightIface->scheduledTransitionDateTime();
+    attributes["scheduledTransitionDuration"] = m_nightLightIface->scheduledTransitionDuration();
+    attributes["targetTemperature"] = m_nightLightIface->targetTemperature();
+    qCDebug(nightmode) << "Updating attributes" << attributes;
+    m_sensor->setAttributes(attributes);
+    m_sensor->setState(m_nightLightIface->inhibited());
+
+}
 void setupNightmode()
 {
     new NightMode(qApp);

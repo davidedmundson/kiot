@@ -1,0 +1,27 @@
+<?xml version="1.0" ?>
+<node>
+  <interface name="org.kde.KWin.NightLight">
+    <method name="inhibit">
+      <arg direction="out" type="u" name="cookie"/>
+    </method>
+    <method name="uninhibit">
+      <arg direction="in" type="u" name="cookie"/>
+    </method>
+    <method name="preview">
+      <arg direction="in" type="u" name="temperature"/>
+    </method>
+    <method name="stopPreview"/>
+    <property access="read" type="b" name="inhibited"/>
+    <property access="read" type="b" name="enabled"/>
+    <property access="read" type="b" name="running"/>
+    <property access="read" type="b" name="available"/>
+    <property access="read" type="u" name="currentTemperature"/>
+    <property access="read" type="u" name="targetTemperature"/>
+    <property access="read" type="u" name="mode"/>
+    <property access="read" type="b" name="daylight"/>
+    <property access="read" type="t" name="previousTransitionDateTime"/>
+    <property access="read" type="u" name="previousTransitionDuration"/>
+    <property access="read" type="t" name="scheduledTransitionDateTime"/>
+    <property access="read" type="u" name="scheduledTransitionDuration"/>
+  </interface>
+</node>
