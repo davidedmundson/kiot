@@ -47,7 +47,7 @@ WantedBy=graphical-session.target
 </details>
 
 ### Installation
-
+**Note: Remember to read and understand the scripts before running them, as they will modify your system.**
 To automatically set up and start Kiot as a systemd user service, run the provided helper script:
 
 ```bash

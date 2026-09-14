@@ -1,5 +1,8 @@
 #!/bin/bash
 
+#Makes sure we are in the correct directory
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+cd "$SCRIPT_DIR/"
 # Check that kiot is installed first
 if ! command -v "kiot" &>/dev/null; then
     echo "kiot is not installed, aborting until its found"
