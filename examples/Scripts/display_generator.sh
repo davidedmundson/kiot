@@ -1,23 +1,24 @@
 #!/bin/bash
 
+#Checks if kscreen-doctor is installed
 if ! command -v "kscreen-doctor" &>/dev/null; then
     echo "kscreen-doctor does not exist, aborting"
     exit 1
 fi
-
+#Checks if hwinfo is installed
 if ! command -v "hwinfo" &>/dev/null; then
     echo "hwinfo does not exist, aborting"
     exit 1
 fi
-
+#Sets our output file
 OUTPUT_FILE="displays.conf"
 rm -f "$OUTPUT_FILE"
 
 echo "Collecting display information..."
-
+#Tries to map the ports from kscreen-doctor
 mapfile -t ports < <(kscreen-doctor --outputs | grep "Output:" | awk '{print $3}')
 echo "Found ports: ${#ports[@]}"
-
+#Tries to map the models from hwinfo, if it fails, it will use a standard display name
 mapfile -t models < <(hwinfo --monitor 2>/dev/null | grep -E 'Model:' | cut -d':' -f2)
 echo "Found screen models: ${#models[@]}"
 
@@ -27,7 +28,7 @@ fi
 
 echo "-----------------------------------"
 echo "Found screens:"
-
+#Iterates over the ports and models to generate your config file
 for index in "${!ports[@]}"; do
     port="${ports[$index]}"
     model_name="${models[$index]:-$port}"
