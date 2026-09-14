@@ -12,7 +12,7 @@
 #include "core.h"
 #include "entities/switch.h"
 
-
+#include <KSandbox>
 #include <KConfigGroup>
 #include <KSharedConfig>
 #include <KUser>
@@ -540,6 +540,8 @@ private slots:
  */
 bool isUserInDockerGroup()
 {
+    if(KSandbox::isFlatpak())
+        return true;
     KUser currentUser;
     const QList<KUserGroup> groups = currentUser.groups();
     
