@@ -18,12 +18,18 @@ finish-args:
   - "--socket=pulseaudio"
   - "--filesystem=home:ro"
   - "--filesystem=xdg-config/kiotrc"
+#Docker
+  - "--filesystem=/run/docker.sock"
+
 
   - "--talk-name=org.kde.StatusNotifierWatcher"
   - "--own-name=org.kde.StatusNotifierItem-2-2"
+#Kwin and active window integration
   - "--talk-name=org.kde.KWin"
+#BLuetooth integration
   - "--talk-name=org.bluez"
   - "--talk-name=org.freedesktop.Flatpak"
+#mpris
   - "--talk-name=org.mpris.MediaPlayer2"
   - "--talk-name=org.mpris.MediaPlayer2.*"
 
