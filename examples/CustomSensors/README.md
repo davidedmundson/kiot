@@ -11,6 +11,7 @@
   - [Current Temperature](#5-current-temperature)
 - [System](#system)
   - [CPU Temperature](#1-cpu-temperature)
+  - [Uptime](#2-uptime)
 
 
 ## About
@@ -146,3 +147,50 @@ interval=60s
 unit_of_measurement=min
 ```
 </details>
+
+### 3. **Free RAM**
+This is a simple example of how to get the available free ram in GiB.
+<details>
+<summary>Click to Expand Example</summary>
+
+```toml
+[CustomSensors][free_ram]
+name=Available RAM
+command=free -h | awk '/^Mem:/ {print $7}' | cut -d'G' -f1
+interval=300s
+unit_of_measurement=GiB
+```
+</details>
+
+
+### 4. **Total RAM**
+This is a simple example of how to get the total ram in GiB.
+<details>
+<summary>Click to Expand Example</summary>
+
+```toml
+[CustomSensors][free_ram]
+name=Available RAM
+command=free -h | awk '/^Mem:/ {print $2}' | cut -d'G' -f1
+interval=60000s
+unit_of_measurement=GiB
+```
+</details>
+
+
+### 5. **CPU usage**
+This is a simple example of how to get the total cpu usage in %.
+<details>
+<summary>Click to Expand Example</summary>
+
+```toml
+[CustomSensors][cpu_usage]
+name=CPU usage
+command=top -bn1 | grep "%Cpu" | awk '{print 100 - $8}'
+interval=300s
+unit_of_measurement=%
+```
+</details>
+
+
+More to come
