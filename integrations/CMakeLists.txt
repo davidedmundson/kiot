@@ -23,6 +23,7 @@ set(KIOT_INTEGRATIONS_SRC
     bluetooth.cpp
     applauncher.cpp
     mpris.cpp
+    docker.cpp
 )
 
 
