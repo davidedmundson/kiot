@@ -16,6 +16,7 @@ This directory contains the core entity implementations for the KIOT (KDE Intern
   - [Number](#8-number-numberh--numbercpp)
   - [Text](#9-text-texth--textcpp)
   - [Media Player](#10-mediaplayer-mediaplayerh--mediaplayercpp)
+  - [Notify](#11-notify-notifyh--notifycpp)
 - [Creating New Entities](#creating-new-entities)
 - [MQTT Topic Structure](#mqtt-topic-structure)
 - [Home Assistant Discovery](#home-assistant-discovery)
@@ -244,6 +245,22 @@ state["volume"] = 0.75; // volume level (0.0 to 1.0)
 state["albumart"] = Base64ImageString; // Base64 encoded image
 state["mediatype"] = "music"; // "music", "video", "tvshow", etc.
 player->setState(state);
+```
+
+### 11. **Notify** (`notify.h` / `notify.cpp`)
+Represents notification entities for receiving messages.
+
+**Home Assistant Type:** `notify`  
+**Use Cases:** Text-to-speech messages, desktop notifications, alert systems
+
+**Example Configuration:**
+```cpp
+Notify *notify = new Notify(parent);
+notify->setId("desktop_alerts");
+notify->setName("Desktop Alerts");
+connect(notify, &Notify::notificationReceived, [](const QString &message) {
+    // Display notification or speak message
+});
 ```
 
 
