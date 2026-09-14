@@ -18,6 +18,8 @@ finish-args:
   - "--socket=pulseaudio"
   - "--filesystem=home:ro"
   - "--filesystem=xdg-config/kiotrc"
+#Accent colour
+  - "--filesystem=xdg-config/kdeglobals:ro"  
 #Docker
   - "--filesystem=/run/docker.sock"
 
