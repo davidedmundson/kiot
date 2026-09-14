@@ -1,0 +1,16 @@
+[Unit]
+Description=A linux mqtt bridge for use with home assistant
+Documentation=https://github.com/davidedmundson/kiot
+Wants=network-online.target
+After=network-online.target graphical-session.target
+
+[Service]
+Type=simple
+ExecStart=/usr/bin/kiot
+Restart=on-failure
+RestartSec=3
+
+Slice=user.slice
+
+[Install]
+WantedBy=graphical-session.target
