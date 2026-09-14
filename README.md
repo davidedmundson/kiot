@@ -110,7 +110,7 @@ password=myPassword
 On the Home Assistant side, everything should work automatically with MQTT discovery. After configuring Kiot, try rebooting Home Assistant, then launch the `kiot` program to see if everything connects properly.
 
 ### Configuration Examples
-
+More in depth examples can be found here [examples](examples/README.md)
 #### Basic Configuration
 ```ini
 [general]
@@ -189,6 +189,9 @@ Notifications=true
 PowerController=true
 Scripts=true
 Shortcuts=true
+Docker=true
+AppLauncher=true
+MPRISPlayer=true
 ```
 
 ## Supported Features
@@ -272,7 +275,7 @@ Contributions are welcome!
 4. **Flatpak Limitations**: Some system integrations may not work in sandboxed environment
 
 ### Getting Help
-- Check the configuration examples above
+- Check the configuration examples above, or for more in depth examples go here [examples](/examples/README.md)
 - Review the Home Assistant MQTT documentation
 - Examine system logs for error messages
 
