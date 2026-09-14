@@ -91,7 +91,7 @@ void NightMode::updateAttributes()
     attributes["scheduledTransitionDateTime"] = m_nightLightIface->scheduledTransitionDateTime();
     attributes["scheduledTransitionDuration"] = m_nightLightIface->scheduledTransitionDuration();
     attributes["targetTemperature"] = m_nightLightIface->targetTemperature();
-    qCDebug(nightmode) << "Updating attributes" << attributes;
+
     m_sensor->setAttributes(attributes);
     m_sensor->setState(m_nightLightIface->inhibited());
 
