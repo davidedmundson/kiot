@@ -9,7 +9,7 @@
 This is a collection of example configs for different scripts that can be used with Kiot, along with helper scripts to generate them automatically on your own computer.
 
 ## Display
-Examples of scripts to control your display configuration. You can use the pre generated and modify for you needs [displays.conf](/examples/Scripts/displays.conf) or run the generator script [display_generator.sh](/examples/Scripts/display_generator.sh) locally to have it create correct scripts for your computer.
+Examples of scripts to control your display configuration. You can use the pre generated as a template to modify for you own needs [displays.conf](/examples/Scripts/displays.conf) or run the generator script [display_generator.sh](/examples/Scripts/display_generator.sh) locally to have it create correct scripts for your computer.
 
 <details>
 <summary>Click to Expand Example Output</summary>
@@ -50,6 +50,7 @@ Name=HDR PHILIPS Philips FTV Disable
 Exec=kscreen-doctor output.DP-3.hdr.disable
 Icon=mdi:monitor
 ```
+
 </details>
 
 
