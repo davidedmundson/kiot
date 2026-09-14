@@ -9,6 +9,8 @@
   - [Used Memory](#3-used-memory)
   - [Free Memory](#4-free-memory)
   - [Current Temperature](#5-current-temperature)
+- [System](#system)
+  - [CPU Temperature](#1-cpu-temperature)
 
 
 ## About
@@ -98,6 +100,30 @@ This is a simple example of how to get the current temperature from your Nvidia 
 [CustomSensors][gpu_current_temp]
 name=Gpu temperature
 command=nvidia-smi -q -d TEMPERATURE | grep "GPU Current Temp" -m 1 | cut -d':' -f2 | cut -d' ' -f2
+interval=60s
+state_class=measurement
+unit_of_measurement=C
+```
+</details>
+
+
+## System
+
+Here we are using the package [lm-sensors](https://github.com/lm-sensors/lm-sensors) to get the temperatures from the system. You can install it with your package manager.
+
+This will need customization to your system, but here are some examples of how to get the temperatures from your system.
+
+### 1. **CPU temperature**
+This is a simple example of how to get the cpu temperature from your system. this was made with a amd9950x3d
+for intel something like this "sensors | grep 'Core 0'"
+
+<details>
+<summary>Click to Expand Example</summary>
+
+```toml
+[CustomSensors][cpu_temperature]
+name=CPU temperature
+command=sensors | grep -m 1 'Tctl'  | cut -d':' -f2 | cut -d' ' -f10 | cut -d'+' -f 2 | cut -d'°' -f1
 interval=60s
 state_class=measurement
 unit_of_measurement=C
