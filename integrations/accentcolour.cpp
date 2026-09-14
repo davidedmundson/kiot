@@ -20,42 +20,32 @@ public:
         m_sensor->setId("accentcolor");
         m_sensor->setName("Accent Color");
 
-        // it's in kdeglobals
         KConfigGroup config(KSharedConfig::openConfig("kdeglobals")->group("General"));
         updateAccentColor(config);
-//        m_sensor->setState(config.readEntry("AccentColor", "0,0,0")); // if not custom, then we should find out the default from the theme?
-
         m_watcher = KConfigWatcher::create(KSharedConfig::openConfig("kdeglobals"));
 
         QObject::connect(m_watcher.data(), &KConfigWatcher::configChanged, this, [this](const KConfigGroup &group) {
             if (group.name() != "General") {
                 return;
             }
-            // this is in the format "r,g,b" as numbers. Will need some conversion HA side to do anything useful with it
             updateAccentColor(group);
-//            m_sensor->setState(group.readEntry("AccentColor", "0,0,0"));
         });
     }
 
 private:
     void updateAccentColor(const KConfigGroup &config) {
-        
-        
-
         QString accentColor = config.readEntry("AccentColor","");
         QString lastUsedColor = config.readEntry("LastUsedCustomAccentColor","");
         bool fromWallpaper = config.readEntry("accentColorFromWallpaper", false);
         
         QVariantMap attributes;
         
-        // Set main state
         if (!accentColor.isEmpty()) {
             m_sensor->setState(rgbToHex(accentColor));
             attributes["has_accent"] = true;
             attributes["source"] = fromWallpaper ? "wallpaper" : "custom";
             setRgbAttributes(attributes, accentColor, "current");
         } else {
-            // No accent color set (using theme default)
             m_sensor->setState("theme_default");
             attributes["has_accent"] = false;
             attributes["source"] = "theme";
@@ -64,14 +54,10 @@ private:
             attributes["theme_default_color"] = "#3DAEE9";
             attributes["theme_default_rgb"] = "61,174,233";
         }
-        
-        // Always include last used custom color (if exists)
         if (!lastUsedColor.isEmpty()) {
             attributes["last_used_custom_hex"] = rgbToHex(lastUsedColor);
             setRgbAttributes(attributes, lastUsedColor, "last_used");
         }
-        
-        // Add from_wallpaper flag
         attributes["from_wallpaper"] = fromWallpaper;
         
         m_sensor->setAttributes(attributes);
