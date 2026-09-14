@@ -113,6 +113,8 @@ Here we are using the package [lm-sensors](https://github.com/lm-sensors/lm-sens
 
 This will need customization to your system, but here are some examples of how to get the temperatures from your system.
 
+We also use some other packages to get the information from the system, more info to come
+
 ### 1. **CPU temperature**
 This is a simple example of how to get the cpu temperature from your system. this was made with a amd9950x3d
 for intel something like this "sensors | grep 'Core 0' |  cut -d'+' -f 2 | cut -d'°' -f1"
@@ -127,5 +129,20 @@ command=sensors | grep -m 1 'Tctl'  |  cut -d'+' -f 2 | cut -d'°' -f1
 interval=60s
 state_class=measurement
 unit_of_measurement=C
+```
+</details>
+
+
+### 2. **Uptime**
+This is a simple example of how to get the uptime from your system in minutes.
+<details>
+<summary>Click to Expand Example</summary>
+
+```toml
+[CustomSensors][system_uptime]
+name=System Uptime
+command=awk '{print int($1/60)}' /proc/uptime
+interval=60s
+unit_of_measurement=min
 ```
 </details>
