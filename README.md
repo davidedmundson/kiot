@@ -202,7 +202,7 @@ Shortcuts=true
 | Power Control | Button | Suspend, hibernate, power off, and restart |
 | Camera Activity | Binary Sensor | Detects when camera is in use |
 | Accent Colour | Sensor | Current desktop accent color |
-| Shortcuts | Device Trigger | Global keyboard shortcuts for HA automations |
+| Shortcuts | Select + Device Trigger | Register custom shortcuts for HA automations AND trigger any Global shortcut via DBus |
 | Night Mode | Binary Sensor | Night mode/blue light filter status |
 | Active Window | Sensor | Currently focused application window |
 | Audio Controller | Number + Select | Volume control and device/app selection |
@@ -213,7 +213,8 @@ Shortcuts=true
 | Bluetooth | Switch | Bluetooth adapter control and device connection management |
 | Applauncher| Select | Launch applications from HA, scans for installed apps |
 | CustomSensors | Sensor | Custom sensor integration with output from terminal command|
-
+| Docker | Switch | Docker container control and status as attributes |
+| MPRIS | Media Player | MPRIS media player control [Custom Integration](https://github.com/TheOddPirate/mqtt_media_player)|Button
 ## Flatpak Build
 
 Flatpak installation is also supported:
