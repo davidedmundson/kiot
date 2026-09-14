@@ -115,7 +115,7 @@ This will need customization to your system, but here are some examples of how t
 
 ### 1. **CPU temperature**
 This is a simple example of how to get the cpu temperature from your system. this was made with a amd9950x3d
-for intel something like this "sensors | grep 'Core 0'"
+for intel something like this "sensors | grep 'Core 0' |  cut -d'+' -f 2 | cut -d'°' -f1"
 
 <details>
 <summary>Click to Expand Example</summary>
@@ -123,7 +123,7 @@ for intel something like this "sensors | grep 'Core 0'"
 ```toml
 [CustomSensors][cpu_temperature]
 name=CPU temperature
-command=sensors | grep -m 1 'Tctl'  | cut -d':' -f2 | cut -d' ' -f10 | cut -d'+' -f 2 | cut -d'°' -f1
+command=sensors | grep -m 1 'Tctl'  |  cut -d'+' -f 2 | cut -d'°' -f1
 interval=60s
 state_class=measurement
 unit_of_measurement=C
