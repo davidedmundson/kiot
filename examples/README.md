@@ -9,9 +9,9 @@
 
 ## About
 
-So i dont know what the plan is here but lets try...
+So i dont know what the plan is here, but lets try...
 
-This directory contains integration config examples, some helper scripts to genrate for your computer, and setup guides to help you get the most out of Kiot and hopefully be of inspiration for you to start building your own custom scripts/sensor and share them with us all. =)
+This directory contains integration config examples, some helper scripts to genrate for your computer, and setup guides to help you get the most out of Kiot and hopefully be of some kind of inspiration for you to start building your own custom scripts/sensor and share them with us all. =)
 
 The grammer has been worked on by AI to fix my bad grammer, it should be better now. 
 If you find any errors, please let me know. 
