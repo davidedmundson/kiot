@@ -3,7 +3,7 @@ find_package(PkgConfig REQUIRED)
 pkg_check_modules(LIBUDEV libudev)
 
 include_directories(..)
-
+add_definitions(-DPROJECT_NAME="${PROJECT_NAME}")
 set(KIOT_INTEGRATIONS_SRC
     active.cpp
     notifications.cpp
@@ -50,6 +50,7 @@ if(LIBUDEV_FOUND)
 else()
     message(WARNING "libudev not found, skipping gamepad integration")
 endif()
+
 
 add_library(KIOTIntegrations OBJECT ${KIOT_INTEGRATIONS_SRC})
 
