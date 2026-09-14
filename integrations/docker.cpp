@@ -31,6 +31,7 @@ Q_DECLARE_LOGGING_CATEGORY(docker)
 Q_LOGGING_CATEGORY(docker, "integrations.Docker")
 
 static int SOCKET_TIMEOUT_MS = 10000;
+//TODO create a dynamic docker socket path detection or just config option?
 static const char *DOCKER_SOCKET_PATH = "/var/run/docker.sock";
 
 /**
