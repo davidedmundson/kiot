@@ -18,6 +18,10 @@ finish-args:
   - "--socket=pulseaudio"
   - "--filesystem=home:ro"
   - "--filesystem=xdg-config/kiotrc"
+#GameLauncher
+  - "--filesystem=xdg-data/Steam:ro"      # For Steam
+  - "--filesystem=xdg-data/lutris:ro"     # For Lutris
+  - "--filesystem=xdg-config/heroic:ro"   # for Heroic
 #Accent colour
   - "--filesystem=xdg-config/kdeglobals:ro"  
 #Docker

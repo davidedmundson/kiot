@@ -989,6 +989,6 @@ void setupGameLauncher()
     new GameLauncher(qApp);
 }
 
-REGISTER_INTEGRATION("GameLauncher", setupGameLauncher, true)
+REGISTER_INTEGRATION("GameLauncher", setupGameLauncher, false)
 
 #include "gamelauncher.moc"
