@@ -25,7 +25,8 @@ set(KIOT_INTEGRATIONS_SRC
     mpris.cpp
     docker.cpp
     systemd.cpp
-)
+    gamelauncher.cpp
+   )
 
 
 
