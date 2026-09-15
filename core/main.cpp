@@ -1,4 +1,4 @@
-#include "core.h"
+#include "core/core.h"
 #include "logging/messagehandler.h"
 
 #include <QApplication>

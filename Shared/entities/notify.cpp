@@ -23,7 +23,7 @@
  */
 
 #include "notify.h"
-#include "core.h"
+#include "core/core.h"
 #include <QMqttClient>
 
 

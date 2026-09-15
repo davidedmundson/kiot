@@ -296,7 +296,7 @@ private:
 
 // myentity.cpp
 #include "myentity.h"
-#include "core.h"
+#include "core/core.h"
 #include <QMqttClient>
 
 MyEntity::MyEntity(QObject *parent)
@@ -447,5 +447,5 @@ When adding new entity types:
 
 - [Home Assistant MQTT Integration Documentation](https://www.home-assistant.io/integrations/mqtt/)
 - [Home Assistant Entity Types](https://www.home-assistant.io/integrations/#search/mqtt)
-- [KIOT Main README](../README.md) for project overview and setup
-- [KIOT Integrations README](../integrations/README.md) for creating new integrations
+- [KIOT Main README](../../README.md) for project overview and setup
+- [KIOT Integrations README](../../integrations/README.md) for creating new integrations

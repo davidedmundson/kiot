@@ -1,27 +1,30 @@
 // SPDX-FileCopyrightText: 2025 David Edmundson <davidedmundson@kde.org>
 // SPDX-License-Identifier: LGPL-2.1-or-later
 
-#include "switch.h"
-#include "core.h"
+#include "lock.h"
+#include "core/core.h"
 #include <QJsonDocument>
 #include <QJsonObject>
 #include <QMqttClient>
 #include <QMqttSubscription>
 
-DEFINE_LOGGER(swi, entities.Switch)
 
-Switch::Switch(QObject *parent)
+DEFINE_LOGGER(lock, entities.Lock)
+Lock::Lock(QObject *parent)
     : Entity(parent)
 {
-    setHaType("switch");
+    setHaType("lock");
 }
 
-void Switch::init()
+void Lock::init()
 {
     setDiscoveryConfig("state_topic", baseTopic());
     setDiscoveryConfig("command_topic", baseTopic() + "/set");
-    setDiscoveryConfig("payload_on", "true");
-    setDiscoveryConfig("payload_off", "false");
+    setDiscoveryConfig("payload_lock", "true");
+    setDiscoveryConfig("payload_unlock", "false");
+    setDiscoveryConfig("state_locked", "true");
+    setDiscoveryConfig("state_unlocked", "false");
+    setDiscoveryConfig("device_class", "lock");
     setDiscoveryConfig("json_attributes_topic", baseTopic() + "/attributes");
 
     sendRegistration();
@@ -35,12 +38,12 @@ void Switch::init()
             } else if (message.payload() == "false") {
                 Q_EMIT stateChangeRequested(false);
             } else {
-                qCWarning(swi) << "unknown state request" << message.payload();
+                qCWarning(lock) << "unknown state request" << message.payload();
             }
         });
     }
 }
-void Switch::setState(bool state)
+void Lock::setState(bool state)
 {
     m_state = state;
     if (HaControl::mqttClient()->state() == QMqttClient::Connected) {

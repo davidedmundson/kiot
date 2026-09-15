@@ -20,8 +20,8 @@
  * for control and monitoring.
  */
 #include "mpris.h"
-#include "core.h"
-#include "entities/mediaplayer.h"
+#include "core/core.h"
+#include "Shared/entities/mediaplayer.h"
 #include "Shared/platformhelper.h"
 
 

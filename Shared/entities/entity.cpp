@@ -17,7 +17,7 @@
  */
 
 #include "entity.h"
-#include "core.h"
+#include "core/core.h"
 #include <QHostInfo>
 #include <QJsonDocument>
 #include <QJsonObject>
