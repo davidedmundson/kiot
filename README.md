@@ -14,8 +14,10 @@
    - [Quick Install](#quick-build)
    - [Manual Install](#manual-build)
 - [Future Development](#future-development)
+- [Project Structure](#project-structure)
 - [Contributing](#contributing)
 - [Troubleshooting](#troubleshooting)
+- [See Also](#see-also)
 
 ## About
 
@@ -259,6 +261,15 @@ Long-term, Flatpak distribution is the primary focus. The goal is to publish to 
 3. **Better Documentation** - Comprehensive guides and examples
 4. **Extensibility / Plugin System** – Explore ways to allow community developed integrations
 
+## Project Structure
+
+As part of the modular rewrite of Kiot, the repository is organized into distinct, well-documented directories:
+
+- **[Core (`core/`)](core/README.md)** – Contains the main binary logic, entry point, appdata/metadata generation, and custom logging.
+- **[Shared (`Shared/`)](Shared/README.md)** – Shared utility classes (`PlatformHelper`, `DBusProperty`) and foundational elements.
+  - **[Entities (`Shared/entities/`)](Shared/entities/README.md)** – Core entity implementations required by all integrations to build and communicate with Home Assistant via MQTT.
+- **[Examples (`examples/`)](examples/README.md)** – Detailed configuration files and inspiration.
+
 ## Contributing
 
 Contributions are welcome!
@@ -278,5 +289,15 @@ Contributions are welcome!
 - Check the configuration examples above, or for more in depth examples go here [examples](/examples/README.md)
 - Review the Home Assistant MQTT documentation
 - Examine system logs for error messages
+
+
+## See Also
+
+- [KIOT Core](/core/README.md) for information about the core bin part of the project
+- [KIOT Shared](/Shared/README.md) for information about the shared lib part of the project
+- [KIOT Shared/Entities](/Shared/entities/README.md) for information about the shared lib entites part of the project
+- [KIOT Integrations](/integrations/README.md) for creating new integrations
+- [KIOT Examples](/examples/README.md) for config examples and some inspiration
+- [KIOT Helper Scripts](/scripts/README.md) for information about the helper scripts
 
 ---
