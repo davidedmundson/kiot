@@ -8,7 +8,7 @@ project(kiot VERSION 0.0.1 DESCRIPTION "KDE Internet of Things desktop integrati
 # ------------------------------------------------------------------------------
 # PROSJEKT DEVELOPERS Shown under device info in HA with version and more
 # ------------------------------------------------------------------------------
-set(PROJECT_DEVELOPERS "David Edmundson & Odd Østlie" CACHE STRING "List of developers")
+set(PROJECT_DEVELOPERS "David Edmundson & Odd Østlie" CACHE STRING "List of developers, add yourself here to be shown with the device info")
 
 
 # ------------------------------------------------------------------------------
@@ -27,13 +27,30 @@ list(REVERSE DOMAIN_PARTS)
 string(REPLACE ";" "." REVERSED_DOMAIN "${DOMAIN_PARTS}")
 set(APP_ID "${REVERSED_DOMAIN}.${PROJECT_NAME}" CACHE STRING "Reverse-DNS App ID" FORCE)
 
+
+string(TIMESTAMP CURRENT_YEAR "%Y")
+set(CURRENT_YEAR ${CURRENT_YEAR} CACHE STRING "Current year")
+# ------------------------------------------------------------------------------
+# Adds project definition for reusability in sub directories cmakelists
+# ------------------------------------------------------------------------------
+add_definitions(-DPROJECT_NAME="${PROJECT_NAME}")
+add_definitions(-DPROJECT_DESCRIPTION="${PROJECT_DESCRIPTION}")
+add_definitions(-DPROJECT_VERSION="${PROJECT_VERSION}")
+add_definitions(-DPROJECT_DOMAIN="${PROJECT_HOMEPAGE_URL}")
+
+
+message(STATUS "[CMake] Using project_name: PROJECT_NAME: ${PROJECT_NAME}")
+message(STATUS "[CMake] Using project_version: PROJECT_VERSION: ${PROJECT_VERSION}")
+message(STATUS "[CMake] Using project_description: PROJECT_DESCRIPTION: ${PROJECT_DESCRIPTION}")
+message(STATUS "[CMake] Using project_developers: PROJECT_DEVELOPERS: ${PROJECT_DEVELOPERS}")
 message(STATUS "[CMake] Using app_id: APP_ID: ${APP_ID}")
 
 #USed to make sure we do it right with flatpak builds
 option(BUILD_FLATPAK "Build for flatpak" OFF)
 
-set(PROJECT_VERSION "0.1")
-set(PROJECT_VERSION_MAJOR 0)
+#IS this needed when we use the project part to set it?
+#set(PROJECT_VERSION "0.1")
+#set(PROJECT_VERSION_MAJOR 0)
 
 set(QT_MIN_VERSION "6.6.0")
 set(KF6_MIN_VERSION "6.15")
@@ -107,6 +124,9 @@ set(SOURCES
     entities/mediaplayer.cpp
     logging/messagehandler.cpp
     logging/messagehandler.h
+
+    Shared/platformhelper.cpp
+    Shared/platformhelper.h
 )
 
 add_subdirectory(integrations)
@@ -116,7 +136,7 @@ if(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/appdata/CMakeLists.txt")
     add_subdirectory(appdata)
 endif()
 
-add_executable(kiot ${SOURCES})
+add_executable(${PROJECT_NAME} ${SOURCES})
 
 # Include resources for kwin script used by ActiveWindowWatcher
 qt_add_resources(INTEGRATIONS_RESOURCES
@@ -126,7 +146,7 @@ target_sources(${PROJECT_NAME} PRIVATE ${INTEGRATIONS_RESOURCES})
 
 
 target_link_libraries(
-    kiot
+    ${PROJECT_NAME}
     Qt6::Gui
     Qt6::Mqtt
     Qt6::DBus
@@ -143,12 +163,13 @@ target_compile_definitions(${PROJECT_NAME} PRIVATE
     PROJECT_DOMAIN="${PROJECT_HOMEPAGE_URL}"
     PROJECT_DEVELOPERS="${PROJECT_DEVELOPERS}"
     APP_ID="${APP_ID}"
+    CURRENT_YEAR="${CURRENT_YEAR}"
     $<$<CONFIG:Release>:QT_NO_DEBUG_OUTPUT>
 )
 
-install(TARGETS kiot ${KDE_INSTALL_TARGETS_DEFAULT_ARGS})
+install(TARGETS ${PROJECT_NAME} ${KDE_INSTALL_TARGETS_DEFAULT_ARGS})
 
-#ecm_install_configured_files(INPUT org.davidedmundson.kiot.desktop.in @ONLY DESTINATION ${KDE_INSTALL_AUTOSTARTDIR})
-#ecm_install_configured_files(INPUT org.davidedmundson.kiot.desktop.in @ONLY DESTINATION ${KDE_INSTALL_APPDIR})
+#ecm_install_configured_files(INPUT ${APP_ID}.desktop.in @ONLY DESTINATION ${KDE_INSTALL_AUTOSTARTDIR})
+#ecm_install_configured_files(INPUT ${APP_ID}.desktop.in @ONLY DESTINATION ${KDE_INSTALL_APPDIR})
 
 feature_summary(WHAT ALL INCLUDE_QUIET_PACKAGES FATAL_ON_MISSING_REQUIRED_PACKAGES)
