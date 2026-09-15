@@ -26,10 +26,8 @@
 #include "core.h"
 #include <QMqttClient>
 
-#include <QLoggingCategory>
-Q_DECLARE_LOGGING_CATEGORY(notify)
-Q_LOGGING_CATEGORY(notify,"entities.Notify")
 
+DEFINE_LOGGER(notify, entities.Notify)
 Notify::Notify(QObject *parent)
     : Entity(parent)
 {

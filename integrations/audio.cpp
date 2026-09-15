@@ -4,6 +4,8 @@
 #include "core.h"
 #include "entities/number.h"
 #include "entities/select.h"
+#include "Shared/platformhelper.h"
+
 
 #include <PulseAudioQt/Context>
 #include <PulseAudioQt/SinkInput>
@@ -16,10 +18,10 @@
 #include <QFile>
 #include <QTimer>
 #include <QDir>
-#include <QLoggingCategory>
-#include <cstddef>
-Q_DECLARE_LOGGING_CATEGORY(audio)
-Q_LOGGING_CATEGORY(audio, "integrations.Audio")
+
+DEFINE_LOGGER(audio, integrations.Audio)
+
+
 
 class Audio : public QObject
 {

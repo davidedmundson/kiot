@@ -5,10 +5,8 @@
 #include "core.h"
 #include <QMqttClient>
 
-#include <QLoggingCategory>
-Q_DECLARE_LOGGING_CATEGORY(numb)
-Q_LOGGING_CATEGORY(numb, "entities.Number")
 
+DEFINE_LOGGER(numb, entities.Number)
 Number::Number(QObject *parent)
     : Entity(parent)
 {

@@ -3,15 +3,15 @@
 
 #include "core.h"
 #include "entities/entities.h"
+#include "Shared/platformhelper.h"
+
 #include <QCoreApplication>
 #include <QSocketNotifier>
 #include <QTimer>
 #include <libudev.h>
 #include <unistd.h>
 
-#include <QLoggingCategory>
-Q_DECLARE_LOGGING_CATEGORY(gamepad)
-Q_LOGGING_CATEGORY(gamepad, "integration.Gamepad")
+DEFINE_LOGGER(gamepad,integrations.Gamepad)
 
 class Gamepad : public QObject
 {

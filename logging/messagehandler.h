@@ -1,7 +1,6 @@
 #ifndef KIOT_MESSAGEHANDLER_H
 #define KIOT_MESSAGEHANDLER_H
 
-#include <QLoggingCategory>
 #include <QtGlobal>
 
 
@@ -10,8 +9,6 @@
  * @brief Custom Qt message handler and logging configuration
  */
 
-// Declare logging category
-Q_DECLARE_LOGGING_CATEGORY(main_cpp)
 
 extern QtMessageHandler originalHandler;
 

@@ -11,10 +11,9 @@
 #include <BluezQt/Manager>
 #include <KSharedConfig>
 #include <KConfigGroup>
-#include <QLoggingCategory>
 
-Q_DECLARE_LOGGING_CATEGORY(bt)
-Q_LOGGING_CATEGORY(bt, "integrations.Bluetooth")
+#include "Shared/platformhelper.h"
+DEFINE_LOGGER(bt,integrations.Bluetooth)
 
 // ==== Bluetooth devices code ==========
 class BluetoothDeviceSwitch : public QObject

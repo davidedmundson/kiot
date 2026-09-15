@@ -3,6 +3,7 @@
 
 #include "core.h"
 #include "entities/select.h"
+#include "Shared/platformhelper.h"
 
 #include <KService>
 #include <KServiceGroup>
@@ -25,9 +26,9 @@
 #include <QDateTime>
 #include <QRegularExpression>
 
-#include <QLoggingCategory>
-Q_DECLARE_LOGGING_CATEGORY(appla_logger)
-Q_LOGGING_CATEGORY(appla_logger, "integration.AppLauncher")
+DEFINE_LOGGER(appla_logger,integrations.AppLauncher)
+
+
 
 namespace
 {

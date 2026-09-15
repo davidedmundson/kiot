@@ -8,9 +8,7 @@
 #include <QMqttClient>
 #include <QMqttSubscription>
 
-#include <QLoggingCategory>
-Q_DECLARE_LOGGING_CATEGORY(swi)
-Q_LOGGING_CATEGORY(swi, "entities.Switch")
+DEFINE_LOGGER(swi, entities.Switch)
 
 Switch::Switch(QObject *parent)
     : Entity(parent)

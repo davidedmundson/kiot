@@ -6,7 +6,6 @@
 
 #include <cstdio>
 
-Q_LOGGING_CATEGORY(main_cpp, "kiot.main")
 
 QtMessageHandler originalHandler = nullptr;
 
