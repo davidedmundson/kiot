@@ -106,25 +106,26 @@ file(GLOB_RECURSE ALL_CLANG_FORMAT_SOURCE_FILES *.cpp *.h *.hpp *.c)
 kde_clang_format(${ALL_CLANG_FORMAT_SOURCE_FILES})
 
 set(SOURCES
-    main.cpp
-    core.cpp
-    dbusproperty.cpp
-    dbusproperty.h
-    entities/entity.cpp
-    entities/binarysensor.cpp
-    entities/button.cpp
-    entities/number.cpp
-    entities/switch.cpp
-    entities/event.cpp
-    entities/select.cpp
-    entities/sensor.cpp
-    entities/text.cpp
-    entities/lock.cpp
-    entities/notify.cpp
-    entities/mediaplayer.cpp
-    logging/messagehandler.cpp
-    logging/messagehandler.h
+    core/main.cpp
+    core/core.cpp
+    core/logging/messagehandler.cpp
+    core/logging/messagehandler.h
 
+    
+    Shared/dbusproperty.cpp
+    Shared/dbusproperty.h
+    Shared/entities/entity.cpp
+    Shared/entities/binarysensor.cpp
+    Shared/entities/button.cpp
+    Shared/entities/number.cpp
+    Shared/entities/switch.cpp
+    Shared/entities/event.cpp
+    Shared/entities/select.cpp
+    Shared/entities/sensor.cpp
+    Shared/entities/text.cpp
+    Shared/entities/lock.cpp
+    Shared/entities/notify.cpp
+    Shared/entities/mediaplayer.cpp
     Shared/platformhelper.cpp
     Shared/platformhelper.h
 )
@@ -132,8 +133,8 @@ set(SOURCES
 add_subdirectory(integrations)
 add_subdirectory(ui)
 
-if(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/appdata/CMakeLists.txt")
-    add_subdirectory(appdata)
+if(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/core/appdata/CMakeLists.txt")
+    add_subdirectory(core/appdata)
 endif()
 
 add_executable(${PROJECT_NAME} ${SOURCES})

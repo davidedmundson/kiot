@@ -1,8 +1,8 @@
 // SPDX-FileCopyrightText: 2025 Odd Østlie <theoddpirate@gmail.com>
 // SPDX-License-Identifier: LGPL-2.1-or-later
 
-#include "core.h"
-#include "entities/entities.h"
+#include "core/core.h"
+#include "Shared/entities/entities.h"
 
 #include <Solid/Battery>
 #include <Solid/Device>

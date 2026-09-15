@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: LGPL-2.1-or-later
 
 #include "sensor.h"
-#include "core.h"
+#include "core/core.h"
 #include <QJsonDocument>
 #include <QJsonObject>
 #include <QMqttClient>

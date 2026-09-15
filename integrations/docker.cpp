@@ -9,8 +9,8 @@
  * through Home Assistant switches and event listening.
  */
 
-#include "core.h"
-#include "entities/switch.h"
+#include "core/core.h"
+#include "Shared/entities/switch.h"
 #include "Shared/platformhelper.h"
 
 

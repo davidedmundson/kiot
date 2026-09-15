@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: LGPL-2.1-or-later
 
 #include "binarysensor.h"
-#include "core.h"
+#include "core/core.h"
 #include <QMqttClient>
 
 DEFINE_LOGGER(binary, entities.BinarySensor)

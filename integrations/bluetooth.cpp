@@ -1,7 +1,7 @@
 // SPDX-FileCopyrightText: 2025 Odd Østlie <theoddpirate@gmail.com>
 // SPDX-License-Identifier: LGPL-2.1-or-later
-#include "core.h"
-#include "entities/switch.h"
+#include "core/core.h"
+#include "Shared/entities/switch.h"
 
 #include <BluezQt/Adapter>
 

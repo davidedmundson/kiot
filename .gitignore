@@ -6,4 +6,4 @@ flatpak-repo/
 .directory
 .flatpak-builder/
 .build-installer/
-appdata/generated-icons/
+core/appdata/generated-icons/
