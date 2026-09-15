@@ -219,7 +219,12 @@ MPRISPlayer=true
 | Applauncher| Select | Launch applications from HA, scans for installed apps |
 | CustomSensors | Sensor | Custom sensor integration with output from terminal command|
 | Docker | Switch | Docker container control and status as attributes |
-| MPRIS | Media Player | MPRIS media player control [Custom Integration](https://github.com/TheOddPirate/mqtt_media_player)|Button
+| MPRIS | Media Player | MPRIS media player control [Custom Integration](https://github.com/TheOddPirate/mqtt_media_player)|
+| Game Launcher | Select | Game launcher for steam/heroic/lutris games|
+| Notifications | Notify | Send notifications to KDE via MQTT |
+| SystemD | Switch | Systemd user service control|
+
+
 ## Flatpak Build
 
 Flatpak installation is also supported:
