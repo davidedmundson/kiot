@@ -136,9 +136,10 @@ ConnectedNode::ConnectedNode(QObject *parent)
     setDiscoveryConfig("device",
                        QVariantMap({{"name", hostname()},
                                     {"identifiers", "linux_ha_bridge_" + hostname()},
-                                    {"sw_version", "0.1"},
-                                    {"manufacturer", "Linux HA Bridge"},
-                                    {"model", "Linux"}}));
+                                    {"sw_version", QStringLiteral(PROJECT_VERSION)},
+                                    {"manufacturer", QStringLiteral(PROJECT_DEVELOPERS)}, //TODO update to KDE if we manage to make it part of the official portfolio
+                                    {"model", QStringLiteral(PROJECT_NAME) },
+                                    {"hw_version",QSysInfo::prettyProductName() + " - " + QSysInfo::kernelVersion()}}));
 
     auto c = HaControl::mqttClient();
     c->setWillTopic(baseTopic());

@@ -24,12 +24,12 @@ int main(int argc, char **argv)
     initLogging();
     
     KAboutData aboutData(
-        QStringLiteral("kiot"),
+        QStringLiteral(PROJECT_NAME),
         "KDE IOT",
-        QStringLiteral("0.1"),
-        "KDE Internet of Things Connection",
+        QStringLiteral(PROJECT_VERSION),
+        QStringLiteral(PROJECT_DESCRIPTION),
         KAboutLicense::GPL_V3,
-        "© 2024"
+        "© 2024-"+QStringLiteral(CURRENT_YEAR)
     );
     
     KDBusService service(KDBusService::Unique | KDBusService::Replace);
@@ -40,7 +40,7 @@ int main(int argc, char **argv)
     KSignalHandler::self()->watchSignal(SIGINT);
     QObject::connect(KSignalHandler::self(), &KSignalHandler::signalReceived, [](int sig) {
         if (sig == SIGTERM || sig == SIGINT) {
-            qCInfo(main_cpp) << "Shutting down kiot";
+            qCInfo(main_cpp) << "Shutting down" << QStringLiteral(PROJECT_NAME);
             QApplication::quit();
         }
     });

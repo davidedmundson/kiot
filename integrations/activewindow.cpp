@@ -3,8 +3,7 @@
 
 #include "core.h"
 #include "entities/sensor.h"
-
-#include <KSandbox>
+#include "Shared/platformhelper.h"
 #include <QApplication>
 #include <QDBusConnection>
 #include <QDBusInterface>
@@ -13,10 +12,9 @@
 #include <QFile>
 #include <QStandardPaths>
 #include <QTimer>
-#include <QLoggingCategory>
 
-Q_DECLARE_LOGGING_CATEGORY(aw)
-Q_LOGGING_CATEGORY(aw, "integrations.ActiveWindow")
+
+DEFINE_LOGGER(aw,integrations.ActiveWindow)
 
 class KDEActiveWindowWatcher : public QObject
 {
@@ -42,7 +40,7 @@ public:
         if (!m_scriptPath.isEmpty() && QFile::exists(m_scriptPath)) {
             QFile::remove(m_scriptPath);
         }
-        if (KSandbox::isFlatpak()) {
+        if (PlatformHelper::isFlatpak()) {
             auto new_path = QStandardPaths::writableLocation(QStandardPaths::CacheLocation);
             QFile f(new_path + "/activewindow_kwin.js");
             if (f.exists()) f.remove();
@@ -72,7 +70,7 @@ private:
         QString scriptContent = QString::fromUtf8(file.readAll());
         file.close();
         //TODO add a servicename replacer for a just working script even in rebranded forks
-        //scriptContent.replace("com.theoddpirate.kiot", PlatformHelper::generateServiceName());
+        scriptContent.replace("org.davidedmundson.kiot", PlatformHelper::generateServiceName());
 
         QString tempPath = QStandardPaths::writableLocation(QStandardPaths::TempLocation) + "/activewindow_kwin.js";
         if (QFile::exists(tempPath)) QFile::remove(tempPath);
@@ -95,8 +93,8 @@ private:
             return;
         }
         //TODO implement dynamic servicename generation
-        //const QString serviceName = PlatformHelper::generateServiceName() + ".ActiveWindow";
-        const QString serviceName = "org.davidedmundson.kiot.ActiveWindow";
+        const QString serviceName = PlatformHelper::generateServiceName() + ".ActiveWindow";
+      //  const QString serviceName = QString(APP_ID) + ".ActiveWindow";
             
         if (QDBusConnection::sessionBus().registerService(serviceName) &&
             QDBusConnection::sessionBus().registerObject("/ActiveWindow", serviceName, this, QDBusConnection::ExportAllSlots))
@@ -146,7 +144,7 @@ private:
         cleanup();
 
         QString scriptPathToUse = m_scriptPath;
-        if (KSandbox::isFlatpak()) {
+        if (PlatformHelper::isFlatpak()) {
             auto new_path = QStandardPaths::writableLocation(QStandardPaths::CacheLocation);
             if (!QDir(new_path).exists()) QDir().mkpath(new_path);
 
@@ -197,6 +195,12 @@ private:
 
 void setupActiveWindow()
 {
+    if(PlatformHelper::detectDesktopEnvironment() != "kde")
+    {
+        qCDebug(aw) << "KDE Active Window integration is only supported on KDE Plasma";
+        qCDebug(aw) << "Disable it in you config file under [integrations] and set ActiveWindow=false"
+        return;
+    }
     new KDEActiveWindowWatcher(qApp);
 }
 
