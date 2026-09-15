@@ -10,13 +10,11 @@
 #include <QDBusReply>
 #include <QRegularExpression>
 #include <QFileInfo>
-#include <QLoggingCategory>
 #include <QTimer>
 #include <KSharedConfig>
 #include <KConfigGroup>
 
-Q_DECLARE_LOGGING_CATEGORY(SystemD)
-Q_LOGGING_CATEGORY(SystemD, LOG_CAT(integrations.SystemD))
+DEFINE_LOGGER(SystemD, integrations.SystemD)
 
 class SystemDWatcher : public QObject
 {
@@ -66,8 +64,6 @@ SystemDWatcher::SystemDWatcher(QObject *parent)
 // keeps the systemd config group in sync with the actual services available
 bool SystemDWatcher::ensureConfig()
 {
-    // Hent ut KSharedConfig basert på filstien fra PlatformHelper
-    // Merk: KSharedConfig bruker som regel standardnavn, men du kan peke den på en spesifikk fil slik:
     auto config = KSharedConfig::openConfig();
     KConfigGroup settings(config, "systemd");
 
@@ -79,7 +75,6 @@ bool SystemDWatcher::ensureConfig()
 
     bool configChanged = false;
     for (const QString &svc : currentServices) {
-        // KConfig sin hasKey() tilsvarer QSettings sin contains()
         if (!settings.hasKey(svc)) {
             settings.writeEntry(svc, false);
             configChanged = true;
@@ -87,9 +82,8 @@ bool SystemDWatcher::ensureConfig()
         }
     }
     
-    const QStringList configServices = settings.keyList(); // keyList() tilsvarer allKeys() for gruppen
+    const QStringList configServices = settings.keyList(); 
     
-    // Remove services no longer available
     for (const QString &cfgSvc : configServices) {
         if (!currentServices.contains(cfgSvc) && cfgSvc != QLatin1String("initialized")) {
             settings.deleteEntry(cfgSvc);
@@ -99,7 +93,7 @@ bool SystemDWatcher::ensureConfig()
     }
 
     if (configChanged) {
-        config->sync(); // Sync lagrer endringene til disk
+        config->sync(); 
         qCDebug(SystemD) << "SystemD configuration synchronized";
     }
     return true;
@@ -114,18 +108,15 @@ void SystemDWatcher::performInit()
     auto config = KSharedConfig::openConfig();
     KConfigGroup settings(config, "systemd");
   
-    // Initialize switches for enabled services
     for (const QString &svc : listUserServices()) {
-        // readEntry tar en standardverdien (her false) om nøkkelen ikke finnes
         if (!settings.hasKey(svc) || !settings.readEntry(svc, false))
-            continue; // skip disabled
+            continue; 
 
         auto *sw = new Switch(this);
         sw->setId("systemd_" + sanitizeServiceId(svc));
         sw->setName(sanitizeServiceId(svc));
         sw->setDiscoveryConfig("icon", "mdi:account-wrench");
         sw->setState(false); // temp
-        // Query initial state from D-Bus
         QDBusReply<QDBusObjectPath> unitPathReply = m_systemdUser->call("LoadUnit", svc);
         if (unitPathReply.isValid()) {
             qCDebug(SystemD) << "Getting inital state for " << svc;
@@ -140,14 +131,12 @@ void SystemDWatcher::performInit()
                 qCDebug(SystemD) << "Failed to get state for " << svc << ": " << stateReply.error().message();
             }
 
-            // Listen for live property changes
             QDBusConnection::sessionBus().connect("org.freedesktop.systemd1",unitPath.path(),"org.freedesktop.DBus.Properties","PropertiesChanged",this,SLOT(onUnitPropertiesChanged(QString, QVariantMap, QStringList, QDBusMessage)));
         } 
         else {
             qCWarning(SystemD) << "Failed to get unit path for " << svc << ": " << unitPathReply.error().message();
         }
 
-        // Connect switch to D-Bus for toggling service (works in flatpak)
         connect(sw, &Switch::stateChangeRequested, this, [this, svc](bool state) {
             if (!m_systemdUser || !m_systemdUser->isValid()) {
                 qCWarning(SystemD) << "SystemD: D-Bus interface not available for toggling service";
@@ -155,7 +144,7 @@ void SystemDWatcher::performInit()
             }
 
             QString method = state ? "StartUnit" : "StopUnit";
-            QString mode = "replace"; // replace existing job if any
+            QString mode = "replace"; 
 
             QDBusReply<QDBusObjectPath> reply = m_systemdUser->call(method, svc, mode);
             if (!reply.isValid()) {
@@ -221,10 +210,8 @@ QString SystemDWatcher::pathToUnitName(const QString &path) const
 }
 
 // Slot for handling live updates from systemd units
-void SystemDWatcher::onUnitPropertiesChanged(const QString &interface,
-                                           const QVariantMap &changedProps,
-                                           const QStringList &invalidatedProps,
-                                           const QDBusMessage &msg)
+void SystemDWatcher::onUnitPropertiesChanged(const QString &interface,const QVariantMap &changedProps,
+                                           const QStringList &invalidatedProps,const QDBusMessage &msg)
 {
     Q_UNUSED(invalidatedProps);
     if (interface != "org.freedesktop.systemd1.Unit")

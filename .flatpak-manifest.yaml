@@ -22,8 +22,9 @@ finish-args:
   - "--filesystem=xdg-config/kdeglobals:ro"  
 #Docker
   - "--filesystem=/run/docker.sock"
-
-
+#SystemD
+  - "--talk-name=org.freedesktop.systemd1"
+#Notification integration i think
   - "--talk-name=org.kde.StatusNotifierWatcher"
   - "--own-name=org.kde.StatusNotifierItem-2-2"
 #Kwin and active window integration
