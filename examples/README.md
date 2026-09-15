@@ -2,10 +2,11 @@
 
 ## Navigation
 
-* [About](#about)
-* [Scripts](#scripts)
-* [System](#system)
-* [Custom Sensors](#custom-sensors)
+- [About](#about)
+- [Scripts](#scripts)
+- [System](#system)
+- [Custom Sensors](#custom-sensors)
+- [See Also](#see-also)
 
 ## About
 
@@ -34,3 +35,12 @@ Systemd user service configurations and automation scripts for running Kiot smoo
 Examples and configurations for exposing hardware monitoring and system metrics to Home Assistant.
 
 * Directory: [`examples/CustomSensors/`](/examples/CustomSensors/README.md)
+
+## See also
+
+- [KIOT Main](../README.md) for project overview and setup
+- [KIOT Shared](../Shared/README.md)
+- [KIOT Shared/Entities](/Shared/entities/README.md) for information about the shared lib entites part of the project
+- [KIOT Integrations](../integrations/README.md) for creating new integrations
+- [KIOT Example](../examples/README.md) for config examples and some inspiration
+- [KIOT Helper Scripts](/scripts/README.md) for information about the helper scripts

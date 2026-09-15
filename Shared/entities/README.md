@@ -448,4 +448,6 @@ When adding new entity types:
 - [Home Assistant MQTT Integration Documentation](https://www.home-assistant.io/integrations/mqtt/)
 - [Home Assistant Entity Types](https://www.home-assistant.io/integrations/#search/mqtt)
 - [KIOT Main README](../../README.md) for project overview and setup
+- [KIOT Core README](../../core/README.md)
 - [KIOT Integrations README](../../integrations/README.md) for creating new integrations
+- [KIOT Example](../../examples/README.md) for config examples and some inspiration
