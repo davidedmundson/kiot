@@ -24,6 +24,7 @@ set(KIOT_INTEGRATIONS_SRC
     applauncher.cpp
     mpris.cpp
     docker.cpp
+    systemd.cpp
 )
 
 
