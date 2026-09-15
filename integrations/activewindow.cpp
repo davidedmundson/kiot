@@ -198,7 +198,7 @@ void setupActiveWindow()
     if(PlatformHelper::detectDesktopEnvironment() != "kde")
     {
         qCDebug(aw) << "KDE Active Window integration is only supported on KDE Plasma";
-        qCDebug(aw) << "Disable it in you config file under [integrations] and set ActiveWindow=false"
+        qCDebug(aw) << "Disable it in you config file under [integrations] and set ActiveWindow=false";
         return;
     }
     new KDEActiveWindowWatcher(qApp);
