@@ -3,6 +3,7 @@
 
 #include "core.h"
 #include "entities/entities.h"
+#include "Shared/platformhelper.h"
 
 #include <KConfigGroup>
 #include <KProcess>
@@ -16,9 +17,9 @@
 #include <QStringView>
 #include <QTimer>
 
-#include <QLoggingCategory>
-Q_DECLARE_LOGGING_CATEGORY(customSensors)
-Q_LOGGING_CATEGORY(customSensors, "integration.CustomSensors")
+DEFINE_LOGGER(customSensors,integrations.CustomSensors)
+
+
 
 constexpr qint64 MinimumIntervalMs = 1000;
 constexpr qint64 DefaultIntervalMs = 10 * 1000;

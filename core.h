@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: LGPL-2.1-or-later
 
 #pragma once
-
+#include "Shared/platformhelper.h"
 #include <KSharedConfig>
 #include <QCoreApplication>
 #include <QMqttSubscription>

@@ -22,6 +22,8 @@
 #include "mpris.h"
 #include "core.h"
 #include "entities/mediaplayer.h"
+#include "Shared/platformhelper.h"
+
 
 // Qt Core includes
 #include <QEventLoop>
@@ -49,9 +51,10 @@
 #include <QNetworkReply>
 #include <QNetworkRequest>
 
-#include <QLoggingCategory>
-Q_DECLARE_LOGGING_CATEGORY(mpris)
-Q_LOGGING_CATEGORY(mpris, "integration.Mpris")
+#include "Shared/platformhelper.h"
+DEFINE_LOGGER(mpris, integrations.Mpris)
+
+
 
 // Include generated DBus interface headers
 #include "dbusproperties.h"

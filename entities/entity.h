@@ -25,6 +25,7 @@
 #include <QString>
 #include <QVariant>
 #include <QVariantMap>
+#include "Shared/platformhelper.h"
 
 /**
  * @class Entity

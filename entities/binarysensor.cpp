@@ -5,9 +5,8 @@
 #include "core.h"
 #include <QMqttClient>
 
-#include <QLoggingCategory>
-Q_DECLARE_LOGGING_CATEGORY(binary)
-Q_LOGGING_CATEGORY(binary, "entities.BinarySensor")
+DEFINE_LOGGER(binary, entities.BinarySensor)
+
 
 BinarySensor::BinarySensor(QObject *parent)
     : Entity(parent)

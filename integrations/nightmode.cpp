@@ -2,6 +2,8 @@
 // SPDX-License-Identifier: LGPL-2.1-or-later
 #include "core.h"
 #include "entities/entities.h"
+#include "Shared/platformhelper.h"
+
 #include <QCoreApplication>
 #include "dbusproperties.h"
 #include "kwinnightlight.h"
@@ -9,9 +11,9 @@
 #include <QDBusMessage>
 #include <QDBusReply>
 
-#include <QLoggingCategory>
-Q_DECLARE_LOGGING_CATEGORY(nightmode)
-Q_LOGGING_CATEGORY(nightmode, "integration.NightMode")
+DEFINE_LOGGER(nightmode, integrations.NightMode)
+
+
 
 class NightMode : public QObject
 {

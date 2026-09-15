@@ -11,8 +11,9 @@
 
 #include "core.h"
 #include "entities/switch.h"
+#include "Shared/platformhelper.h"
 
-#include <KSandbox>
+
 #include <KConfigGroup>
 #include <KSharedConfig>
 #include <KUser>
@@ -26,9 +27,8 @@
 
 #include <atomic>
 
-#include <QLoggingCategory>
-Q_DECLARE_LOGGING_CATEGORY(docker)
-Q_LOGGING_CATEGORY(docker, "integrations.Docker")
+DEFINE_LOGGER(docker,integrations.Docker)
+
 
 static int SOCKET_TIMEOUT_MS = 10000;
 //TODO create a dynamic docker socket path detection or just config option?
@@ -540,7 +540,7 @@ private slots:
  */
 bool isUserInDockerGroup()
 {
-    if(KSandbox::isFlatpak())
+    if(PlatformHelper::isFlatpak())
         return true;
     KUser currentUser;
     const QList<KUserGroup> groups = currentUser.groups();

@@ -7,6 +7,8 @@
 
 #include "core.h"
 #include "entities/entities.h"
+#include "Shared/platformhelper.h"
+
 #include <KIdleTime>
 
 #include <QDir>
@@ -17,9 +19,9 @@
 #include <sys/ioctl.h>
 #include <unistd.h>
 
-#include <QLoggingCategory>
-Q_DECLARE_LOGGING_CATEGORY(cam)
-Q_LOGGING_CATEGORY(cam, "integration.Camera")
+DEFINE_LOGGER(cam,integrations.Camera)
+
+
 
 class CameraWatcher : public QObject
 {

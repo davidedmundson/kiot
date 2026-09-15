@@ -10,8 +10,7 @@
 #include <QTimer>
 #include <QLoggingCategory>
 
-Q_DECLARE_LOGGING_CATEGORY(core)
-Q_LOGGING_CATEGORY(core, "kiot.HaControl")
+DEFINE_LOGGER(core, HaControl)
 
 HaControl *HaControl::s_self = nullptr;
 QList<IntegrationFactory> HaControl::s_integrations;

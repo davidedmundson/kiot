@@ -3,17 +3,17 @@
 
 #include "core.h"
 #include "entities/entities.h"
+#include "Shared/platformhelper.h"
+
 #include <KConfigGroup>
 #include <KProcess>
 #include <KSharedConfig>
-#include <KSandbox>
 
 #include <QAction>
 #include <QCoreApplication>
 
-#include <QLoggingCategory>
-Q_DECLARE_LOGGING_CATEGORY(scripts)
-Q_LOGGING_CATEGORY(scripts, "integration.Scripts")
+DEFINE_LOGGER(scripts, integrations.Scripts)
+
 
 void registerScripts()
 {
@@ -48,8 +48,8 @@ void registerScripts()
             p->setProgram(program);
             p->setArguments(args);
 
-            if (KSandbox::isFlatpak()) {
-                KSandbox::ProcessContext ctx = KSandbox::makeHostContext(*p);
+            if (PlatformHelper::isFlatpak()) {
+                KSandbox::ProcessContext ctx = PlatformHelper::makeHostContext(*p);
                 p->setProgram(ctx.program);
                 p->setArguments(ctx.arguments);
             }

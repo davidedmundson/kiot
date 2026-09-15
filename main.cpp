@@ -8,6 +8,7 @@
 #include <KDBusService>
 #include <KSignalHandler>
 
+DEFINE_LOGGER(main_cpp, main)
 /**
  * @brief Main entry point for the kiot application
  * @param argc Argument count
@@ -33,7 +34,7 @@ int main(int argc, char **argv)
     );
     
     KDBusService service(KDBusService::Unique | KDBusService::Replace);
-    
+    qCInfo(main_cpp) << "Starting" << PROJECT_NAME << "version:" << PROJECT_VERSION;
     HaControl appControl;
 
     KSignalHandler::self()->watchSignal(SIGTERM);

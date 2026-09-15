@@ -4,14 +4,17 @@
 #include "core.h"
 #include "entities/event.h"
 #include "entities/select.h"
+#include "Shared/platformhelper.h"
+
+
 #include <KConfigGroup>
 #include <KGlobalAccel>
 #include <KSharedConfig>
+
 #include <QAction>
 #include <QTimer>
 #include <QApplication>
 #include <QStringList>
-#include <QLoggingCategory>
 #include <QDBusConnection>
 #include <QDBusInterface>
 #include <QDBusReply>
@@ -21,8 +24,9 @@
 #include <algorithm>
 #include <QLocale>
 
-Q_DECLARE_LOGGING_CATEGORY(shortcut)
-Q_LOGGING_CATEGORY(shortcut, "integration.Shortcut")
+
+DEFINE_LOGGER(shortcut, integrations.Shortcut)
+
 
 class Shortcut : public QObject
 {

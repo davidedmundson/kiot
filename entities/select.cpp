@@ -8,9 +8,8 @@
 #include <QMqttClient>
 #include <QMqttSubscription>
 
-#include <QLoggingCategory>
-Q_DECLARE_LOGGING_CATEGORY(sel)
-Q_LOGGING_CATEGORY(sel, "entities.Select")
+
+DEFINE_LOGGER(sel, entities.Select)
 
 Select::Select(QObject *parent)
     : Entity(parent)

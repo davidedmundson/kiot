@@ -12,9 +12,10 @@
 #include <KSharedConfig>
 #include <KConfigGroup>
 
-#include <QLoggingCategory>
-Q_DECLARE_LOGGING_CATEGORY(batter)
-Q_LOGGING_CATEGORY(batter, "integration.Battery")
+#include "Shared/platformhelper.h"
+DEFINE_LOGGER(batter,integrations.Battery)
+
+
 
 
 // Helper functions to map the types to human strings

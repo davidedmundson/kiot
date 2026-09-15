@@ -8,10 +8,8 @@
 #include <QMqttClient>
 #include <QMqttSubscription>
 
-#include <QLoggingCategory>
-Q_DECLARE_LOGGING_CATEGORY(lock)
-Q_LOGGING_CATEGORY(lock, "entities.Lock")
 
+DEFINE_LOGGER(lock, entities.Lock)
 Lock::Lock(QObject *parent)
     : Entity(parent)
 {

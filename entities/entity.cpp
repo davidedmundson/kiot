@@ -24,9 +24,8 @@
 #include <QJsonArray>
 #include <QMqttClient>
 
-#include <QLoggingCategory>
-Q_DECLARE_LOGGING_CATEGORY(base)
-Q_LOGGING_CATEGORY(base, "entities.Entity")
+
+DEFINE_LOGGER(base, entities.Entity)
 
 static QString s_topicPrefix = "kiot";
 
