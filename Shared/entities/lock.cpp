@@ -9,7 +9,7 @@
 #include <QMqttSubscription>
 
 
-DEFINE_LOGGER(lock, entities.Lock)
+DEFINE_LOGGER(lock, Shared.Entities.Lock)
 Lock::Lock(QObject *parent)
     : Entity(parent)
 {

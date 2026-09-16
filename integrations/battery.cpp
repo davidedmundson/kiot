@@ -13,7 +13,7 @@
 #include <KConfigGroup>
 
 #include "Shared/platformhelper.h"
-DEFINE_LOGGER(batter,integrations.Battery)
+DEFINE_LOGGER(batter,Integrations.Battery)
 
 
 
@@ -273,7 +273,7 @@ void BatteryWatcher::updateBatteryAttributes(const QString &udi)
 
 void BatteryWatcher::ensureConfig()
 {
-    auto config = KSharedConfig::openConfig();
+    auto config = KSharedConfig::openConfig(PlatformHelper::configFilePath(), KConfig::SimpleConfig );
     auto group = KConfigGroup(config, "Battery");
     if (group.hasKey("RemoveDevices")){
         bool value = group.readEntry("RemoveDevices", false);

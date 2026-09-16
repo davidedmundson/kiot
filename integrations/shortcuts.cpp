@@ -25,7 +25,7 @@
 #include <QLocale>
 
 
-DEFINE_LOGGER(shortcut, integrations.Shortcut)
+DEFINE_LOGGER(shortcut, Integrations.Shortcut)
 
 
 class Shortcut : public QObject
@@ -176,7 +176,7 @@ private:
     // Register our shortcuts to allow events to be executed from it to trigger automations
     void registerShortcuts()
     {
-        auto shortcutConfigToplevel = KSharedConfig::openConfig()->group("Shortcuts");
+        auto shortcutConfigToplevel = KSharedConfig::openConfig(PlatformHelper::configFilePath(), KConfig::SimpleConfig )->group("Shortcuts");
         const QStringList shortcutIds = shortcutConfigToplevel.groupList();
         for (const QString &shortcutId : shortcutIds) {
             auto shortcutConfig = shortcutConfigToplevel.group(shortcutId);

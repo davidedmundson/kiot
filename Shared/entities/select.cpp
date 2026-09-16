@@ -9,7 +9,7 @@
 #include <QMqttSubscription>
 
 
-DEFINE_LOGGER(sel, entities.Select)
+DEFINE_LOGGER(sel, Shared.Entities.Select)
 
 Select::Select(QObject *parent)
     : Entity(parent)

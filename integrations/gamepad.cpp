@@ -11,7 +11,7 @@
 #include <libudev.h>
 #include <unistd.h>
 
-DEFINE_LOGGER(gamepad,integrations.Gamepad)
+DEFINE_LOGGER(gamepad,Integrations.Gamepad)
 
 class Gamepad : public QObject
 {

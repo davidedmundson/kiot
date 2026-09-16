@@ -13,7 +13,7 @@
 #include <KConfigGroup>
 
 #include "Shared/platformhelper.h"
-DEFINE_LOGGER(bt,integrations.Bluetooth)
+DEFINE_LOGGER(bt,Integrations.Bluetooth)
 
 // ==== Bluetooth devices code ==========
 class BluetoothDeviceSwitch : public QObject
@@ -272,7 +272,7 @@ void BluetoothAdapterWatcher::update()
 
 void BluetoothAdapterWatcher::ensureConfig()
 {
-    auto config = KSharedConfig::openConfig();
+    auto config = KSharedConfig::openConfig(PlatformHelper::configFilePath(), KConfig::SimpleConfig );
     auto group = KConfigGroup(config, "Bluetooth");
     if (group.hasKey("RemoveDevices")){
         bool value = group.readEntry("RemoveDevices", false);

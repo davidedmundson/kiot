@@ -37,6 +37,7 @@ add_definitions(-DPROJECT_NAME="${PROJECT_NAME}")
 add_definitions(-DPROJECT_DESCRIPTION="${PROJECT_DESCRIPTION}")
 add_definitions(-DPROJECT_VERSION="${PROJECT_VERSION}")
 add_definitions(-DPROJECT_DOMAIN="${PROJECT_HOMEPAGE_URL}")
+add_definitions(-DAPP_ID="${APP_ID}")
 
 
 message(STATUS "[CMake] Using project_name: PROJECT_NAME: ${PROJECT_NAME}")
@@ -79,6 +80,8 @@ find_package(Qt6 ${QT_MIN_VERSION} CONFIG REQUIRED COMPONENTS
     DBus
     Widgets
     Mqtt
+    Quick
+    QuickWidgets
 )
 
 find_package(KF6 ${KF6_MIN_VERSION} REQUIRED COMPONENTS
@@ -117,49 +120,59 @@ set(SOURCES
     core/startup/desktopmanager.cpp
     core/startup/desktopmanager.h    
 
-    
-    Shared/dbusproperty.cpp
-    Shared/dbusproperty.h
-    Shared/entities/entity.cpp
-    Shared/entities/binarysensor.cpp
-    Shared/entities/button.cpp
-    Shared/entities/number.cpp
-    Shared/entities/switch.cpp
-    Shared/entities/event.cpp
-    Shared/entities/select.cpp
-    Shared/entities/sensor.cpp
-    Shared/entities/text.cpp
-    Shared/entities/lock.cpp
-    Shared/entities/notify.cpp
-    Shared/entities/mediaplayer.cpp
-    Shared/platformhelper.cpp
-    Shared/platformhelper.h
 )
-
+add_subdirectory(Shared)
 add_subdirectory(integrations)
-add_subdirectory(ui)
 
+# Add KCM if not building Flatpak
+if(NOT BUILD_FLATPAK)
+    add_subdirectory(kcm)
+endif()
+
+# Add qt ui if it exists
+if(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/core/ui_qt/CMakeLists.txt")
+    add_subdirectory(core/ui_qt)
+endif()
+
+# Add appdata if it exists
 if(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/core/appdata/CMakeLists.txt")
     add_subdirectory(core/appdata)
 endif()
 
 add_executable(${PROJECT_NAME} ${SOURCES})
 
+qt_add_qml_module(${PROJECT_NAME}
+    URI main_qt.window
+    RESOURCE_PREFIX /imports
+    VERSION 1.0
+    QML_FILES
+        core/ui_qt/ui/main.qml
+    RESOURCES
+        core/ui_qt/resources.qrc
+)
 # Include resources for kwin script used by ActiveWindowWatcher
 qt_add_resources(INTEGRATIONS_RESOURCES
     integrations/resources.qrc
 )
-target_sources(${PROJECT_NAME} PRIVATE ${INTEGRATIONS_RESOURCES})
+target_sources(${PROJECT_NAME} PRIVATE 
+    ${INTEGRATIONS_RESOURCES}
+
+    )
 
 
-target_link_libraries(
-    ${PROJECT_NAME}
+target_link_libraries(${PROJECT_NAME} PRIVATE
     Qt6::Gui
     Qt6::Mqtt
     Qt6::DBus
-    KIOTIntegrations
+    Qt6::Quick
+    Qt6::QuickWidgets
     KF6::CoreAddons
     KF6::DBusAddons
+    KIOTShared
+    KIOT_UIQT
+    KIOTIntegrations
+
+  
 )
 
 #Adds the variables from cmakelist so its usable from cpp

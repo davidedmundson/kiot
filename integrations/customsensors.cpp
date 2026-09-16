@@ -17,7 +17,7 @@
 #include <QStringView>
 #include <QTimer>
 
-DEFINE_LOGGER(customSensors,integrations.CustomSensors)
+DEFINE_LOGGER(customSensors,Integrations.CustomSensors)
 
 
 
@@ -149,7 +149,7 @@ private:
 
 void registerCustomSensors()
 {
-    auto sensorConfigToplevel = KSharedConfig::openConfig()->group("CustomSensors");
+    auto sensorConfigToplevel = KSharedConfig::openConfig(PlatformHelper::configFilePath(), KConfig::SimpleConfig )->group("CustomSensors");
     const QStringList sensorIds = sensorConfigToplevel.groupList();
     int loaded = 0;
     for (const QString &sensorId : sensorIds) {

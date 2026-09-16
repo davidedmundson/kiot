@@ -19,7 +19,7 @@
 #include <QTimer>
 #include <QDir>
 
-DEFINE_LOGGER(audio, integrations.Audio)
+DEFINE_LOGGER(audio, Integrations.Audio)
 
 
 

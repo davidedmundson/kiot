@@ -11,10 +11,9 @@
 #include <QDir>
 #include <QTextStream>
 #include <QFileInfo>
-#include <QLoggingCategory>
 #include <QGuiApplication>
-Q_DECLARE_LOGGING_CATEGORY(sm)
-Q_LOGGING_CATEGORY(sm, LOG_CAT(SystemdManager))
+
+DEFINE_LOGGER(sm, Core.Startup.SystemdManager)
 
 SystemdManager::SystemdManager(QObject *parent) : QObject(parent) {}
 

@@ -14,7 +14,7 @@
 #include <QTimer>
 
 
-DEFINE_LOGGER(aw,integrations.ActiveWindow)
+DEFINE_LOGGER(aw, Integrations.ActiveWindow)
 
 class KDEActiveWindowWatcher : public QObject
 {

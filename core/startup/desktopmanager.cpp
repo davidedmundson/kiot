@@ -8,11 +8,10 @@
 #include <QDir>
 #include <QTextStream>
 #include <QFileInfo>
-#include <QLoggingCategory>
 #include <QCoreApplication>
 
-Q_DECLARE_LOGGING_CATEGORY(dm)
-Q_LOGGING_CATEGORY(dm, LOG_CAT(DesktopManager))
+
+DEFINE_LOGGER(dm, Core.Startup.DesktopManager)
 
 DesktopManager::DesktopManager(QObject *parent) : QObject(parent) {}
 

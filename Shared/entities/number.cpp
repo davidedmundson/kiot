@@ -6,7 +6,7 @@
 #include <QMqttClient>
 
 
-DEFINE_LOGGER(numb, entities.Number)
+DEFINE_LOGGER(numb, Shared.Entities.Number)
 Number::Number(QObject *parent)
     : Entity(parent)
 {
