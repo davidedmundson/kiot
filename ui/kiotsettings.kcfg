@@ -22,6 +22,10 @@
             <label>Use TLS</label>
             <default>false</default>
         </entry>
+        <entry name="autostart" type="Bool">
+            <label>Autostart</label>
+            <default>false</default>
+        </entry>
     </group>
 </kcfg>
 

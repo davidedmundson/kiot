@@ -40,6 +40,11 @@ KCM.SimpleKCM {
             checked: kcm.settings.tls
             onToggled: kcm.settings.tls = checked
         }
+        QQC2.CheckBox {
+            Kirigami.FormData.label: i18n("Autostart:")
+            checked: kcm.settings.autostart
+            onToggled: kcm.settings.autostart = checked
+        }
     }
 }
 
