@@ -110,6 +110,12 @@ set(SOURCES
     core/core.cpp
     core/logging/messagehandler.cpp
     core/logging/messagehandler.h
+    core/startup/startupmanager.cpp
+    core/startup/startupmanager.h
+    core/startup/systemdmanager.cpp
+    core/startup/systemdmanager.h
+    core/startup/desktopmanager.cpp
+    core/startup/desktopmanager.h    
 
     
     Shared/dbusproperty.cpp
