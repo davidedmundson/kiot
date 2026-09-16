@@ -13,6 +13,9 @@ This is a collection of examples on system setup to help you get started.
 
 ## Autostart
 
+> **Note:** Autostart is now handled automatically by `kiot` via the kcm module/configuration file (`[general]` -> `autostart=true/false`). You typically no longer need to set this up manually. The examples and scripts below are kept as a reference and as a manual fallback in case the automatic autostart management fails in special environments. (Did it fail for you? Please feel free to send us a log!)
+
+
 Example of a systemd user service to autostart Kiot on login. For a copy-paste ready version, check the [kiot.service](/examples/System/kiot.service) file.
 <details>
 <summary>Click to Expand Example Output</summary>
