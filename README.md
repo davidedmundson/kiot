@@ -121,6 +121,7 @@ port=1883
 user=mqtt_user
 password=secure_password
 tls=false
+autostart=false 
 ```
 
 #### Scripts Configuration
