@@ -16,7 +16,7 @@ finish-args:
   - "--socket=session-bus"
   - "--socket=system-bus"
   - "--socket=pulseaudio"
-  - "--filesystem=home:ro"
+ 
   - "--filesystem=xdg-config/kiotrc"
 #GameLauncher
   - "--filesystem=xdg-data/Steam:ro"      # For Steam
@@ -26,6 +26,7 @@ finish-args:
   - "--filesystem=xdg-config/kdeglobals:ro"  
 #Docker
   - "--filesystem=/run/docker.sock"
+  - "--filesystem=xdg-config/autostart:rw"  #for auto startup on flatpak
 #SystemD
   - "--talk-name=org.freedesktop.systemd1"
 #Notification integration i think

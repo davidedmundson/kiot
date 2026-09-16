@@ -2,6 +2,8 @@
 // SPDX-License-Identifier: LGPL-2.1-or-later
 
 #include "core/core.h"
+#include "core.h"
+#include "core/startup/startupmanager.h"
 #include "Shared/entities/entities.h"
 #include <KConfigGroup>
 #include <QJsonDocument>
@@ -9,7 +11,7 @@
 #include <QMqttClient>
 #include <QTimer>
 #include <QLoggingCategory>
-
+#include <QApplication>
 DEFINE_LOGGER(core, HaControl)
 
 HaControl *HaControl::s_self = nullptr;
@@ -25,11 +27,40 @@ public:
     void init() override;
 };
 
+
+void HaControl::validateStartup(bool autostart)
+{
+    auto m_startupManager = new StartupManager(this);
+    if( !m_startupManager->isAutostartEnabled() && autostart){
+        if(m_startupManager->setAutostart(autostart))
+        {
+            QString startup_used = m_startupManager->shouldUseSystemd() ? "systemd" : "desktop";
+            if(startup_used == "systemd"){
+                qCInfo(core) << "Auto start enabled and started, closing myself to run from" << startup_used;
+                QApplication::exit(0);
+                return;
+            } 
+            else{
+                qCInfo(core) << "Auto start enabled with" << startup_used << " we should now auto start on next bootup";
+            }
+        }
+        else{
+           qCWarning(core) << "Failed to enable auto startup";
+        }
+    } else if (m_startupManager->isAutostartEnabled() &&!autostart){
+        qCInfo(core) << "Disabling autostartup";
+        m_startupManager->setAutostart(autostart);
+    }
+}
 HaControl::HaControl()
 {
     s_self = this;
+
     auto config = KSharedConfig::openConfig();
     auto group = config->group("general");
+    auto autostart = group.readEntry("autostart", false);
+    validateStartup(autostart);
+
     m_client = new QMqttClient(this);
     m_client->setHostname(group.readEntry("host"));
     m_client->setPort(group.readEntry("port", 1883));
@@ -75,7 +106,10 @@ HaControl::HaControl()
 
 HaControl::~HaControl()
 {
-    delete m_connectedNode;
+    if (m_connectedNode) {
+        delete m_connectedNode;
+        m_connectedNode = nullptr;
+    }
 }
 
 void HaControl::doConnect()

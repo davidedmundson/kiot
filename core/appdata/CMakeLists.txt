@@ -52,7 +52,8 @@ else()
 
   if(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/${APP_ID}.desktop.in")
     ecm_install_configured_files(INPUT ${CMAKE_CURRENT_SOURCE_DIR}/${APP_ID}.desktop.in @ONLY DESTINATION ${KDE_INSTALL_APPDIR})
-    ecm_install_configured_files(INPUT ${CMAKE_CURRENT_SOURCE_DIR}/${APP_ID}.desktop.in @ONLY DESTINATION ${KDE_INSTALL_AUTOSTARTDIR})
+  #Disabling since kiot now controls auto startup based on config setup/kcm
+  #  ecm_install_configured_files(INPUT ${CMAKE_CURRENT_SOURCE_DIR}/${APP_ID}.desktop.in @ONLY DESTINATION ${KDE_INSTALL_AUTOSTARTDIR})
   endif()
 endif()
 

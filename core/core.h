@@ -33,12 +33,13 @@ public:
     static bool registerIntegrationFactory(const QString &name, std::function<void()> plugin, bool onByDefault = true);
 
 private:
+    void validateStartup(bool autostart);
     void doConnect();
     void loadIntegrations(KSharedConfigPtr config);
     static QList<IntegrationFactory> s_integrations;
     static HaControl *s_self;
     QMqttClient *m_client;
-    ConnectedNode *m_connectedNode;
+    ConnectedNode *m_connectedNode = nullptr;
 };
 
 // clang-format off
