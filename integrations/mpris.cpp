@@ -52,7 +52,7 @@
 #include <QNetworkRequest>
 
 #include "Shared/platformhelper.h"
-DEFINE_LOGGER(mpris, integrations.Mpris)
+DEFINE_LOGGER(mpris, Integrations.Mpris)
 
 
 

@@ -1,7 +1,7 @@
 // SPDX-FileCopyrightText: 2025 David Edmundson <davidedmundson@kde.org>
 // SPDX-License-Identifier: LGPL-2.1-or-later
 
-#include "core/core.h"
+#include "ui_qt/mainwindow.h"
 #include "core.h"
 #include "core/startup/startupmanager.h"
 #include "Shared/entities/entities.h"
@@ -12,7 +12,7 @@
 #include <QTimer>
 #include <QLoggingCategory>
 #include <QApplication>
-DEFINE_LOGGER(core, HaControl)
+DEFINE_LOGGER(core, Core.HaControl)
 
 HaControl *HaControl::s_self = nullptr;
 QList<IntegrationFactory> HaControl::s_integrations;
@@ -56,11 +56,11 @@ HaControl::HaControl()
 {
     s_self = this;
 
-    auto config = KSharedConfig::openConfig();
+    auto config = KSharedConfig::openConfig(PlatformHelper::configFilePath(), KConfig::SimpleConfig );
     auto group = config->group("general");
     auto autostart = group.readEntry("autostart", false);
     validateStartup(autostart);
-
+    m_mainWindow = MainWindow::instance();
     m_client = new QMqttClient(this);
     m_client->setHostname(group.readEntry("host"));
     m_client->setPort(group.readEntry("port", 1883));
@@ -85,6 +85,8 @@ HaControl::HaControl()
     //
 
     connect(m_client, &QMqttClient::stateChanged, this, [reconnectTimer, this](QMqttClient::ClientState state) {
+        if (m_mainWindow)
+            m_mainWindow->updateIcon(state);
         switch (state) {
         case QMqttClient::Connected:
             qCInfo(core) << "connected";
@@ -114,7 +116,7 @@ HaControl::~HaControl()
 
 void HaControl::doConnect()
 {
-    auto config = KSharedConfig::openConfig();
+    auto config = KSharedConfig::openConfig(PlatformHelper::configFilePath(), KConfig::SimpleConfig);
     auto group = config->group("general");
     if (group.readEntry("tls", false)) {
         QSslConfiguration sslConfig = QSslConfiguration::defaultConfiguration();

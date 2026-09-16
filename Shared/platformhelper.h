@@ -93,14 +93,14 @@ public:
      * @brief Path of this application's configuration file.
      *
      * @return the @c <PROJECT_NAME>rc file inside the platform configuration
-     *         directory (e.g. @c ~/.config/odd-macrosrc on Linux).
+     *         directory (e.g. @c ~/.config/kiotrc on Linux).
      */
-    static QString configFilePath(const QString &fileType="rs");
+    static QString configFilePath(const QString &fileType="rc");
     /**
      * @brief Path of this application's configuration Directory path.
      *
      * @return the @c <PROJECT_NAME> dir inside the platform configuration
-     *         directory (e.g. @c ~/.config/kiot_qt on Linux).
+     *         directory (e.g. @c ~/.config/kiot/ on Linux).
      */
     static QString configDirPath();
     /**

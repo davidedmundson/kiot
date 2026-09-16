@@ -24,14 +24,12 @@
 #include <QTimer>
 #include <QApplication>
 #include <QByteArray>
-#include <QLoggingCategory>
 #include <QProcess>
 #include <QCollator>
 #include <QLocale>
 #include <algorithm>
 
-Q_DECLARE_LOGGING_CATEGORY(gl)
-Q_LOGGING_CATEGORY(gl, LOG_CAT(integrations.GameLauncher))
+DEFINE_LOGGER(gl, Integrations.GameLauncher)
 
 #include <QRegularExpression>
 namespace
@@ -251,7 +249,7 @@ private:
      */
     void ensureConfig()
     {
-        auto config = KSharedConfig::openConfig();
+        auto config = KSharedConfig::openConfig(PlatformHelper::configFilePath(), KConfig::SimpleConfig );
         KConfigGroup settings(config, "gamelauncher");
 
         bool configChanged = false;
@@ -311,7 +309,7 @@ private:
         
         QStringList options;
         
-        auto config = KSharedConfig::openConfig();
+        auto config = KSharedConfig::openConfig(PlatformHelper::configFilePath(), KConfig::SimpleConfig );
         KConfigGroup settings(config, "gamelauncher");
 
         // Add games that are enabled in config

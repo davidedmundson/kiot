@@ -11,7 +11,7 @@
 #include <QDBusMessage>
 #include <QDBusReply>
 
-DEFINE_LOGGER(nightmode, integrations.NightMode)
+DEFINE_LOGGER(nightmode, Integrations.NightMode)
 
 
 

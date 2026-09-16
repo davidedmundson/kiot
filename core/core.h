@@ -11,7 +11,7 @@
 
 class QMqttClient;
 class ConnectedNode;
-
+class MainWindow;
 struct IntegrationFactory {
     QString name;
     std::function<void()> factory;
@@ -40,6 +40,7 @@ private:
     static HaControl *s_self;
     QMqttClient *m_client;
     ConnectedNode *m_connectedNode = nullptr;
+    MainWindow *m_mainWindow = nullptr;
 };
 
 // clang-format off

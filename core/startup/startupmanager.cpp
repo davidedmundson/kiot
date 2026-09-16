@@ -9,7 +9,7 @@
 #include <QDBusInterface>
 #include <QDBusReply>
 
-DEFINE_LOGGER(sum, core.StartupManager)
+DEFINE_LOGGER(sum, Core.Startup.StartupManager)
 
 StartupManager::StartupManager(QObject *parent)
     : QObject(parent),

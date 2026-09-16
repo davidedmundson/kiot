@@ -19,7 +19,7 @@
 #include <sys/ioctl.h>
 #include <unistd.h>
 
-DEFINE_LOGGER(cam,integrations.Camera)
+DEFINE_LOGGER(cam,Integrations.Camera)
 
 
 

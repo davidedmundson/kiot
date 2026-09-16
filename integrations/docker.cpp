@@ -27,7 +27,7 @@
 
 #include <atomic>
 
-DEFINE_LOGGER(docker,integrations.Docker)
+DEFINE_LOGGER(docker,Integrations.Docker)
 
 
 static int SOCKET_TIMEOUT_MS = 10000;
@@ -184,7 +184,7 @@ private:
      */
     void initializeSwitches()
     {
-        const auto cfg = KSharedConfig::openConfig();
+        const auto cfg = KSharedConfig::openConfig(PlatformHelper::configFilePath(), KConfig::SimpleConfig );
         const KConfigGroup grp = cfg->group("docker");
 
         // Create switches for enabled containers
@@ -265,7 +265,7 @@ private:
      */
     bool ensureConfigDefaults()
     {
-        const auto cfg = KSharedConfig::openConfig();
+        const auto cfg = KSharedConfig::openConfig(PlatformHelper::configFilePath(), KConfig::SimpleConfig );
         KConfigGroup grp = cfg->group("docker");
 
         const QStringList currentContainers = listAllContainers();

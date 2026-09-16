@@ -25,7 +25,7 @@
 #include <QMqttClient>
 
 
-DEFINE_LOGGER(base, entities.Entity)
+DEFINE_LOGGER(base, Shared.Entities.Entity)
 
 static QString s_topicPrefix = "kiot";
 

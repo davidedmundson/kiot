@@ -28,7 +28,7 @@
 /**
  * @brief Logging category used by the platform helper.
  */
-DEFINE_LOGGER(helper,PlatformHelper)
+DEFINE_LOGGER(helper, Shared.PlatformHelper)
 
 /**
  * @brief Detect the current platform using compile-time macros.
@@ -202,7 +202,7 @@ QString PlatformHelper::resolveOrganizationDomain(const QString &input)
  */
 QString PlatformHelper::configFilePath(const QString &fileType)
 {
-    return QStandardPaths::writableLocation(QStandardPaths::ConfigLocation) + "/" + QStringLiteral(PROJECT_NAME) + "/" + QStringLiteral(PROJECT_NAME) + fileType;
+    return QStandardPaths::writableLocation(QStandardPaths::ConfigLocation) +  "/" + QStringLiteral(PROJECT_NAME) + fileType;
 }
 
 QString PlatformHelper::configDirPath()

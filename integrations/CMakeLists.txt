@@ -26,7 +26,8 @@ set(KIOT_INTEGRATIONS_SRC
     docker.cpp
     systemd.cpp
     gamelauncher.cpp
-   )
+
+)
 
 
 
@@ -36,7 +37,8 @@ set_source_files_properties(
    ../dbus/org.mpris.MediaPlayer2.Player.xml
    ../dbus/org.mpris.MediaPlayer2.xml
    PROPERTIES
-   NO_NAMESPACE ON)
+   NO_NAMESPACE ON
+)
    
 qt_add_dbus_interface(KIOT_INTEGRATIONS_SRC ../dbus/org.freedesktop.DBus.Properties.xml dbusproperties)
 qt_add_dbus_interface(KIOT_INTEGRATIONS_SRC ../dbus/org.mpris.MediaPlayer2.Player.xml mprisplayer)
@@ -58,6 +60,7 @@ add_library(KIOTIntegrations OBJECT ${KIOT_INTEGRATIONS_SRC})
 
 # Always link main dependencies
 target_link_libraries(KIOTIntegrations
+    KIOTShared
     KF6::IdleTime
     KF6::GlobalAccel
     KF6::Notifications

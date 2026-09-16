@@ -12,12 +12,12 @@
 #include <QAction>
 #include <QCoreApplication>
 
-DEFINE_LOGGER(scripts, integrations.Scripts)
+DEFINE_LOGGER(scripts, Integrations.Scripts)
 
 
 void registerScripts()
 {
-    auto scriptConfigToplevel = KSharedConfig::openConfig()->group("Scripts");
+    auto scriptConfigToplevel = KSharedConfig::openConfig(PlatformHelper::configFilePath(), KConfig::SimpleConfig )->group("Scripts");
     const QStringList scriptIds = scriptConfigToplevel.groupList();
     for (const QString &scriptId : scriptIds) {
         auto scriptConfig = scriptConfigToplevel.group(scriptId);

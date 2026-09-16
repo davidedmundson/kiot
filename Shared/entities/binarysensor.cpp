@@ -5,7 +5,7 @@
 #include "core/core.h"
 #include <QMqttClient>
 
-DEFINE_LOGGER(binary, entities.BinarySensor)
+DEFINE_LOGGER(binary, Shared.Entities.BinarySensor)
 
 
 BinarySensor::BinarySensor(QObject *parent)

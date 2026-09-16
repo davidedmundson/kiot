@@ -14,7 +14,7 @@
 #include <KSharedConfig>
 #include <KConfigGroup>
 
-DEFINE_LOGGER(SystemD, integrations.SystemD)
+DEFINE_LOGGER(SystemD, Integrations.SystemD)
 
 class SystemDWatcher : public QObject
 {
@@ -64,7 +64,7 @@ SystemDWatcher::SystemDWatcher(QObject *parent)
 // keeps the systemd config group in sync with the actual services available
 bool SystemDWatcher::ensureConfig()
 {
-    auto config = KSharedConfig::openConfig();
+    auto config = KSharedConfig::openConfig(PlatformHelper::configFilePath(), KConfig::SimpleConfig );
     KConfigGroup settings(config, "systemd");
 
     const QStringList currentServices = listUserServices();
@@ -105,7 +105,7 @@ void SystemDWatcher::performInit()
         return;
     }
     
-    auto config = KSharedConfig::openConfig();
+    auto config = KSharedConfig::openConfig(PlatformHelper::configFilePath(), KConfig::SimpleConfig );
     KConfigGroup settings(config, "systemd");
   
     for (const QString &svc : listUserServices()) {

@@ -1,5 +1,6 @@
 #include "core/core.h"
 #include "logging/messagehandler.h"
+#include "ui_qt/mainwindow.h"
 
 #include <QApplication>
 #include <csignal>
@@ -8,7 +9,7 @@
 #include <KDBusService>
 #include <KSignalHandler>
 
-DEFINE_LOGGER(main_cpp, main)
+DEFINE_LOGGER(main_cpp, Core.Main)
 /**
  * @brief Main entry point for the kiot application
  * @param argc Argument count
@@ -21,7 +22,8 @@ DEFINE_LOGGER(main_cpp, main)
 int main(int argc, char **argv)
 {
     QApplication app(argc, argv);
-    
+    QApplication::setDesktopFileName(PlatformHelper::generateServiceName());
+    QApplication::setApplicationName(QStringLiteral(PROJECT_NAME));
     initLogging();
     
     KAboutData aboutData(
@@ -35,6 +37,7 @@ int main(int argc, char **argv)
     
     KDBusService service(KDBusService::Unique | KDBusService::Replace);
     qCInfo(main_cpp) << "Starting" << PROJECT_NAME << "version:" << PROJECT_VERSION;
+    MainWindow mainWindow;
     HaControl appControl;
 
     KSignalHandler::self()->watchSignal(SIGTERM);

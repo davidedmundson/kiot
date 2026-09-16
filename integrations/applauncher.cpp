@@ -26,7 +26,7 @@
 #include <QDateTime>
 #include <QRegularExpression>
 
-DEFINE_LOGGER(appla_logger,integrations.AppLauncher)
+DEFINE_LOGGER(appla_logger,Integrations.AppLauncher)
 
 
 
@@ -188,7 +188,7 @@ private:
             }
         }
 
-        auto config = KSharedConfig::openConfig();
+        auto config = KSharedConfig::openConfig(PlatformHelper::configFilePath(), KConfig::SimpleConfig );
         KConfigGroup group(config, "AppLauncher");
      
         bool configChanged = false;
