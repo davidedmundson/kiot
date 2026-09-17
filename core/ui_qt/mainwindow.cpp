@@ -3,7 +3,7 @@
 #include "core/core.h"
 #include "mainwindow.h"
 #include "settingsmanager.h"
-
+#include <KConfigGroup>
 #include <QApplication>
 #include <QCloseEvent>
 #include <QTimer>
@@ -247,8 +247,12 @@ void MainWindow::setupSystemTray()
     updateIcon(QMqttClient::ClientState::Disconnected);
     // Connect tray icon activation
     connect(m_trayIcon, &QSystemTrayIcon::activated, this, &MainWindow::onTrayActivated);
-    
-    m_trayIcon->show();
+    auto conf = KSharedConfig::openConfig(PlatformHelper::configFilePath(), KConfig::SimpleConfig);
+    auto group = conf->group("general");
+    if(group.readEntry("systray", true))
+        m_trayIcon->show();
+    else
+       m_trayIcon->hide();
     qCDebug(mw) << "System tray initialized";
 }
 
