@@ -34,6 +34,7 @@ public:
 
 private:
     void validateStartup(bool autostart);
+    bool validateConfig();
     void doConnect();
     void loadIntegrations(KSharedConfigPtr config);
     static QList<IntegrationFactory> s_integrations;

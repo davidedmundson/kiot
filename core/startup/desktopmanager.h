@@ -11,6 +11,7 @@ public:
 
     bool setupAutostart(bool enabled);
     bool isAutostartEnabled();
+    bool isAvailable();
 
 private:
     QString desktopFilePath();

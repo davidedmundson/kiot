@@ -27,48 +27,77 @@ public:
     void init() override;
 };
 
-
 void HaControl::validateStartup(bool autostart)
 {
-    auto m_startupManager = new StartupManager(this);
+    auto startupManager = new StartupManager(this);
+    bool currentlyEnabled = startupManager->isAutostartEnabled();
 
-    if (PlatformHelper::isFlatpak()){
-        //COuld not get isAutostartEnabled() to work perfekt with backgroundmanager and its portal
-        QString on_off = autostart ? "Enabling" : "Disabling";
-        qCInfo(core) << on_off << "autostartup";
-        m_startupManager->setAutostart(autostart);
+    // Hvis ønsket tilstand matcher det som allerede er satt, trenger vi ikke gjøre noe
+    if (currentlyEnabled == autostart) {
+        qCDebug(core) << "Autostart is already in desired state:" << autostart;
         return;
     }
-    if( !m_startupManager->isAutostartEnabled() && autostart){
-        if(m_startupManager->setAutostart(autostart))
-        {
-            QString startup_used = m_startupManager->shouldUseSystemd() ? "systemd" : "desktop";
-            if(startup_used == "systemd"){
-                qCInfo(core) << "Auto start enabled and started, closing myself to run from" << startup_used;
+
+    QString actionStr = autostart ? "Enabling" : "Disabling";
+    qCInfo(core) << actionStr << " autostartup";
+
+    if (startupManager->setAutostart(autostart)) {
+        if (autostart) {
+            qCInfo(core) << "Autostart successfully enabled.";
+            
+            // Hvis vi bruker systemd (og ikke er i Flatpak), kan vi avslutte 
+            // slik at systemd tar over kjøringen i bakgrunnen som planlagt.
+            if (!PlatformHelper::isFlatpak()) {
+                qCInfo(core) << "Running natively with systemd, closing instance to let systemd manage lifecycle.";
                 QApplication::exit(0);
-                return;
-            } 
-            else{
-                qCInfo(core) << "Auto start enabled with" << startup_used << " we should now auto start on next bootup";
             }
+        } else {
+            qCInfo(core) << "Autostart successfully disabled.";
         }
-        else{
-           qCWarning(core) << "Failed to enable auto startup";
-        }
-    } else if (m_startupManager->isAutostartEnabled() &&!autostart){
-        qCInfo(core) << "Disabling autostartup";
-        m_startupManager->setAutostart(autostart);
+    } else {
+        qCWarning(core) << "Failed to" << (autostart ? "enable" : "disable") << "autostartup";
     }
+}
+
+bool HaControl::validateConfig()
+{
+    auto config = KSharedConfig::openConfig(PlatformHelper::configFilePath(), KConfig::SimpleConfig );
+    if (!config->hasGroup("general")) {
+        qCWarning(core) << "Config not found, creating default config and launching UI";
+        KConfigGroup group(config, "general");
+        group.writeEntry("host", "localhost");
+        group.writeEntry("port", 1883);
+        group.writeEntry("user", "mqtt");
+        group.writeEntry("password", "mqtt-password-here");
+        group.writeEntry("autostart", false);
+        group.writeEntry("useSSL",false);
+        group.writeEntry("discoveryprefix","homeassistant");
+        config->sync();
+        return false;
+    }else{
+        KConfigGroup group(config, "general");
+        if(group.readEntry("password") == "mqtt-password-here"){
+            m_mainWindow->show();
+        }
+
+    }
+    return true;
 }
 HaControl::HaControl()
 {
     s_self = this;
+    m_mainWindow = MainWindow::instance();
+    if(!validateConfig())
+    {
+    QProcess::startDetached(QStringLiteral(PROJECT_NAME) );
+    QApplication::quit();
 
+    }
+    
     auto config = KSharedConfig::openConfig(PlatformHelper::configFilePath(), KConfig::SimpleConfig );
     auto group = config->group("general");
     auto autostart = group.readEntry("autostart", false);
     validateStartup(autostart);
-    m_mainWindow = MainWindow::instance();
     m_client = new QMqttClient(this);
     m_client->setHostname(group.readEntry("host"));
     m_client->setPort(group.readEntry("port", 1883));

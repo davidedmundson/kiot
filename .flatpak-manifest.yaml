@@ -17,7 +17,7 @@ finish-args:
   - "--socket=system-bus"
   - "--socket=pulseaudio"
  
-  - "--filesystem=xdg-config/kiotrc"
+
 #GameLauncher
   - "--filesystem=xdg-data/Steam:ro"      # For Steam
   - "--filesystem=xdg-data/lutris:ro"     # For Lutris

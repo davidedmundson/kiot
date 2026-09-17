@@ -4,7 +4,7 @@
 #ifndef MAINWINDOW_H
 #define MAINWINDOW_H
 #include "Shared/platformhelper.h"
-
+#include "settingsmanager.h"
 #include <QMainWindow>
 #include <QQuickWidget>
 #include <QWindow>
@@ -20,6 +20,7 @@ public:
     ~MainWindow();
 
     static MainWindow *instance() { return s_instance; }
+
     void updateIcon(QMqttClient::ClientState state);
     static void sendNotification(const QString &title, const QString &msg, 
                                 QSystemTrayIcon::MessageIcon icon = QSystemTrayIcon::Information, 
@@ -58,6 +59,7 @@ private:
     QAction *m_statusAction = nullptr;
     QAction *m_versionAction = nullptr;
     QMenu *m_menu = nullptr;
+
     static MainWindow *s_instance;
 };
 

@@ -18,7 +18,6 @@ class SettingsManager : public QObject
 
 public:
     explicit SettingsManager(QObject *parent = nullptr);
-
     QVariantMap configSections() const;
     QVariantList sectionOrder() const;
 
@@ -52,6 +51,7 @@ private:
 
     QVariantMap m_configSections;
     QVariantList m_sectionOrder;
+    
 };
 
 #endif // SETTINGSMANAGER_H
