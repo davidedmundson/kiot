@@ -120,6 +120,16 @@ public:
      */
     static QString generateServiceName();
 
+
+        /**
+     * @brief gets project name from cmakelists
+     *
+     * 
+     *
+     * @return the project name.
+     */
+    static QString getProjectName();
+
     /**
      * @brief Normalise a user supplied domain string into a host name.
      *

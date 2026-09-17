@@ -77,7 +77,6 @@ bool SystemdManager::removeServiceFile() {
     return file.remove();
 }
 
-// Originale D-Bus kall med riktig signatur
 bool SystemdManager::enableServiceViaDBus() {
 
     QDBusInterface systemd("org.freedesktop.systemd1", "/org/freedesktop/systemd1","org.freedesktop.systemd1.Manager",QDBusConnection::sessionBus());
@@ -87,9 +86,7 @@ bool SystemdManager::enableServiceViaDBus() {
         return false;
     }
 
-    QDBusReply<bool> enableReply = systemd.call(
-        "EnableUnitFiles",
-        QStringList() << QString(PROJECT_NAME) + ".service",
+    QDBusReply<bool> enableReply = systemd.call("EnableUnitFiles", QStringList() << QString(PROJECT_NAME) + ".service",
         false, // runtime
         true   // force
     );
@@ -104,11 +101,7 @@ bool SystemdManager::enableServiceViaDBus() {
         qCWarning(sm) << "Failed to reload systemd:" << reloadReply.error().message();
     }
 
-    QDBusReply<QDBusObjectPath> startReply = systemd.call(
-        "StartUnit",
-        QString(PROJECT_NAME) + ".service",
-        "replace"
-    );
+    QDBusReply<QDBusObjectPath> startReply = systemd.call("StartUnit", QString(PROJECT_NAME) + ".service","replace");
 
     if (!startReply.isValid()) {
         qCWarning(sm) << "Failed to start service:" << startReply.error().message();
@@ -118,32 +111,20 @@ bool SystemdManager::enableServiceViaDBus() {
 }
 
 bool SystemdManager::disableServiceViaDBus() {
-    QDBusInterface systemd("org.freedesktop.systemd1",
-                          "/org/freedesktop/systemd1",
-                          "org.freedesktop.systemd1.Manager",
-                          QDBusConnection::sessionBus());
+    QDBusInterface systemd("org.freedesktop.systemd1", "/org/freedesktop/systemd1", "org.freedesktop.systemd1.Manager",QDBusConnection::sessionBus());
 
     if (!systemd.isValid()) {
         qCWarning(sm) << "Cannot connect to systemd via D-Bus";
         return false;
     }
 
-QDBusMessage stopReply = systemd.call(
-        "StopUnit",
-        QString(PROJECT_NAME) + ".service",
-        "replace"
-    );
+    QDBusMessage stopReply = systemd.call("StopUnit", QString(PROJECT_NAME) + ".service", "replace");
 
     if (stopReply.type() == QDBusMessage::ErrorMessage) {
         qCWarning(sm) << "Failed to stop service:" << stopReply.errorMessage();
     }
 
-    // Bruk QDBusMessage her siden DisableUnitFiles returnerer a(sss), ikke bool
-    QDBusMessage disableReply = systemd.call(
-        "DisableUnitFiles",
-        QStringList() << QString(PROJECT_NAME) + ".service",
-        false // runtime
-    );
+    QDBusMessage disableReply = systemd.call("DisableUnitFiles",QStringList() << QString(PROJECT_NAME) + ".service",false);
 
     if (disableReply.type() == QDBusMessage::ErrorMessage) {
         qCWarning(sm) << "Failed to disable service:" << disableReply.errorMessage();
@@ -158,7 +139,6 @@ QDBusMessage stopReply = systemd.call(
     return true;
 }
 
-// Sett opp autostart, beholder original logikk
 bool SystemdManager::setupAutostart(bool enabled) {
     qCDebug(sm) << "Setting autostart to:" << enabled;
 
@@ -185,14 +165,10 @@ bool SystemdManager::setupAutostart(bool enabled) {
     }
 }
 
-// Restaurert funksjon med ekstra check av ExecStart
 bool SystemdManager::isAutostartEnabled()
 {
-    // 1. Sjekk via D-Bus om enheten finnes og er enabled
-    QDBusInterface systemd("org.freedesktop.systemd1",
-                           "/org/freedesktop/systemd1",
-                           "org.freedesktop.systemd1.Manager",
-                           QDBusConnection::sessionBus());
+    QDBusInterface systemd("org.freedesktop.systemd1","/org/freedesktop/systemd1","org.freedesktop.systemd1.Manager",QDBusConnection::sessionBus());
+
     if (!systemd.isValid()) {
         qCWarning(sm) << "Cannot connect to systemd via D-Bus";
         return false;
@@ -211,14 +187,12 @@ bool SystemdManager::isAutostartEnabled()
         return false;
     }
 
-    // 2. Sjekk at service-filen eksisterer
     QFile file(serviceFilePath());
     if (!file.exists()) {
         qCDebug(sm) << "Service file missing:" << serviceFilePath();
         return false;
     }
 
-    // 3. Sjekk at ExecStart matcher plattformen
     if (file.open(QIODevice::ReadOnly | QIODevice::Text)) {
         QString content = QString::fromUtf8(file.readAll());
         file.close();
@@ -234,6 +208,5 @@ bool SystemdManager::isAutostartEnabled()
         return false;
     }
 
-    // Alt OK
     return true;
 }

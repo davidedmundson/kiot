@@ -166,6 +166,20 @@ QString PlatformHelper::generateServiceName()
     */
 }
 
+
+/**
+ * @brief Generate a reverse-DNS service name from the organisation domain.
+ *
+ * @return the generated service name.
+ */
+QString PlatformHelper::getProjectName()
+{
+    return QString(PROJECT_NAME);
+    
+}
+
+
+
 /**
  * @brief Normalise a raw domain string into a lower-cased host name.
  *

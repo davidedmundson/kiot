@@ -1,10 +1,12 @@
 #pragma once
 
+#include "backgroundmanager.h"
 #include <QObject>
 #include <QString>
 
 class SystemdManager;
 class DesktopManager;
+class BackgroundManager;
 
 class StartupManager : public QObject {
     Q_OBJECT
@@ -19,5 +21,6 @@ public:
 private:
     SystemdManager *m_systemdManager;
     DesktopManager *m_desktopManager;
+    BackgroundManager *m_backgroundManager;
 
 };

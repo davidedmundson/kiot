@@ -64,7 +64,7 @@ QString DesktopManager::desktopFileContent() {
         "OnlyShowIn=KDE;\n"
     ).arg(QStringLiteral(PROJECT_NAME))
      .arg(QStringLiteral(PROJECT_DESCRIPTION))
-     .arg(QStringLiteral(APP_ID)) // Eller app-id hvis du har det definert
+     .arg(QStringLiteral(APP_ID)) 
      .arg(execLine);
 }
 

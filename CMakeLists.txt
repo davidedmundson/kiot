@@ -119,8 +119,20 @@ set(SOURCES
     core/startup/systemdmanager.h
     core/startup/desktopmanager.cpp
     core/startup/desktopmanager.h    
+    core/startup/backgroundmanager.cpp
+    core/startup/backgroundmanager.h    
 
 )
+
+# Auto generates dbus interfaces on build
+set_source_files_properties(
+   ./dbus/org.freedesktop.portal.Background.xml
+   PROPERTIES
+   NO_NAMESPACE ON
+)
+qt_add_dbus_interface(SOURCES ./dbus/org.freedesktop.portal.Background.xml backgroundportal)
+
+
 add_subdirectory(Shared)
 add_subdirectory(integrations)
 
