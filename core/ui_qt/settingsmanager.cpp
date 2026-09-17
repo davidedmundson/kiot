@@ -188,12 +188,12 @@ void SettingsManager::setPassword(const QString &password)
 
 QString SettingsManager::getDiscoveryPrefix() const
 {
-    return getConfigValue("general", "discoveryPrefix", "homeassistant").toString();
+    return getConfigValue("general", "discoveryprefix", "homeassistant").toString();
 }
 
 void SettingsManager::setDiscoveryPrefix(const QString &prefix)
 {
-    saveConfigValue("general", "discoveryPrefix", prefix);
+    saveConfigValue("general", "discoveryprefix", prefix);
 }
 
 void SettingsManager::loadConfigFile()

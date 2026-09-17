@@ -143,7 +143,7 @@ const QString &discoveryPrefix() {
     if (prefix.isEmpty()) {
         auto conf = KSharedConfig::openConfig(PlatformHelper::configFilePath(), KConfig::SimpleConfig);
         auto group = conf->group("general");
-        prefix = group.readEntry("discoveryPrefix","homeassistant");
+        prefix = group.readEntry("discoveryprefix","homeassistant");
     }
     return prefix;
 }

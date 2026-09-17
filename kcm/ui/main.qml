@@ -34,11 +34,21 @@ KCM.SimpleKCM {
             text: kcm.settings.password
             onTextChanged: kcm.settings.password = text
         }
+            QQC2.TextField {
+            Kirigami.FormData.label: i18n("Discovery Prefix:")
+            text: kcm.settings.discoveryprefix
+            onTextChanged: kcm.settings.discoveryprefix = text
+        }
 
         QQC2.CheckBox {
             Kirigami.FormData.label: i18n("Use TLS:")
             checked: kcm.settings.tls
             onToggled: kcm.settings.tls = checked
+        }
+        QQC2.CheckBox {
+            Kirigami.FormData.label: i18n("Systray icon:")
+            checked: kcm.settings.systray
+            onToggled: kcm.settings.systray = checked
         }
         QQC2.CheckBox {
             Kirigami.FormData.label: i18n("Autostart:")

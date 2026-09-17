@@ -472,7 +472,7 @@ QQC2.Page  {
                     onEditingFinished: if (settingsManager) settingsManager.setPassword(text)
                 }
 
-                QQC2.Label { text: "Discovery:"; Layout.alignment: Qt.AlignRight }
+                QQC2.Label { text: "Discovery Prefix:"; Layout.alignment: Qt.AlignRight }
                 QQC2.TextField {
                     id: discoveryField
                     Layout.fillWidth: true
