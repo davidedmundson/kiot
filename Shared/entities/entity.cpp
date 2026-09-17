@@ -23,7 +23,7 @@
 #include <QJsonObject>
 #include <QJsonArray>
 #include <QMqttClient>
-
+#include <KConfigGroup>
 
 DEFINE_LOGGER(base, Shared.Entities.Entity)
 
@@ -135,10 +135,18 @@ void Entity::setId(const QString &newId)
 void Entity::init()
 {}
 
-/** @private Static discovery prefix for Home Assistant MQTT discovery 
- *  @note Should this be moved to the config file? to support custom prefixes
-*/
-static QString s_discoveryPrefix = "homeassistant";
+
+/** @private Static discovery prefix for Home Assistant MQTT discovery
+ */
+const QString &discoveryPrefix() {
+    static QString prefix;
+    if (prefix.isEmpty()) {
+        auto conf = KSharedConfig::openConfig(PlatformHelper::configFilePath(), KConfig::SimpleConfig);
+        auto group = conf->group("general");
+        prefix = group.readEntry("discoveryPrefix","homeassistant");
+    }
+    return prefix;
+}
 
 void Entity::sendRegistration()
 {
@@ -163,7 +171,7 @@ void Entity::sendRegistration()
         config["device"] = QVariantMap({{"identifiers", "linux_ha_bridge_" + hostname() }});
     }
     config["unique_id"] = "linux_ha_control_"+ hostname() + "_" + id();
-    HaControl::mqttClient()->publish(s_discoveryPrefix + "/" + haType() + "/" + hostname() + "/" + id() + "/config", QJsonDocument(QJsonObject::fromVariantMap(config)).toJson(QJsonDocument::Compact), 0, true);
+    HaControl::mqttClient()->publish(discoveryPrefix() + "/" + haType() + "/" + hostname() + "/" + id() + "/config", QJsonDocument(QJsonObject::fromVariantMap(config)).toJson(QJsonDocument::Compact), 0, true);
     if (id() != "connected") { //special case
         HaControl::mqttClient()->publish(s_topicPrefix + "/" + hostname() + "/connected", "on", 0, false);
     }
@@ -189,7 +197,7 @@ void Entity::unRegister()
     }
     
     qCDebug(base) << "Unregistering entity:" << id() << "(" << name() << ")";
-    HaControl::mqttClient()->publish(s_discoveryPrefix + "/" + haType() + "/" + hostname() + "/" + id() + "/config",
+    HaControl::mqttClient()->publish(discoveryPrefix() + "/" + haType() + "/" + hostname() + "/" + id() + "/config",
     QByteArray(), 0,true);
 }
 
