@@ -133,6 +133,9 @@ set_source_files_properties(
 qt_add_dbus_interface(SOURCES ./dbus/org.freedesktop.portal.Background.xml backgroundportal)
 
 
+
+    
+
 add_subdirectory(Shared)
 add_subdirectory(integrations)
 

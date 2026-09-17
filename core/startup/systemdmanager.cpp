@@ -76,7 +76,11 @@ bool SystemdManager::removeServiceFile() {
     QFile file(serviceFilePath());
     return file.remove();
 }
-
+bool SystemdManager::isAvailable()
+{
+    QDBusInterface systemd("org.freedesktop.systemd1", "/org/freedesktop/systemd1","org.freedesktop.systemd1.Manager",QDBusConnection::sessionBus());
+    return systemd.isValid();
+}
 bool SystemdManager::enableServiceViaDBus() {
 
     QDBusInterface systemd("org.freedesktop.systemd1", "/org/freedesktop/systemd1","org.freedesktop.systemd1.Manager",QDBusConnection::sessionBus());

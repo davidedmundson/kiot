@@ -11,7 +11,8 @@ public:
 
 
     bool setupAutostart(bool enabled);
-    bool isAutostartEnabled();
+    bool isAutostartEnabled() const;
+    bool isAvailable();
 
 
 private:

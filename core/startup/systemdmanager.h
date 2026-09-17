@@ -11,7 +11,7 @@ public:
 
     bool setupAutostart(bool enabled);
     bool isAutostartEnabled();
-
+    bool isAvailable();
 
     static QString serviceFilePath();
     static QString serviceContent();
@@ -23,4 +23,5 @@ private:
     bool removeServiceFile();
     bool enableServiceViaDBus();
     bool disableServiceViaDBus();
+
 };

@@ -216,11 +216,23 @@ QString PlatformHelper::resolveOrganizationDomain(const QString &input)
  */
 QString PlatformHelper::configFilePath(const QString &fileType)
 {
-    return QStandardPaths::writableLocation(QStandardPaths::ConfigLocation) +  "/" + QStringLiteral(PROJECT_NAME) + fileType;
+    QString configFilePath = QStandardPaths::writableLocation(QStandardPaths::ConfigLocation) +  "/" + QStringLiteral(PROJECT_NAME) + fileType;
+    QFile file(configFilePath);
+    if(!file.exists())
+    {
+        if (!file.open(QIODevice::ReadWrite)) {
+            qDebug() << "Failed to create/open file:" << file.errorString();
+            return configFilePath;
+        }
+        file.seek(0); 
+        file.close();
+    }
+    return configFilePath;
 }
 
 QString PlatformHelper::configDirPath()
 {
+
     return QStandardPaths::writableLocation(QStandardPaths::ConfigLocation) + "/" + QStringLiteral(PROJECT_NAME) ;
 }
 

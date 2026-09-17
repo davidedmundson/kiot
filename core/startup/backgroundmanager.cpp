@@ -3,34 +3,56 @@
 #include <QDBusConnection>
 #include <QDBusPendingReply>
 #include <QLoggingCategory>
-
+#include <KSharedConfig>
+#include <KConfigGroup>
 
 DEFINE_LOGGER(bgm, Core.Startup.BackgroundManager)
 
 
 BackgroundManager::BackgroundManager(QObject *parent)
     : QObject(parent)
-    , m_backgroundIface(new OrgFreedesktopPortalBackgroundInterface(
-          QStringLiteral("org.freedesktop.portal.Desktop"),
-          QStringLiteral("/org/freedesktop/portal/desktop"),
-          QDBusConnection::sessionBus(),
-          this))
+    , m_backgroundIface(new OrgFreedesktopPortalBackgroundInterface(QStringLiteral("org.freedesktop.portal.Desktop"), QStringLiteral("/org/freedesktop/portal/desktop"),QDBusConnection::sessionBus(),this))
 {
 }
 
 bool BackgroundManager::setupAutostart(bool enabled)
 {
-    if (enabled) {
-        return enableAutostartup();
-    } else {
-        return disableAutostartup();
-    }
-}
 
-bool BackgroundManager::isAutostartEnabled()
+    if (enabled) {
+        if(enableAutostartup())
+        {
+            KSharedConfigPtr config = KSharedConfig::openConfig(PlatformHelper::configFilePath(), KConfig::SimpleConfig );
+            KConfigGroup startupGroup(config, "general");
+            startupGroup.writeEntry("BackgroundAutostartEnabled", enabled);
+            config->sync(); 
+            return true;
+        }
+        return false;
+    } else {
+        if(disableAutostartup())
+        {
+            KSharedConfigPtr config = KSharedConfig::openConfig(PlatformHelper::configFilePath(), KConfig::SimpleConfig );
+            KConfigGroup startupGroup(config, "general");
+            startupGroup.writeEntry("BackgroundAutostartEnabled", enabled);
+            config->sync(); 
+            return true;
+        }
+        return false;
+    }
+
+
+}
+bool BackgroundManager::isAvailable()
 {
-    // TODO find a good way to implement this check, does not look like its available atm, sor returning false to always make sure its done on startup
-    return false; 
+    return m_backgroundIface->isValid();
+}
+bool BackgroundManager::isAutostartEnabled() const
+{
+    //WORKAROUND temprorary until we can find this dynamically
+    KSharedConfigPtr config = KSharedConfig::openConfig(PlatformHelper::configFilePath(), KConfig::SimpleConfig );
+    KConfigGroup startupGroup(config, "general");
+    
+    return startupGroup.readEntry("BackgroundAutostartEnabled", false);
 }
 
 bool BackgroundManager::enableAutostartup()
@@ -53,6 +75,7 @@ bool BackgroundManager::enableAutostartup()
         return false;
     }
 
+    
     qCDebug(bgm) << "Background request successful! Handle path:" << reply.value().path();
     return true;
 }

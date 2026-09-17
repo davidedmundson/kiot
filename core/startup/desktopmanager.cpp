@@ -68,6 +68,13 @@ QString DesktopManager::desktopFileContent() {
      .arg(execLine);
 }
 
+bool DesktopManager::isAvailable() {
+    QFileInfo info( QDir::homePath() + "/.config/autostart");
+    if(info.isDir() && info.isWritable()) {
+        return true;
+    }
+    return false;
+}
 bool DesktopManager::writeDesktopFile() {
     QFile file(desktopFilePath());
     QDir().mkpath(QFileInfo(file).absolutePath());
