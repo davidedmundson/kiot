@@ -494,7 +494,7 @@ QQC2.Page  {
                     onToggled: if (settingsManager) settingsManager.saveConfigValue("general", "systray", checked)
                 }
 
-                QQC2.Label { text: "Autostart (systemd service):"; Layout.alignment: Qt.AlignRight }
+                QQC2.Label { text: "Autostart:"; Layout.alignment: Qt.AlignRight }
                 QQC2.CheckBox {
                     id: autostartCheckbox
                     checked: settingsManager ? settingsManager.getConfigValue("general", "autostart", false) : false
