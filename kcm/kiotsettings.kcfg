@@ -18,9 +18,17 @@
             <label>MQTT password</label>
             <default></default>
         </entry>
+        <entry name="discoveryprefix" type="String">
+            <label>Discovery Prefix</label>
+            <default></default>
+        </entry>
         <entry name="tls" type="Bool">
             <label>Use TLS</label>
             <default>false</default>
+        </entry>
+        <entry name="systray" type="Bool">
+            <label>Systray icon</label>
+            <default>true</default>
         </entry>
         <entry name="autostart" type="Bool">
             <label>Autostart</label>
