@@ -138,8 +138,8 @@ void SettingsManager::restoreDefaults()
     setUser("");
     setPassword("");
     setDiscoveryPrefix("homeassistant");
-    saveConfigValue("Main", "useSSL", false);
-    saveConfigValue("Main", "autostart", true);
+    saveConfigValue("general", "useSSL", false);
+    saveConfigValue("general", "autostart", true);
     
     QProcess::startDetached(QString(PROJECT_NAME), QStringList());
     QApplication::quit();
@@ -148,52 +148,52 @@ void SettingsManager::restoreDefaults()
 // MQTT settings
 QString SettingsManager::getHost() const
 {
-    return getConfigValue("Main", "host", "").toString();
+    return getConfigValue("general", "host", "").toString();
 }
 
 void SettingsManager::setHost(const QString &host)
 {
-    saveConfigValue("Main", "host", host);
+    saveConfigValue("general", "host", host);
 }
 
 int SettingsManager::getPort() const
 {
-    return getConfigValue("Main", "port", 1883).toInt();
+    return getConfigValue("general", "port", 1883).toInt();
 }
 
 void SettingsManager::setPort(int port)
 {
-    saveConfigValue("Main", "port", port);
+    saveConfigValue("general", "port", port);
 }
 
 QString SettingsManager::getUser() const
 {
-    return getConfigValue("Main", "user", "").toString();
+    return getConfigValue("general", "user", "").toString();
 }
 
 void SettingsManager::setUser(const QString &user)
 {
-    saveConfigValue("Main", "user", user);
+    saveConfigValue("general", "user", user);
 }
 
 QString SettingsManager::getPassword() const
 {
-    return getConfigValue("Main", "password", "").toString();
+    return getConfigValue("general", "password", "").toString();
 }
 
 void SettingsManager::setPassword(const QString &password)
 {
-    saveConfigValue("Main", "password", password);
+    saveConfigValue("general", "password", password);
 }
 
 QString SettingsManager::getDiscoveryPrefix() const
 {
-    return getConfigValue("Main", "discoveryPrefix", "homeassistant").toString();
+    return getConfigValue("general", "discoveryPrefix", "homeassistant").toString();
 }
 
 void SettingsManager::setDiscoveryPrefix(const QString &prefix)
 {
-    saveConfigValue("Main", "discoveryPrefix", prefix);
+    saveConfigValue("general", "discoveryPrefix", prefix);
 }
 
 void SettingsManager::loadConfigFile()
@@ -271,10 +271,10 @@ void SettingsManager::loadConfigFile()
         }
     }
 
-    // Sørg for at "Main" alltid kommer først
-    if (m_sectionOrder.contains("Main")) {
-        m_sectionOrder.removeAll("Main");
-        m_sectionOrder.prepend("Main");
+    // Sørg for at "general" alltid kommer først
+    if (m_sectionOrder.contains("general")) {
+        m_sectionOrder.removeAll("general");
+        m_sectionOrder.prepend("general");
     }
 
     // Kjører groupNestedSections for å rydde opp i QML-strukturen
@@ -295,19 +295,17 @@ void SettingsManager::groupNestedSections()
    QVariantList newOrder;
     QVariantMap newSections = m_configSections;
 
-    if (m_sectionOrder.contains("Main")) {
-        newOrder.append("Main");
+    if (m_sectionOrder.contains("general")) {
+        newOrder.append("general");
     }
 
     // Add non-special sections
     for (const QVariant &sectionVar : m_sectionOrder) {
         QString section = sectionVar.toString();
-        if (section == "Main" || section.startsWith("Scripts") || section.startsWith("Shortcuts")|| section.startsWith("CustomSensors")) {
+        if (section == "general" || section.startsWith("Scripts") || section.startsWith("Shortcuts")|| section.startsWith("CustomSensors")) {
             continue;
         }
         newOrder.append(section);
-
-
     }
 
     // Group scripts
