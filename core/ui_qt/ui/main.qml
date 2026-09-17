@@ -372,7 +372,7 @@ QQC2.Page  {
                 QQC2.TabButton {
                     text: {
                         var section = modelData
-                        if (section === "Main") return "Main"
+                        if (section === "general") return "General"
                         if (section === "Integrations") return "Integrations"
                         if (section === "Scripts") return "Scripts"
                         if (section === "Shortcuts") return "Shortcuts"
@@ -401,7 +401,7 @@ QQC2.Page  {
                     property string section: modelData
                     
                     sourceComponent: {
-                        if (section === "Main") {
+                        if (section === "general") {
                             return generalSettingsComponent
                         } else if (section === "Scripts") {
                             return scriptsGroupComponent
@@ -483,22 +483,22 @@ QQC2.Page  {
                 QQC2.Label { text: "Use SSL:"; Layout.alignment: Qt.AlignRight }
                 QQC2.CheckBox {
                     id: sslCheckbox
-                    checked: settingsManager ? settingsManager.getConfigValue("Main", "useSSL", false) : false
-                    onToggled: if (settingsManager) settingsManager.saveConfigValue("Main", "useSSL", checked)
+                    checked: settingsManager ? settingsManager.getConfigValue("general", "useSSL", false) : false
+                    onToggled: if (settingsManager) settingsManager.saveConfigValue("general", "useSSL", checked)
                 }
 
                 QQC2.Label { text: "Show system tray:"; Layout.alignment: Qt.AlignRight }
                 QQC2.CheckBox {
                     id: systrayCheckbox
-                    checked: settingsManager ? settingsManager.getConfigValue("Main", "systray", true) : true
-                    onToggled: if (settingsManager) settingsManager.saveConfigValue("Main", "systray", checked)
+                    checked: settingsManager ? settingsManager.getConfigValue("general", "systray", true) : true
+                    onToggled: if (settingsManager) settingsManager.saveConfigValue("general", "systray", checked)
                 }
 
                 QQC2.Label { text: "Autostart (systemd service):"; Layout.alignment: Qt.AlignRight }
                 QQC2.CheckBox {
                     id: autostartCheckbox
-                    checked: settingsManager ? settingsManager.getConfigValue("Main", "autostart", false) : false
-                    onToggled: if (settingsManager) settingsManager.saveConfigValue("Main", "autostart", checked)
+                    checked: settingsManager ? settingsManager.getConfigValue("general", "autostart", false) : false
+                    onToggled: if (settingsManager) settingsManager.saveConfigValue("general", "autostart", checked)
                 }
             }
 
