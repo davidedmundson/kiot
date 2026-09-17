@@ -2,7 +2,9 @@
 #include "Shared/platformhelper.h"
 #include "startupmanager.h"
 #include "systemdmanager.h" 
+#include "backgroundmanager.h"
 #include "desktopmanager.h"
+
 #include <QObject>
 #include <QGuiApplication>
 #include <QDBusConnection>
@@ -14,15 +16,16 @@ DEFINE_LOGGER(sum, Core.Startup.StartupManager)
 StartupManager::StartupManager(QObject *parent)
     : QObject(parent),
       m_systemdManager(new SystemdManager(this)),
-      m_desktopManager(new DesktopManager(this)) {}
+      m_desktopManager(new DesktopManager(this)),
+      m_backgroundManager(new BackgroundManager(this)) {}
 
 StartupManager::~StartupManager() = default;
 
-// Sjekker om vi har et aktivt systemd-miljø tilgjengelig
+
 bool StartupManager::shouldUseSystemd() const {
     // Flatpak check
     if (PlatformHelper::isFlatpak()) {
-        qCDebug(sum) << "Running in Flatpak, preferring .desktop autostart";
+        qCDebug(sum) << "Running in Flatpak, preferring backgroundmanager for autostart";
         return false;
     }
     //Check that systemd is available for uswe
@@ -47,9 +50,10 @@ bool StartupManager::shouldUseSystemd() const {
 bool StartupManager::isAutostartEnabled() {
     if (shouldUseSystemd()) {
         return m_systemdManager->isAutostartEnabled();
+    } else if (PlatformHelper::isFlatpak()) {
+        return m_backgroundManager->isAutostartEnabled();
     } else {
         return m_desktopManager->isAutostartEnabled();
-    //TODO implement desktopmanager and return the
     }
     return false;
 }
@@ -62,8 +66,15 @@ bool StartupManager::setAutostart(bool enabled) {
         }
         qCWarning(sum) << "Systemd autostart failed, attempting fallback to .desktop";
     }
-
-    // Fallback eller direkte valg for .desktop
+    else if (PlatformHelper::isFlatpak()) {
+        qCDebug(sum) << "Delegating autostart configuration to BackgroundManager";
+        if (m_backgroundManager->setupAutostart(enabled))
+        {
+            return  true;
+        }
+        qCWarning(sum) << "BackgroundManager autostart failed, attempting fallback to .desktop";
+    }
+    // Fallback 
     qCDebug(sum) << "Using DesktopManager for autostart";
     bool success = m_desktopManager->setupAutostart(enabled);
 

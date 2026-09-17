@@ -31,6 +31,14 @@ public:
 void HaControl::validateStartup(bool autostart)
 {
     auto m_startupManager = new StartupManager(this);
+
+    if (PlatformHelper::isFlatpak()){
+        //COuld not get isAutostartEnabled() to work perfekt with backgroundmanager and its portal
+        QString on_off = autostart ? "Enabling" : "Disabling";
+        qCInfo(core) << on_off << "autostartup";
+        m_startupManager->setAutostart(autostart);
+        return;
+    }
     if( !m_startupManager->isAutostartEnabled() && autostart){
         if(m_startupManager->setAutostart(autostart))
         {
