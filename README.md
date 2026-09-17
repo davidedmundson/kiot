@@ -122,6 +122,7 @@ user=mqtt_user
 password=secure_password
 tls=false
 autostart=false 
+discoveryprefix=homeassistant #For auto device detection in home assistant use default 
 ```
 
 #### Scripts Configuration
