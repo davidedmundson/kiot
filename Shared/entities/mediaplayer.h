@@ -55,7 +55,7 @@ public:
      * @param parent Parent QObject for memory management (optional)
      */
     explicit MediaPlayer(QObject *parent = nullptr);
-
+    ~MediaPlayer();
     /**
      * @brief Sets the complete media player state
      * @param info Map containing all media player state information

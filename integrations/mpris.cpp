@@ -262,8 +262,16 @@ public:
     /**
      * @brief Destructor
      */
-    ~PlayerContainer() = default;
+    ~PlayerContainer()
+    {
+        if (m_propsIface) {
+            disconnect(m_propsIface, nullptr, this, nullptr);
+        }
+        if (m_playerIface) {
+            disconnect(m_playerIface, nullptr, this, nullptr);
+        }
 
+    }
     /// @return The D-Bus service name of this player
     QString busName() const
     {
@@ -753,7 +761,13 @@ public:
      */
     ~MprisMultiplexer()
     {
+     
+        // Slett alle spillere eksplisitt nå så D-Bus grensesnittene lukkes pent
+        
         updateMediaPlayerEntity(nullptr);
+        disconnect(m_playerEntity, nullptr, this, nullptr);
+        
+
     }
 
 private:
@@ -994,8 +1008,13 @@ private:
             m_playerEntity->setState(emptyState);
             return;
         }
-
-        QVariantMap state;
+        if(QCoreApplication::closingDown())
+        {
+            qCDebug(mpris) << "Application is closing down, skipping update" << container->busName();
+            // Skip updating the
+            return;
+        }
+            QVariantMap state;
 
         // Convert PlaybackStatus enum to string
         QString playbackStatusStr;
