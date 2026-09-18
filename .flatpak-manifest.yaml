@@ -1,7 +1,7 @@
 id: org.davidedmundson.kiot
 branch: master
 runtime: org.kde.Platform
-runtime-version: "6.10" # don't forget to change QtMqtt
+runtime-version: "6.11" # don't forget to change QtMqtt
 sdk: org.kde.Sdk
 command: kiot
 tags:
@@ -16,30 +16,26 @@ finish-args:
   - "--socket=session-bus"
   - "--socket=system-bus"
   - "--socket=pulseaudio"
- 
 
-#GameLauncher
-  - "--filesystem=xdg-data/Steam:ro"      # For Steam
-  - "--filesystem=xdg-data/lutris:ro"     # For Lutris
-  - "--filesystem=xdg-config/heroic:ro"   # for Heroic
-#Accent colour
-  - "--filesystem=xdg-config/kdeglobals:ro"  
-#Docker
-  - "--filesystem=/run/docker.sock"
+  - "--filesystem=xdg-data/Steam:ro"          # GameLauncher For Steam
+  - "--filesystem=xdg-data/lutris:ro"         # GameLauncher For Lutris
+  - "--filesystem=xdg-config/heroic:ro"       # GameLauncher for Heroic
 
-#SystemD
-  - "--talk-name=org.freedesktop.systemd1"
-#Notification integration i think
-  - "--talk-name=org.kde.StatusNotifierWatcher"
-  - "--own-name=org.kde.StatusNotifierItem-2-2"
-#Kwin and active window integration
-  - "--talk-name=org.kde.KWin"
-#BLuetooth integration
-  - "--talk-name=org.bluez"
+  - "--filesystem=/usr/share/applications:ro" # For AppLauncher
+  - "--filesystem=xdg-data/applications:ro"   # For AppLauncher
+
+  - "--filesystem=xdg-config/kdeglobals:ro"   #Accent colour
+  - "--filesystem=/run/docker.sock"           #Docker
+  - "--talk-name=org.freedesktop.systemd1"    #SystemD
+  - "--talk-name=org.kde.StatusNotifierWatcher" #For notifications?
+  - "--own-name=org.kde.StatusNotifierItem-2-2" #For notifications?
+  - "--talk-name=org.kde.KWin"                #Kwin and active window integration
+  - "--talk-name=org.bluez"                   #BLuetooth integration
   - "--talk-name=org.freedesktop.Flatpak"
-#mpris
-  - "--talk-name=org.mpris.MediaPlayer2"
-  - "--talk-name=org.mpris.MediaPlayer2.*"
+  - "--talk-name=org.kde.kglobalaccel"        #Shortcuts integration
+  - "--talk-name=org.mpris.MediaPlayer2"      #mpris
+  - "--talk-name=org.mpris.MediaPlayer2.*"    #mpris
+  - "--talk-name=org.freedesktop.portal.*"    #Portal
 
 modules:
   - name: extra-cmake-modules
@@ -55,8 +51,8 @@ modules:
     sources:
       - type: git
         url: https://github.com/qt/qtmqtt.git
-        tag: 6.10.0
-        commit: d18c7571f295cd17e32ca084e8b05c50f21feba0
+        tag: 6.11.2
+        commit: 12144d369e4670291a80f8c7c6a775ab5103e391
 
   - name: pulseaudio-qt
     buildsystem: cmake-ninja
