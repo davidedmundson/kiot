@@ -8,7 +8,7 @@
 #include <QJsonObject>
 #include <QMqttClient>
 #include <QMqttSubscription>
-
+#include <KConfigGroup>
 MediaPlayer::MediaPlayer(QObject *parent)
     : Entity(parent)
 {
@@ -37,7 +37,7 @@ void MediaPlayer::init()
     setDiscoveryConfig("command_playmedia_topic", baseTopic() + "/playmedia");
     setDiscoveryConfig("command_seek_position_topic", baseTopic() + "/setposition");
     setDiscoveryConfig("availability",
-                       QVariantMap({{"topic", "kiot/" + hostname() + "/connected"},
+                       QVariantMap({{"topic", topixPrefix() + "/" + hostname() + "/connected"},
                                     {"payload_available", "on"},
                                     {"payload_not_available", "off"}}));
     setDiscoveryConfig("device",
