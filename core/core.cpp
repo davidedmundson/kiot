@@ -77,6 +77,7 @@ bool HaControl::validateConfig()
     }else{
         KConfigGroup group(config, "general");
         if(group.readEntry("password") == "mqtt-password-here"){
+            MainWindow::sendNotification(QString(PROJECT_NAME),"Please configure your MQTT settings");
             m_mainWindow->show();
         }
 
@@ -149,6 +150,11 @@ HaControl::~HaControl()
         delete m_connectedNode;
         m_connectedNode = nullptr;
     }
+    if(m_client){
+        qCInfo(core) << "disconnecting from mqtt host";
+        m_client->disconnectFromHost();
+
+    }
 }
 
 void HaControl::doConnect()
@@ -169,7 +175,7 @@ bool HaControl::registerIntegrationFactory(const QString &name, std::function<vo
     return true;
 }
 
-// Kjør integrasjoner
+// Loads the integrations set to enabled in our config file
 void HaControl::loadIntegrations(KSharedConfigPtr config)
 {
     auto integrationconfig = config->group("Integrations");
@@ -179,7 +185,7 @@ void HaControl::loadIntegrations(KSharedConfigPtr config)
     }
 
     for (const auto &entry : s_integrations) {
-        // Bruk onByDefault hvis config ikke finnes
+        // Uses the onByDefault value if the key doesn't exist
         if (!integrationconfig.hasKey(entry.name)) {
             integrationconfig.writeEntry(entry.name, entry.onByDefault);
             config->sync();

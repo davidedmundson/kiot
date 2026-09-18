@@ -8,7 +8,7 @@ add_definitions(-DPROJECT_DESCRIPTION="${PROJECT_DESCRIPTION}")
 add_definitions(-DPROJECT_VERSION="${PROJECT_VERSION}")
 add_definitions(-DPROJECT_DOMAIN="${PROJECT_HOMEPAGE_URL}")
 add_definitions(-DAPP_ID="${APP_ID}")
-
+add_definitions(-DPROJECT_DEVELOPERS="${PROJECT_DEVELOPERS}")
 
 set(KIOT_SHARED_SRC
     
