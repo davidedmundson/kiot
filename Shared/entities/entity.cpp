@@ -62,28 +62,6 @@ static QString sanitizeForMqttTopic(const QString &input)
     return result;
 }
 
-/** @private Static discovery prefix for Home Assistant MQTT discovery
- */
-const QString &discoveryPrefix() {
-    static QString prefix;
-    if (prefix.isEmpty()) {
-        auto conf = KSharedConfig::openConfig(PlatformHelper::configFilePath(), KConfig::SimpleConfig);
-        auto group = conf->group("general");
-        prefix = group.readEntry("discoveryprefix","homeassistant");
-    }
-    return prefix;
-}
-
-const QString &topixPrefix() {
-    static QString prefix;
-    if (prefix.isEmpty()) {
-        auto conf = KSharedConfig::openConfig(PlatformHelper::configFilePath(), KConfig::SimpleConfig);
-        auto group = conf->group("general");
-        prefix = group.readEntry("topicprefix","kiot");
-    }
-    return prefix;
-}
-
 Entity::Entity(QObject *parent):
     QObject(parent)
 {

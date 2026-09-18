@@ -25,6 +25,8 @@
 #include <QString>
 #include <QVariant>
 #include <QVariantMap>
+#include <KSharedConfig>
+#include <KConfigGroup>
 #include "Shared/platformhelper.h"
 
 /**
@@ -217,7 +219,31 @@ public:
      * @brief Unregisters this entity from Home Assistant
      */
     void unRegister();
+
     
+    /** @private Static discovery prefix for Home Assistant MQTT discovery
+    */
+    static QString &discoveryPrefix() {
+        static QString prefix;
+        if (prefix.isEmpty()) {
+            auto conf = KSharedConfig::openConfig(PlatformHelper::configFilePath(), KConfig::SimpleConfig);
+            auto group = conf->group("general");
+            prefix = group.readEntry("discoveryprefix","homeassistant");
+        }
+        return prefix;
+    }
+    /** @private Static topic prefix mqtt
+    */
+    static QString &topixPrefix() {
+        static QString prefix;
+        if (prefix.isEmpty()) {
+            auto conf = KSharedConfig::openConfig(PlatformHelper::configFilePath(), KConfig::SimpleConfig);
+            auto group = conf->group("general");
+            prefix = group.readEntry("topicprefix","kiot");
+        }
+        return prefix;
+    }
+
 protected:
     /**
      * @brief Initialization method called on MQTT connect
