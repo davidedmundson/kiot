@@ -19,6 +19,7 @@
 #include "entity.h"
 #include "core/core.h"
 #include <QHostInfo>
+#include <QSysInfo>
 #include <QJsonDocument>
 #include <QJsonObject>
 #include <QJsonArray>
@@ -27,7 +28,6 @@
 
 DEFINE_LOGGER(base, Shared.Entities.Entity)
 
-static QString s_topicPrefix = "kiot";
 
 static QString sanitizeForMqttTopic(const QString &input)
 {
@@ -62,6 +62,28 @@ static QString sanitizeForMqttTopic(const QString &input)
     return result;
 }
 
+/** @private Static discovery prefix for Home Assistant MQTT discovery
+ */
+const QString &discoveryPrefix() {
+    static QString prefix;
+    if (prefix.isEmpty()) {
+        auto conf = KSharedConfig::openConfig(PlatformHelper::configFilePath(), KConfig::SimpleConfig);
+        auto group = conf->group("general");
+        prefix = group.readEntry("discoveryprefix","homeassistant");
+    }
+    return prefix;
+}
+
+const QString &topixPrefix() {
+    static QString prefix;
+    if (prefix.isEmpty()) {
+        auto conf = KSharedConfig::openConfig(PlatformHelper::configFilePath(), KConfig::SimpleConfig);
+        auto group = conf->group("general");
+        prefix = group.readEntry("topicprefix","kiot");
+    }
+    return prefix;
+}
+
 Entity::Entity(QObject *parent):
     QObject(parent)
 {
@@ -75,7 +97,7 @@ QString Entity::hostname() const
 
 QString Entity::baseTopic() const
 {
-    return s_topicPrefix + "/" + hostname() + "/" + id();
+    return topixPrefix() + "/" + hostname() + "/" + id();
 
 }
 
@@ -136,18 +158,6 @@ void Entity::init()
 {}
 
 
-/** @private Static discovery prefix for Home Assistant MQTT discovery
- */
-const QString &discoveryPrefix() {
-    static QString prefix;
-    if (prefix.isEmpty()) {
-        auto conf = KSharedConfig::openConfig(PlatformHelper::configFilePath(), KConfig::SimpleConfig);
-        auto group = conf->group("general");
-        prefix = group.readEntry("discoveryprefix","homeassistant");
-    }
-    return prefix;
-}
-
 void Entity::sendRegistration()
 {
     if (haType().isEmpty()) {
@@ -157,7 +167,7 @@ void Entity::sendRegistration()
     config["name"] = name();
     
     if (id() != "connected") { //special case
-        config["availability_topic"] = s_topicPrefix + "/" + hostname() + "/connected";
+        config["availability_topic"] = topixPrefix() + "/" + hostname() + "/connected";
         config["payload_available"] = "on";
         config["payload_not_available"] = "off";
         const QString icon = haIcon();
@@ -168,12 +178,17 @@ void Entity::sendRegistration()
     //Attributes topic, since every mqtt entity looks like it supports attributes
     config["json_attributes_topic"] = baseTopic() + "/attributes";
     if (!config.contains("device")) {
-        config["device"] = QVariantMap({{"identifiers", "linux_ha_bridge_" + hostname() }});
+        config["device"] = QVariantMap({{"name", hostname()},
+                                    {"identifiers", "linux_ha_bridge_" + hostname()},
+                                    {"sw_version", QStringLiteral(PROJECT_VERSION)},
+                                    {"manufacturer", QStringLiteral(PROJECT_DEVELOPERS)}, //TODO update to KDE if we manage to make it part of the official portfolio
+                                    {"model", QStringLiteral(PROJECT_NAME) },
+                                    {"hw_version",QSysInfo::prettyProductName() + " - " + QSysInfo::kernelVersion()}});
     }
     config["unique_id"] = "linux_ha_control_"+ hostname() + "_" + id();
     HaControl::mqttClient()->publish(discoveryPrefix() + "/" + haType() + "/" + hostname() + "/" + id() + "/config", QJsonDocument(QJsonObject::fromVariantMap(config)).toJson(QJsonDocument::Compact), 0, true);
     if (id() != "connected") { //special case
-        HaControl::mqttClient()->publish(s_topicPrefix + "/" + hostname() + "/connected", "on", 0, false);
+        HaControl::mqttClient()->publish(topixPrefix() + "/" + hostname() + "/connected", "on", 0, false);
     }
 }
 
