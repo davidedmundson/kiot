@@ -191,8 +191,9 @@ void MediaPlayer::publishState()
        if (!mqtt || mqtt->state() != QMqttClient::Connected)
         return;
 
-    if (m_state.value("name").toString() != name()) {
+ /*   if (m_state.value("name").toString() != name()) {
         setName(m_state["name"].toString());
         sendRegistration();
      }
+*/
     }

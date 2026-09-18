@@ -779,7 +779,7 @@ private:
         m_playerEntity = new MediaPlayer(this);
         m_playerEntity->setId("mpris_media_player");
         m_playerEntity->setName("Kiot Active MPRIS Player");
-
+        updateMediaPlayerEntity(nullptr); //To make sure any leftover state is cleared
         // Connect entity signals to player control methods
         connect(m_playerEntity, &MediaPlayer::playRequested, this, [this]() {
             if (m_activePlayer)
