@@ -7,6 +7,8 @@
 
 #include <KService>
 #include <KServiceGroup>
+#include <KProcess>
+#include <KSandbox>
 #include <KApplicationTrader>
 #include <KIO/ApplicationLauncherJob>
 #include <QJsonArray>
@@ -91,19 +93,42 @@ private slots:
 
         AppData app = m_appList[option];
 
-        KService::Ptr service = KService::serviceByDesktopName(app.desktopFileName);
-        if (service) {
-            qCDebug(appla_logger) << "Launching application:" << app.name;
+        if (PlatformHelper::isFlatpak()) {
+            qCDebug(appla_logger) << "Launching application via host context (Flatpak):" << app.execCommand;
+            QStringList parts = QProcess::splitCommand(app.execCommand);
+            if (!parts.isEmpty()) {
+                QString program = parts.first();
+                QStringList arguments = parts.mid(1);
+        
+                qCDebug(appla_logger) << "Program:" << program;
+                qCDebug(appla_logger) << "Arguments:" << arguments;
+        
+                KProcess *m_process = new KProcess(this);
+                m_process->setProgram(program);
+                m_process->setArguments(arguments);
+                KSandbox::ProcessContext ctx = KSandbox::makeHostContext(*m_process);
+                m_process->setProgram(ctx.program);
+                m_process->setArguments(ctx.arguments);
+                m_process->startDetached();
 
-            auto *job = new KIO::ApplicationLauncherJob(service);
-            job->start();
-
-            QVariantMap attributes = app.toVariantMap();
-            attributes["last_launched_at"] = QDateTime::currentDateTime().toString(Qt::ISODate);
-            m_select->setAttributes(attributes);
+            }            
         } else {
-            qCWarning(appla_logger) << "Failed to resolve KService for application:" << app.name;
+            KService::Ptr service = KService::serviceByDesktopName(app.desktopFileName);
+            if (service) {
+                qCDebug(appla_logger) << "Launching application natively:" << app.name;
+
+                auto *job = new KIO::ApplicationLauncherJob(service);
+                job->start();
+            } else {
+                qCWarning(appla_logger) << "Failed to resolve KService for application:" << app.name;
+                setToDefault();
+                return;
+            }
         }
+
+        QVariantMap attributes = app.toVariantMap();
+        attributes["last_launched_at"] = QDateTime::currentDateTime().toString(Qt::ISODate);
+        m_select->setAttributes(attributes);
 
         setToDefault();
     }
@@ -223,6 +248,7 @@ private:
      */
     void discoverAllApplications(const QStringList &allowedCategories)
     {
+        // TODO - add support for flatpak apps, manual desktop parser looks like most reliable method here
         QMap<QString, AppData> apps;
         const KService::List services = KService::allServices();
 
