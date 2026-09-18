@@ -7,6 +7,11 @@ command: kiot
 tags:
   - nightly
 desktop-file-name-suffix: " (Nightly)"
+
+# FOr testing with applauncher support
+#environment:
+#  XDG_DATA_DIRS: "/app/share:/usr/share:/usr/locale/share:/run/host/usr/share:/run/host/var/lib/flatpak/exports/share:$XDG_DATA_DIRS"
+
 finish-args:
   - "--share=ipc"
   - "--share=network"
@@ -20,10 +25,6 @@ finish-args:
   - "--filesystem=xdg-data/Steam:ro"          # GameLauncher For Steam
   - "--filesystem=xdg-data/lutris:ro"         # GameLauncher For Lutris
   - "--filesystem=xdg-config/heroic:ro"       # GameLauncher for Heroic
-
-  - "--filesystem=/usr/share/applications:ro" # For AppLauncher
-  - "--filesystem=xdg-data/applications:ro"   # For AppLauncher
-
   - "--filesystem=xdg-config/kdeglobals:ro"   #Accent colour
   - "--filesystem=/run/docker.sock"           #Docker
   - "--talk-name=org.freedesktop.systemd1"    #SystemD
@@ -35,7 +36,7 @@ finish-args:
   - "--talk-name=org.kde.kglobalaccel"        #Shortcuts integration
   - "--talk-name=org.mpris.MediaPlayer2"      #mpris
   - "--talk-name=org.mpris.MediaPlayer2.*"    #mpris
-  - "--talk-name=org.freedesktop.portal.*"    #Portal
+  - "--talk-name=org.freedesktop.portal.*"    #Portal used in autostartup with background manager
 
 modules:
   - name: extra-cmake-modules
