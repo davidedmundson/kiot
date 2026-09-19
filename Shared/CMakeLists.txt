@@ -11,9 +11,7 @@ add_definitions(-DAPP_ID="${APP_ID}")
 add_definitions(-DPROJECT_DEVELOPERS="${PROJECT_DEVELOPERS}")
 
 set(KIOT_SHARED_SRC
-    
-    dbusproperty.cpp
-    dbusproperty.h
+
     entities/entity.cpp
     entities/binarysensor.cpp
     entities/button.cpp
@@ -26,8 +24,13 @@ set(KIOT_SHARED_SRC
     entities/lock.cpp
     entities/notify.cpp
     entities/mediaplayer.cpp
+    entities/image.cpp
+    entities/image.cpp 
+    
     platformhelper.cpp
     platformhelper.h
+    dbusproperty.cpp
+    dbusproperty.h
 )
 
 
