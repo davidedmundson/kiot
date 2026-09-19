@@ -25,7 +25,9 @@ set(KIOT_SHARED_SRC
     entities/notify.cpp
     entities/mediaplayer.cpp
     entities/image.cpp
-    entities/image.cpp 
+    entities/image.h 
+    entities/camera.cpp
+    entities/camera.h 
     
     platformhelper.cpp
     platformhelper.h
