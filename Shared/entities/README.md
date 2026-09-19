@@ -19,6 +19,7 @@ This directory contains the core entity implementations for the KIOT (KDE Intern
   - [Notify](#11-notify-notifyh--notifycpp)
   - [Camera](#12-camera-camerah--cameracpp)
   - [Image](#13-image-imageh--imagecpp)
+  - [Update](#14-update-updateh--updatecpp)
 - [Creating New Entities](#creating-new-entities)
 - [MQTT Topic Structure](#mqtt-topic-structure)
 - [Home Assistant Discovery](#home-assistant-discovery)
@@ -307,6 +308,35 @@ urlImage->setName("Webcam Stream URL");
 urlImage->setIsUrlMode(true);
 // Publish an image URL:
 urlImage->publishImageUrl("https://example.com/latest.jpg");
+```
+
+### 14. **Update** (`update.h` / `update.cpp`)
+Represents firmware/software update entities for monitoring and installing updates.
+
+**Home Assistant Type:** `update`  
+**Use Cases:** Kiot update from Home Assistant, firmware version monitoring, remote update installation
+
+**Example Configuration:**
+```cpp
+Update *update = new Update(parent);
+update->setId("kiot_firmware");
+update->setName("Kiot Firmware");
+update->setInstalledVersion("1.0.0");
+update->setLatestVersion("1.1.0");
+update->setTitle("Kiot System Update");
+update->setReleaseSummary("Bug fixes and performance improvements");
+update->setReleaseUrl("https://github.com/davidedmundson/kiot/releases");
+
+connect(update, &Update::installRequested, []() {
+    // Start update installation process
+    // Update progress during installation:
+    // update->setInProgress(true);
+    // update->setUpdatePercentage(25);
+    // ...
+    // When complete:
+    // update->setInstalledVersion("1.1.0");
+    // update->setInProgress(false);
+});
 ```
 
 
