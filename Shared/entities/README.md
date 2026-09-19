@@ -17,6 +17,8 @@ This directory contains the core entity implementations for the KIOT (KDE Intern
   - [Text](#9-text-texth--textcpp)
   - [Media Player](#10-mediaplayer-mediaplayerh--mediaplayercpp)
   - [Notify](#11-notify-notifyh--notifycpp)
+  - [Camera](#12-camera-camerah--cameracpp)
+  - [Image](#13-image-imageh--imagecpp)
 - [Creating New Entities](#creating-new-entities)
 - [MQTT Topic Structure](#mqtt-topic-structure)
 - [Home Assistant Discovery](#home-assistant-discovery)
@@ -263,6 +265,50 @@ connect(notify, &Notify::notificationReceived, [](const QString &message) {
 });
 ```
 
+### 12. **Camera** (`camera.h` / `camera.cpp`)
+Represents camera entities for image publishing.
+
+**Home Assistant Type:** `camera`  
+**Use Cases:** Screenshot sharing, webcam snapshots, image-based sensors
+
+**Example Configuration:**
+```cpp
+Camera *camera = new Camera(parent);
+camera->setId("screenshot");
+camera->setName("Screenshot");
+// Publish an image:
+camera->publishImage(base64ImageData);
+connect(camera, &Camera::commandReceived, [](const QString &cmd) {
+    // Handle image update requests
+});
+```
+
+### 13. **Image** (`image.h` / `image.cpp`)
+Represents static image entities for publishing image files or image URLs.
+
+**Home Assistant Type:** `image`  
+**Use Cases:** Static snapshots, dynamically updated images, external image URL bridging
+
+**Example Configuration (Binary / Base64 Mode):**
+```cpp
+Image *imageEntity = new Image(parent);
+imageEntity->setId("snapshot");
+imageEntity->setName("Desktop Snapshot");
+imageEntity->setMimeType("image/jpeg");
+// Publish a base64-encoded image:
+imageEntity->publishImage(base64ImageData);
+```
+
+**Example Configuration (URL Mode):**
+```cpp
+Image *urlImage = new Image(parent);
+urlImage->setId("webcam_url");
+urlImage->setName("Webcam Stream URL");
+urlImage->setIsUrlMode(true);
+// Publish an image URL:
+urlImage->publishImageUrl("https://example.com/latest.jpg");
+```
+
 
 ---
 
@@ -410,8 +456,9 @@ Each entity type maps directly to Home Assistant entity types:
 | Number | number | numeric input with constraints |
 | Text | text | text for input  |
 | Camera | camera | image publishing |
+| Image | image | image publishing |
 | Notify | notify | notification sending |
-| Update | update | firmware updates |
+
 
 ---
 
