@@ -28,7 +28,10 @@ set(KIOT_SHARED_SRC
     entities/image.h 
     entities/camera.cpp
     entities/camera.h 
+    entities/update.cpp
+    entities/update.h 
     
+
     platformhelper.cpp
     platformhelper.h
     dbusproperty.cpp
