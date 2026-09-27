@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<component type="addon">
+    <id>org.davidedmundson.kiot.Plugin.TemplatePlugin</id>
+    <extends>org.davidedmundson.kiot</extends>
+    <name>TemplatePlugin</name>
+    <summary>Give Kiot new life with extra plugins</summary>
+    <url type="homepage">https://github.com/username/repo_name</url>
+    <metadata_license>LGPL-2.1-or-later</metadata_license>
+    <project_license>LGPL-2.1-or-later</project_license>
+</component>
