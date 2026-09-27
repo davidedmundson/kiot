@@ -5,6 +5,8 @@
 
 This plugin integrates a **SendSpin** client into KIOT, allowing you to stream audio to your KDE setup from Music Assistant.
 
+WARNING, working but unfinished and saves data to /data/conf/*.json atm
+
 The underlying client code is adapted from [Third Reality's Voice Music Assistant](https://github.com/thirdreality/voice-music-assistant/tree/linux-voice-assistant/buildroot/package/thirdreality/sendspin-client).
 
 ---
