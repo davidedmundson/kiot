@@ -10,7 +10,7 @@
 class SendspinDesktopClient : public QObject {
     Q_OBJECT
 public:
-    explicit SendspinDesktopClient(const QString &clientName = "KdeKryptoniteDesktop", QObject *parent = nullptr);
+    explicit SendspinDesktopClient(const QString &clientName = "kiot", QObject *parent = nullptr);
     ~SendspinDesktopClient();
 
     void connectToServer(const QString &url);
