@@ -7,3 +7,5 @@ flatpak-repo/
 .flatpak-builder/
 .build-installer/
 core/appdata/generated-icons/
+PluginsExperimental/*/build/
+PluginsExperimental/*/*/build/

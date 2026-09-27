@@ -3,6 +3,7 @@
 
 #pragma once
 #include <KIOTShared/kiotshared.h>
+#include "plugins/pluginmanager.h"
 #include <KSharedConfig>
 #include <QCoreApplication>
 #include <QMqttSubscription>
@@ -34,11 +35,11 @@ public:
 private:
     void validateStartup(bool autostart);
     bool validateConfig();
-    void loadIntegrations(KSharedConfigPtr config);
+    void loadIntegrations();
 
     QList<LoadedPlugin> m_loadedPlugins;
     static HaControl *s_self;
-
+    PluginManager *m_pluginManager = nullptr;
     ConnectedNode *m_connectedNode = nullptr;
     MainWindow *m_mainWindow = nullptr;
 };
