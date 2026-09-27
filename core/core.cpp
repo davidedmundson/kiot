@@ -7,6 +7,7 @@
 #include "ui_qt/mainwindow.h"
 #include "core.h"
 #include "core/startup/startupmanager.h"
+#include "plugins/pluginmanager.h"
 #include <KIOTShared/kiotshared.h>
 
 #include <KConfigGroup>
@@ -89,6 +90,7 @@ bool HaControl::validateConfig()
 }
 HaControl::HaControl()
 {
+    m_pluginManager = new PluginManager(this);
     s_self = this;
     m_mainWindow = MainWindow::instance();
     ConfigManager *m_conf = new ConfigManager(this);
@@ -120,7 +122,7 @@ HaControl::HaControl()
 
     m_connectedNode = new ConnectedNode(this);
 
-    loadIntegrations(config);
+    loadIntegrations();
 
     transportManager->doConnect();
 }
@@ -131,91 +133,21 @@ HaControl::~HaControl()
         delete m_connectedNode;
         m_connectedNode = nullptr;
     }
-
-    for (const auto &plugin : std::as_const(m_loadedPlugins)) {
-        if (plugin.interface) {
-            plugin.interface->stopPlugin();
-        }
-        if (plugin.loader) {
-            plugin.loader->unload();
-        }
+    if(m_pluginManager)
+    {
+        delete m_pluginManager;
+        m_pluginManager = nullptr;
     }
-    m_loadedPlugins.clear();
+
 }
 
 
-void HaControl::loadIntegrations(KSharedConfigPtr config)
+void HaControl::loadIntegrations()
 {
-      auto integrationconfig = config->group("Integrations");
-
-    if (!integrationconfig.exists()) {
-        qCWarning(core) << "Integration group not found in config, defaulting to onByDefault values";
-    }
-
-
-    QStringList pluginDirStrings = PlatformHelper::appdataDirPaths();
-    qCDebug(core) << "Checking plugin path:" << pluginDirStrings;
-    if(QDir(QCoreApplication::applicationDirPath() + "/plugins").exists())
-        pluginDirStrings.append(QCoreApplication::applicationDirPath() + "/plugins");
-    for (QString pathName : pluginDirStrings)
-    {
-        if(!pathName.endsWith("/plugins"))
-            pathName = pathName + "/plugins";
-        qCDebug(core) << "Checking plugin path:" << pathName;
-        QDir pluginsDir(pathName);
-        if(!pluginsDir.exists())
-            continue;
-        for (const QString &fileName : pluginsDir.entryList(QDir::Files)) {
-            if(!fileName.endsWith(".so"))
-                continue;
-            auto pluginLoader = new QPluginLoader(pluginsDir.absoluteFilePath(fileName), this);
-            QObject *pluginInstance = pluginLoader->instance();
-
-            if (pluginInstance) {
-                auto *kiotPlugin = qobject_cast<KIOTShared::Plugins::KIOTPluginInterface *>(pluginInstance);
-                if (kiotPlugin) {
-                    QString pluginName = kiotPlugin->name();
-
-                    if (!integrationconfig.hasKey(pluginName)) {
-                        integrationconfig.writeEntry(pluginName, kiotPlugin->enabledByDefault());
-                        config->sync();
-                    }
-        
-                    bool enabled = integrationconfig.readEntry(pluginName, false);
-
-                    if (enabled) {
-                        if (kiotPlugin->checkCompatibility()) {
-                            if (kiotPlugin->startPlugin()) {
-                                qCInfo(core) << "Started plugin integration:" << pluginName;
-                                m_loadedPlugins.append({kiotPlugin, pluginLoader});
-                            } else {
-                                qCWarning(core) << "Failed to start plugin:" << pluginName;
-                                pluginLoader->unload();
-                                pluginLoader->deleteLater();
-                            }
-                        } else {
-                            qCWarning(core) << "Plugin compatibility check failed for:" << pluginName << "Disabling";
-                            integrationconfig.writeEntry(pluginName, false);
-                            config->sync();
-                            pluginLoader->unload();
-                            pluginLoader->deleteLater();
-                        }
-                    } else {
-                        qCDebug(core) << "Skipped disabled plugin:" << pluginName;
-                        pluginLoader->unload();
-                        pluginLoader->deleteLater();
-                    }
-                } else {
-                    qCWarning(core) << "File" << fileName << "does not cast to KIOTPluginInterface!";
-                    pluginLoader->unload();
-                    pluginLoader->deleteLater();
-                }
-            } else {
-                qCWarning(core) << "Failed to load plugin from file" << fileName << ":" << pluginLoader->errorString();
-                pluginLoader->deleteLater();
-            }
-        }
-    }   
+    if(m_pluginManager)
+        m_pluginManager->loadActivatedPlugins();
+    else
+        qCWarning(core) << "PluginManager not initialized";
 }
 
 ConnectedNode::ConnectedNode(QObject *parent)
@@ -244,7 +176,9 @@ ConnectedNode::ConnectedNode(QObject *parent)
 
 ConnectedNode::~ConnectedNode()
 {
-    TransportManager::mqttClient()->publish(baseTopic(), "off", 0, true);
+    auto client = TransportManager::mqttClient();
+    if(client)
+        client->publish(baseTopic(), "off", 0, true);
 }
 
 void ConnectedNode::init()

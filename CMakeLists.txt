@@ -106,7 +106,25 @@ include(ECMConfiguredInstall)
 
 include_directories("${CMAKE_CURRENT_BINARY_DIR}")
 
-file(GLOB_RECURSE ALL_CLANG_FORMAT_SOURCE_FILES *.cpp *.h *.hpp *.c)
+#Changed to specific folders to avoid formatting the PluginsExperimental folder as its a mess
+file(GLOB_RECURSE ALL_CLANG_FORMAT_SOURCE_FILES
+    "${CMAKE_CURRENT_SOURCE_DIR}/core/*.cpp"
+    "${CMAKE_CURRENT_SOURCE_DIR}/core/*.h"
+    "${CMAKE_CURRENT_SOURCE_DIR}/core/*.hpp"
+    "${CMAKE_CURRENT_SOURCE_DIR}/core/*.c"
+    "${CMAKE_CURRENT_SOURCE_DIR}/Shared/*.cpp"
+    "${CMAKE_CURRENT_SOURCE_DIR}/Shared/*.h"
+    "${CMAKE_CURRENT_SOURCE_DIR}/Shared/*.hpp"
+    "${CMAKE_CURRENT_SOURCE_DIR}/Shared/*.c"
+    "${CMAKE_CURRENT_SOURCE_DIR}/Plugins/*.cpp"
+    "${CMAKE_CURRENT_SOURCE_DIR}/Plugins/*.h"
+    "${CMAKE_CURRENT_SOURCE_DIR}/Plugins/*.hpp"
+    "${CMAKE_CURRENT_SOURCE_DIR}/Plugins/*.c"
+    "${CMAKE_CURRENT_SOURCE_DIR}/kcm/*.cpp"
+    "${CMAKE_CURRENT_SOURCE_DIR}/kcm/*.h"
+    "${CMAKE_CURRENT_SOURCE_DIR}/kcm/*.hpp"
+    "${CMAKE_CURRENT_SOURCE_DIR}/kcm/*.c"
+)
 kde_clang_format(${ALL_CLANG_FORMAT_SOURCE_FILES})
 
 # Builds the shared lib needed by everything else

@@ -40,7 +40,9 @@ set(KIOT_CORE_SOURCES
     startup/desktopmanager.cpp
     startup/desktopmanager.h    
     startup/backgroundmanager.cpp
-    startup/backgroundmanager.h    
+    startup/backgroundmanager.h   
+    plugins/pluginmanager.cpp
+    plugins/pluginmanager.h
 )
 
 set(DBUS_XML_DIR "${CMAKE_CURRENT_SOURCE_DIR}/dbus")
