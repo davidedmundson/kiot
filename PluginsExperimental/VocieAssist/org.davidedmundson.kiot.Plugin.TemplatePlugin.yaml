@@ -1,0 +1,61 @@
+# ==============================================================================
+# KIOT Plugin Flatpak Extension Manifest Template
+# ==============================================================================
+# ⚠️ CRITICAL NAMING WARNING FOR DEVELOPERS ⚠️
+# The extension 'id' MUST strictly follow this exact naming convention:
+#   <core_app_id>.plugin.<YourPluginName>
+#
+# For KIOT, the core app ID is 'org.davidedmundson.kiot'.
+# Therefore, your extension ID MUST start with 'org.davidedmundson.kiot.plugin.'.
+# If you deviate (e.g., missing '.kiot.'), Flatpak-builder will throw:
+#   "No extension point matching ... in app/org.davidedmundson.kiot/..."
+# ==============================================================================
+
+id: org.davidedmundson.kiot.plugin.TemplatePlugin
+
+# Extension branch. Must match the branch of the runtime/core app it extends.
+branch: '1.0'
+
+# Defines the host application this extension plugs into.
+# Flatpak uses this to bind the extension directly to the KIOT sandbox environment.
+runtime: org.davidedmundson.kiot
+runtime-version: 'master'
+
+# The KDE Software Development Kit used to build this plugin (must match core SDK version).
+sdk: org.kde.Sdk//6.11
+
+# Tells flatpak-builder that this module is an extension, not a standalone application.
+build-extension: true
+
+# Disables separate locale generation to keep the extension package simple and lightweight.
+separate-locales: false
+
+# Build configuration options
+build-options:
+    # Forces the installation prefix to /app.
+    # This ensures that CMake install rules (e.g., DESTINATION plugins/TemplatePlugin)
+    # correctly place files into /app/plugins/TemplatePlugin/ inside the extension sandbox,
+    # allowing KIOT core's merge-dirs configuration to discover them.
+    prefix: /app
+
+# Build modules required to compile the plugin
+modules:
+  - name: kiot-plugin-template
+    buildsystem: cmake-ninja
+
+    # Sources required for the build
+    sources:
+      # 1. The local plugin source code directory containing CMakeLists.txt, C++ files, etc.
+      - type: dir
+        path: "."
+
+      # 2. AppStream Metainfo XML file used for software centers, extension management,
+      # and runtime discovery.
+      - type: file
+        path: org.davidedmundson.kiot.Plugin.TemplatePlugin.Metainfo.xml
+
+    # Additional configuration options passed to CMake
+    config-opts:
+      # Informs the build system about the parent application name for proper namespacing
+      - -DPARENT_APP_NAME=kiot
+      - -DBUILD_FLATPAK_EXTENSION=ON
