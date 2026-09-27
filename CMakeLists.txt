@@ -142,6 +142,16 @@ if(BUILD_PLUGINS)
     endif()
 endif()
 
+# Builds the kcm module if not in a flatpak sandbox
+if(NOT BUILD_FLATPAK)
+    add_subdirectory(kcm)
+endif()
+
+# Builds the core binary
+add_subdirectory(core)
+
+
+
 # BUilds every Experimental plugin if you set it to ON
 if(BUILD_EXPERIMENTAL_PLUGINS)
     if(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/PluginsExperimental/CMakeLists.txt")
@@ -151,13 +161,6 @@ if(BUILD_EXPERIMENTAL_PLUGINS)
     endif()
 endif()
 
-# Builds the kcm module if not in a flatpak sandbox
-if(NOT BUILD_FLATPAK)
-    add_subdirectory(kcm)
-endif()
-
-# Builds the core binary
-add_subdirectory(core)
 
 #feature_summary(WHAT ALL INCLUDE_QUIET_PACKAGES FATAL_ON_MISSING_REQUIRED_PACKAGES)
 

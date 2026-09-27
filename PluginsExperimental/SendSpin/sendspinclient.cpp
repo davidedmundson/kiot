@@ -5,6 +5,10 @@
 #include <sendspin/player_role.h>
 #include <sendspin/visualizer_role.h>
 
+#include <KIOTShared/kiotshared.h>
+using KIOTShared::PlatformHelper;
+DEFINE_PLUGIN_LOGGER(spclient,SendSpinPlugin)
+
 #include <pulse/error.h>
 #include <pulse/pulseaudio.h>
 #include <QStandardPaths>
@@ -61,8 +65,6 @@ public:
 
     std::optional<uint16_t> load_static_delay() override {
         int val = readField("readField" == QString("static_delay_ms") ? "static_delay_ms" : "static_delay_ms"); // (liten skriveleif-sjekk fix under)
-        // Riktig linje:
-        // int val = readField("static_delay_ms");
         if (val < 0) return std::nullopt;
         return static_cast<uint16_t>(val);
     }
@@ -95,7 +97,10 @@ private:
         return false;
     }
 };
+
+
 class DesktopPlayerListener : public PlayerRoleListener {
+
 public:
     DesktopPlayerListener(SendspinDesktopClient *parent) : parent_(parent) {}
     ~DesktopPlayerListener() override { parent_->closeAudio(); }
@@ -174,12 +179,15 @@ private:
 
 SendspinDesktopClient::SendspinDesktopClient(const QString &clientName, QObject *parent)
 : QObject(parent) {
+    
 
+
+    SendspinClient::set_log_level(LogLevel::ERROR);
     SendspinClientConfig config;
     config.client_id = clientName.toStdString();
     config.name = clientName.toStdString();
-    config.product_name = QStringLiteral(PROJECT_NAME).toStdString() + " " + QStringLiteral(PLUGIN_NAME).toStdString();
-    config.manufacturer = QStringLiteral(PROJECT_NAME).toStdString();
+    config.product_name = "KIOT" + QStringLiteral(PLUGIN_NAME).toStdString();;
+    config.manufacturer = "KIOT " + QStringLiteral(PLUGIN_NAME).toStdString();;
     config.software_version = QStringLiteral(PLUGIN_VERSION).toStdString();
 
     client_ = std::make_unique<SendspinClient>(std::move(config));
@@ -203,7 +211,7 @@ SendspinDesktopClient::SendspinDesktopClient(const QString &clientName, QObject 
     auto &metadata = client_->add_metadata();
     metadata.set_listener(meta_listener);
 
-    client_->start_server();
+    client_->start();
 
     QTimer *loopTimer = new QTimer(this);
     connect(loopTimer, &QTimer::timeout, this, [this]() {
