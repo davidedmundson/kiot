@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<component type="addon">
+    <id>org.davidedmundson.kiot.Plugin.SendSpin</id>
+    <extends>org.davidedmundson.kiot</extends>
+    <name>SendSpinPlugin</name>
+    <summary>A KIOT Plugin that implements a sendspin client to use your KDE setup with music assistant</summary>
+    <url type="homepage">https://github.com/davidedmundson/kiot</url>
+    <metadata_license>LGPL-2.1-or-later</metadata_license>
+    <project_license>LGPL-2.1-or-later</project_license>
+</component>
