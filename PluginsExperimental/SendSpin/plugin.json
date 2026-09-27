@@ -1,0 +1,5 @@
+{
+    "name": "SendSpin",
+    "version": "0.0.1",
+    "description": "A KIOT Plugin that implements a sendspin client to use your KDE setup with music assistant" 
+}
