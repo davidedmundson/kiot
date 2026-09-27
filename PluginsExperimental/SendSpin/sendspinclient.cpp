@@ -1,4 +1,8 @@
 #include "sendspinclient.h"
+#include <QString>
+#include <QHostInfo>
+#include <QSysInfo>
+
 
 // Alle dine eksisterende includes fra sendspin-client.cpp:
 #include <sendspin/client.h>
@@ -867,7 +871,7 @@ void SendSpinClientWrapper::stop() {
 }
 
 void SendSpinClientWrapper::run_client(std::string connect_url) {
-    std::string friendly_name = "KIOT Speaker";
+    std::string friendly_name = "KIOT " + QHostInfo::localHostName().toLower().toStdString();
     auto log_level = LogLevel::INFO;
 
     SendspinClient::set_log_level(log_level);
@@ -875,9 +879,9 @@ void SendSpinClientWrapper::run_client(std::string connect_url) {
     SendspinClientConfig config;
     config.client_id = friendly_name;
     config.name = friendly_name;
-    config.product_name = "Voice & Music Assistant";
-    config.manufacturer = "ThirdReality";
-    config.software_version = "1.0.0";
+    config.product_name = "KIOT Sendspin Client";
+    config.manufacturer = "kiot";
+    config.software_version = QStringLiteral(PLUGIN_VERSION).toStdString();
 
     SendspinClient client(std::move(config));
 
@@ -933,7 +937,7 @@ void SendSpinClientWrapper::run_client(std::string connect_url) {
     client.set_network_provider(&network);
     client.set_listener(&client_listener);
 
-    client.start_server();
+    client.start();
     fprintf(stderr, "[sendspin] listening as \"%s\"\n", friendly_name.c_str());
     if (!connect_url.empty()) client.connect_to(connect_url);
 
