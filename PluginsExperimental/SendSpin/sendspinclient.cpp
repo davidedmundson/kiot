@@ -5,7 +5,6 @@
 #include <KIOTShared/kiotshared.h>
 DEFINE_PLUGIN_LOGGER(spclient, SendSpinPlugin) //Change TeplatePlugin to you plugin name for better logs
 
-// Alle dine eksisterende includes fra sendspin-client.cpp:
 #include <sendspin/client.h>
 #include <sendspin/color_role.h>
 #include <sendspin/controller_role.h>
@@ -17,25 +16,14 @@ DEFINE_PLUGIN_LOGGER(spclient, SendSpinPlugin) //Change TeplatePlugin to you plu
 #include <pulse/simple.h>
 #include <algorithm>
 #include <chrono>
-#include <cmath>
-#include <cstdio>
-#include <cstdlib>
 #include <fcntl.h>
 #include <fstream>
-#include <linux/input.h>
-#include <mutex>
 #include <poll.h>
 #include <unistd.h>
 
 using namespace sendspin;
 
-static std::atomic<bool> g_running{true};
 static std::atomic<bool> g_ducked{false};
-static std::atomic<int> g_tap_action{0};  // 0=none, 1=single tap, 2=double tap
-static void signal_handler(int) { g_running = false; }
-static void sigusr1_handler(int) { g_ducked = true; }
-static void sigusr2_handler(int) { g_ducked = false; }
-
 
 static constexpr const char *SOUND_CONF = "/data/conf/sound.json";
 static constexpr const char *SENDSPIN_CONF = "/data/conf/sendspin.json";
