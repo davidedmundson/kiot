@@ -1,20 +1,43 @@
 #pragma once
 
-#include <string>
-#include <thread>
+#include <QObject>
+#include <QString>
 #include <atomic>
+#include <memory>
+#include <sendspin/client.h>
+#include <pulse/simple.h>
 
-class SendSpinClientWrapper {
+class SendspinDesktopClient : public QObject {
+    Q_OBJECT
 public:
-    SendSpinClientWrapper();
-    ~SendSpinClientWrapper();
+    explicit SendspinDesktopClient(const QString &clientName = "KdeKryptoniteDesktop", QObject *parent = nullptr);
+    ~SendspinDesktopClient();
 
-    bool start(const std::string& connect_url = "");
-    void stop();
+    void connectToServer(const QString &url);
+    void disconnectFromServer();
+
+    void setVolume(int percent);
+    int volume() const;
+
+signals:
+    void trackChanged(const QString &artist, const QString &title);
+    void playbackStateChanged(bool playing);
+    void volumeChanged(int percent);
 
 private:
-    void run_client(std::string connect_url);
+    friend class DesktopPlayerListener;
+    friend class DesktopPersistenceProvider;
 
-    std::thread worker_thread_;
-    std::atomic<bool> running_{false};
+    std::unique_ptr<sendspin::SendspinClient> client_;
+    class DesktopPlayerListener *player_listener_{nullptr};
+    class DesktopPersistenceProvider *persistence_{nullptr};
+
+    std::atomic<pa_simple *> pa_{nullptr};
+    int current_volume_{100};
+    size_t frame_size_{4};
+    uint32_t current_rate_{44100};
+    uint8_t current_channels_{2};
+
+    void initAudio(uint32_t rate, uint8_t channels);
+    void closeAudio();
 };
