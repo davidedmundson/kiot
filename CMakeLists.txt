@@ -57,6 +57,7 @@ option(BUILD_FLATPAK "Build for flatpak" OFF)
 option(BUILD_QTUI "Include the qt ui in core" ON)
 option(BUILD_APPDATA "Include the appdata in core" ON)
 option(BUILD_PLUGINS "Build every plugin project in the Plugins directory" ON)
+option(BUILD_EXPERIMENTAL_PLUGINS "Build every experimental plugin project in the PluginsExperimental directory" OFF)
 #USed to build the Qt UI if the cmakelists exitss
 set(HAS_QTUI EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/core/ui_qt/CMakeLists.txt")
 
@@ -106,6 +107,8 @@ include(ECMConfiguredInstall)
 
 include_directories("${CMAKE_CURRENT_BINARY_DIR}")
 
+#Originale gives error with Experimental because sendspin-cpp uses its own rules here
+#file(GLOB_RECURSE ALL_CLANG_FORMAT_SOURCE_FILES *.cpp *.h *.hpp *.c)
 #Changed to specific folders to avoid formatting the PluginsExperimental folder as its a mess
 file(GLOB_RECURSE ALL_CLANG_FORMAT_SOURCE_FILES
     "${CMAKE_CURRENT_SOURCE_DIR}/core/*.cpp"
@@ -136,6 +139,15 @@ if(BUILD_PLUGINS)
         add_subdirectory(Plugins)
     else()
         message(STATUS "[CMake] Plugins subdir missing Cmakelists.......PROBLEMPROBLEMPROBLEM")
+    endif()
+endif()
+
+# BUilds every Experimental plugin if you set it to ON
+if(BUILD_EXPERIMENTAL_PLUGINS)
+    if(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/PluginsExperimental/CMakeLists.txt")
+        add_subdirectory(PluginsExperimental)
+    else()
+        message(STATUS "[CMake] PluginsExperimental subdir missing CMakeLists.......PROBLEMPROBLEMPROBLEM")
     endif()
 endif()
 
