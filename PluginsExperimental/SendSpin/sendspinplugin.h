@@ -91,5 +91,5 @@ public:
     bool stopPlugin() override;
 
 private:
-    SendSpinClientWrapper *m_sendspinClient = nullptr;
+    SendspinDesktopClient *m_sendspinClient = nullptr;
 };

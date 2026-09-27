@@ -7,6 +7,7 @@
  */
 
 #include "sendspinplugin.h"
+#include <QHostInfo>
 #include <QString>
 DEFINE_PLUGIN_LOGGER(tplogger, SendSpinPlugin) //Change TeplatePlugin to you plugin name for better logs
 
@@ -64,10 +65,9 @@ bool SendSpinPlugin::startPlugin()
     }
     if(m_sendspinClient)
         stopPlugin();
-    m_sendspinClient = new SendSpinClientWrapper();
+    m_sendspinClient = new SendspinDesktopClient("KIOT " + QHostInfo::localHostName().toLower());
     //TODO make url part of config file
-    return m_sendspinClient->start("ws://homeassistant.local:8927/sendspin"); // Evt. send med en URL hvis du har det
-
+    m_sendspinClient->connectToServer("ws://homeassistant.local:8927/sendspin"); // Evt. send med en URL hvis du har det
     qCInfo(tplogger) << name() << "plugin started successfully";
     return true;
 }
@@ -75,7 +75,7 @@ bool SendSpinPlugin::startPlugin()
 bool SendSpinPlugin::stopPlugin()
 {
     if (m_sendspinClient) {
-        m_sendspinClient->stop();
+        m_sendspinClient->disconnectFromServer();
         delete m_sendspinClient;
         m_sendspinClient = nullptr;
     }
