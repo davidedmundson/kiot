@@ -200,7 +200,7 @@ MPRISPlayer=true
 
 ## Supported Features
 
-### Integrations
+### Plugins
 
 | Feature | Entity Type | Description |
 |---------|-------------|-------------|
@@ -227,6 +227,16 @@ MPRISPlayer=true
 | SystemD | Switch | Systemd user service control|
 | DisplayManager | Number, Select, Switch | Screen control and management |
 | Macro executor | Notify | Execute macros from HA via virtual keyboard [README](Plugins/Macros/README.md)|
+
+
+### Experimental Plugins
+
+So let me start with saying experimental plugins are not included in the normal build and must be compiled by you.
+check the folder for more info [Experimental](/PluginsExperimental/README.md)
+
+| Feature | Entity Type | Description |
+|---------|-------------|-------------|
+| SendSpin | None | Turn your KDE session into a smart speaker for music assistant |
 
 
 ## Flatpak Build

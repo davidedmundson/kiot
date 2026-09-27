@@ -33,6 +33,16 @@ flatpak-builder --user --install --force-clean build-dir org.davidedmundson.kiot
 
 ```
 
+
+### 3. Example config
+
+So this is jsut copied from my own config file and points to my music assistant server
+
+```ini
+[sendspin]
+url=ws://192.168.86.2:8927/sendspin
+```
+
 ---
 
 ## See Also
