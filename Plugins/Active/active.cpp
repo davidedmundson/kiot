@@ -36,6 +36,34 @@ QVersionNumber ActivePlugin::version() const
 
 bool ActivePlugin::checkCompatibility()
 {
+    auto desktopEnvironment = PlatformHelper::detectDesktopEnvironment();
+    if (desktopEnvironment != "kde") {
+        qCWarning(plugin_logger) << "This plugin is only compatible with KDE Plasma.";
+        return false;
+    }
+
+    if (PlatformHelper::isFlatpak()) {
+        auto appId = PlatformHelper::generateServiceName(); // Henter app-ID-en din (f.eks. org.kde.kiot)
+
+        // 1. Sjekk ScreenSaver-tilgang
+        bool hasAccessScreen = PlatformHelper::checkFlatpakFeature("Session Bus Policy", "org.freedesktop.ScreenSaver", "talk");
+        if (!hasAccessScreen) {
+            qCWarning(plugin_logger) << "Missing required Flatpak permission for ScreenSaver D-Bus interface.";
+            qCInfo(plugin_logger) << "To fix this, run:";
+            qCInfo(plugin_logger) << "  flatpak --user override --talk-name=org.freedesktop.ScreenSaver" << appId;
+            return false;
+        }
+
+        // 2. Sjekk Inhibit-tilgang (hvis dere krever den)
+        bool hasAccessInhibit = PlatformHelper::checkFlatpakFeature("Session Bus Policy", "org.freedesktop.Inhibit", "talk");
+        if (!hasAccessInhibit) {
+            qCWarning(plugin_logger) << "Missing required Flatpak permission for Inhibit D-Bus interface.";
+            qCInfo(plugin_logger) << "To fix this, run:";
+            qCInfo(plugin_logger) << "  flatpak --user override --talk-name=org.freedesktop.Inhibit" << appId;
+            return false;
+        }
+    }
+
     return true;
 }
 
