@@ -8,7 +8,7 @@
 #include <QUrl>
 #include <QVersionNumber>
 #include <KIOTShared/kiotshared.h>
-
+#include "src/VoiceAssistantNode.h"
 using KIOTShared::Plugins::KIOTPluginInterface;
 using KIOTShared::Entities::BinarySensor;
 using KIOTShared::PlatformHelper;
@@ -92,4 +92,5 @@ public:
 
 private:
     BinarySensor *m_dndSensor = nullptr; // Binary sensor for Do Not Disturb state
+    VoiceAssistantNode *m_voiceAssistantNode = nullptr; // Voice assistant node for handling voice commands
 };
