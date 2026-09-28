@@ -5,7 +5,7 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 cd "$SCRIPT_DIR/.."
 
 #Grabs the flatpak id dynamic from the manifest with fallback to david
-FLATPAK_ID=$(grep -E '^id:' .flatpak-manifest.yaml | awk '{print $2}' | tr -d '"' | tr -d "'")
+FLATPAK_ID=$(grep -E '^id:' .org.davidedmundson.kiot.yaml | awk '{print $2}' | tr -d '"' | tr -d "'")
 
 # Hvis den feiler, sett en trygg fallback
 if [ -z "$FLATPAK_ID" ]; then
@@ -25,7 +25,7 @@ build() {
     fi
     mkdir -p build
     echo "Building flatpak bundle...."
-    flatpak-builder --repo=flatpak-repo --force-clean build-installer .flatpak-manifest.yaml 
+    flatpak-builder --repo=flatpak-repo --force-clean build-installer .org.davidedmundson.kiot.yaml 
     echo "Building flatpak installer..........."
     flatpak build-bundle flatpak-repo ./build/kiot.flatpak $FLATPAK_ID master
     echo "installer buildt and located at ./build/kiot.flatpak"

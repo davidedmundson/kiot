@@ -36,9 +36,26 @@ QVersionNumber BluetoothPlugin::version() const
 
 bool BluetoothPlugin::checkCompatibility()
 {
+    if (PlatformHelper::isFlatpak()) {
+        auto appId = PlatformHelper::generateServiceName();
+        
+        bool hasBluezTalk = PlatformHelper::checkFlatpakFeature("Session Bus Policy", "org.bluez", "talk");
+        if (!hasBluezTalk) {
+            qCWarning(plugin_logger) << "Missing required Flatpak permission to talk to BlueZ.";
+            qCInfo(plugin_logger) << "To fix this, run:";
+            qCInfo(plugin_logger) << "  flatpak --user override --talk-name=org.bluez" << appId;
+            return false;
+        }
+        bool hasBluetoothSocket = PlatformHelper::checkFlatpakFeature("Context", "features", "bluetooth"); 
+        if (!hasBluetoothSocket) {
+            qCWarning(plugin_logger) << "Missing required Flatpak bluetooth socket permission (--allow=bluetooth).";
+            qCInfo(plugin_logger) << "To fix this, run:";
+            qCInfo(plugin_logger) << "  flatpak --user override --allow=bluetooth" << appId;
+            return false;
+        }
+    }
     return true;
 }
-
 bool BluetoothPlugin::enabledByDefault()
 {
     if(!checkCompatibility())

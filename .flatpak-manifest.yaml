@@ -2,7 +2,7 @@ id: org.davidedmundson.kiot
 branch: master
 runtime: org.kde.Platform
 runtime-version: "6.11" # don't forget to change QtMqtt
-sdk: org.kde.Sdk//6.11
+sdk: org.kde.Sdk
 command: kiot
 tags:
   - nightly
@@ -14,20 +14,18 @@ desktop-file-name-suffix: " (Nightly)"
 
 
 add-extensions:
-  org.davidedmundson.kiot.plugin:
-    version: '1.0'
+  org.davidedmundson.kiot.Plugin:
     directory: plugins
     subdirectories: true
-    no-autodownload: true
-    merge-dirs: "."
     autodelete: true
-cleanup-commands:
-  - mkdir -p ${FLATPAK_DEST}/plugins
+    no-autodownload: false
+    
 
 finish-args:
   - "--share=ipc"
   - "--share=network"
-  - "--device=all"
+#  - "--device=all"
+  - "--allow=bluetooth" #Bluetooth plugin
   - "--socket=wayland"
   - "--socket=fallback-x11"
   - "--socket=session-bus"
@@ -49,6 +47,11 @@ finish-args:
   - "--talk-name=org.mpris.MediaPlayer2"      #mpris
   - "--talk-name=org.mpris.MediaPlayer2.*"    #mpris
   - "--talk-name=org.freedesktop.portal.*"    #Portal used in autostartup with background manager
+  - "--talk-name=org.freedesktop.Inhibit" # Active plugin
+  - "--talk-name=org.freedesktop.ScreenSaver" #Active plugin
+  - "--talk-name=org.freedesktop.UPower" # Battery plugin
+
+
 
 modules:
   - name: extra-cmake-modules
