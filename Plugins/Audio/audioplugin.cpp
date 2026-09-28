@@ -44,6 +44,17 @@ QVersionNumber AudioPlugin::version() const
 
 bool AudioPlugin::checkCompatibility()
 {
+    if (PlatformHelper::isFlatpak()) {
+        auto appId = PlatformHelper::generateServiceName();
+        
+        bool hasAccess = PlatformHelper::checkFlatpakFeature("Context", "sockets", "pulseaudio");
+        if (!hasAccess) {
+            qCWarning(plugin_logger_audio) << "Missing required Flatpak socket for PulseAudio.";
+            qCInfo(plugin_logger_audio) << "To fix this, you can grant access using Flatseal or by running:";
+            qCInfo(plugin_logger_audio) << "  flatpak --user override --socket=pulseaudio" << appId;
+            return false;
+        }
+    }
     return true;
 }
 
