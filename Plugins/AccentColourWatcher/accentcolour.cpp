@@ -43,8 +43,21 @@ bool AccentColourWatcherPlugin::checkCompatibility()
 {
     auto desktopEnviornment = PlatformHelper::detectDesktopEnvironment();
     if(desktopEnviornment == "kde")
+    {
+        if(PlatformHelper::isFlatpak())
+        {
+           auto hasAccess = PlatformHelper::checkFlatpakFeature("Context", "filesystems", "xdg-config/kdeglobals:ro");
+            if (!hasAccess) {
+                qCWarning(plugin_logger_accentcolour) << "Missing required Flatpak permission to access 'kdeglobals'.";
+                qCInfo(plugin_logger_accentcolour) << "To fix this, you can grant read access using Flatseal or by running:";
+                qCInfo(plugin_logger_accentcolour) << "  flatpak --user override --filesystem=xdg-config/kdeglobals:ro " + PlatformHelper::generateServiceName(); // (eller tilsvarende app-id)
+                return false;
+            }
+        }
         return true;
-    qCWarning(plugin_logger_accentcolour) << "This plugin is only compatible with KDE Plasma";
+    }
+    
+        qCWarning(plugin_logger_accentcolour) << "This plugin is only compatible with KDE Plasma";
     return false;
 }
 

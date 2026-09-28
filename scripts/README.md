@@ -8,6 +8,7 @@
   * [dependencies.sh](#dependenciessh)
   * [native.sh](#nativesh)
   * [flatpak.sh](#flatpaksh)
+  * [plugincreator.sh](#plugincreatorsh)
 * [Usage](#usage)
 * [Notes](#notes)
 * [See Also](#see-also)
@@ -48,6 +49,14 @@ Interactive menu for Flatpak installation.
 - Uninstall Flatpak version
 - Clean build artifacts
 
+### `plugincreator.sh`  
+Interactive menu to help you create a new plugin from the template plugin found in examples
+
+- Takes input variables from you
+- Creates new Plugin folder under 'PluginsExperimental/PluginName'
+- Renames and rebrands the plugin to fit your inputs
+- Ready for use and builds out of the box
+
 ## Usage
 
 1. Make scripts executable:
@@ -67,6 +76,10 @@ Interactive menu for Flatpak installation.
    
    # For Flatpak installation
    ./scripts/flatpak.sh
+   ```
+4. Create new plugin from template:
+   ```bash
+   ./scripts/plugincreator.sh
    ```
 
 ## Notes
