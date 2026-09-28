@@ -34,16 +34,16 @@ QVersionNumber CustomSensorPlugin::version() const
     return QVersionNumber::fromString(version);
 }
 
-bool CustomSensorsPlugin::checkCompatibility()
+bool CustomSensorPlugin::checkCompatibility()
 {
     if (PlatformHelper::isFlatpak()) {
         auto appId = PlatformHelper::generateServiceName();
         
         bool hasFlatpakTalk = PlatformHelper::checkFlatpakFeature("Session Bus Policy", "org.freedesktop.Flatpak", "talk");
         if (!hasFlatpakTalk) {
-            qCWarning(customSensors) << "Missing required Flatpak permission to talk to org.freedesktop.Flatpak.";
-            qCInfo(customSensors) << "To fix this, run:";
-            qCInfo(customSensors) << "  flatpak --user override --talk-name=org.freedesktop.Flatpak " + appId;
+            qCWarning(plugin_logger) << "Missing required Flatpak permission to talk to org.freedesktop.Flatpak.";
+            qCInfo(plugin_logger) << "To fix this, run:";
+            qCInfo(plugin_logger) << "  flatpak --user override --talk-name=org.freedesktop.Flatpak " + appId;
             return false;
         }
     }
