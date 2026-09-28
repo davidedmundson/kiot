@@ -46,6 +46,8 @@ finish-args:
   - "--talk-name=org.mpris.MediaPlayer2"      #mpris
   - "--talk-name=org.mpris.MediaPlayer2.*"    #mpris
   - "--talk-name=org.freedesktop.portal.*"    #Portal used in autostartup with background manager
+  - "--talk-name=org.freedesktop.Inhibit" # Active plugin
+  - "--talk-name=org.freedesktop.ScreenSaver" #Active plugin
 
 modules:
   - name: extra-cmake-modules
