@@ -42,7 +42,7 @@ bool BatteryPlugin::checkCompatibility()
         if (!hasUPower) {
             qCWarning(plugin_loggerbatter) << "Missing required Flatpak permission to talk to UPower.";
             qCInfo(plugin_loggerbatter) << "To fix this, you can grant access using Flatseal or by running:";
-            qCInfo(plugin_loggerbatter) << "  flatpak --user override --talk-name=org.freedesktop.UPower" << appId;
+            qCInfo(plugin_loggerbatter) << "  flatpak --user override --talk-name=org.freedesktop.UPower " + appId;
             return false;
         }
     }

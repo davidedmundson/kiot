@@ -24,13 +24,13 @@ add-extensions:
 finish-args:
   - "--share=ipc"
   - "--share=network"
-#  - "--device=all"
+ # - "--device=all" #FOr camera plugin gamepad plugin
   - "--allow=bluetooth" #Bluetooth plugin
   - "--socket=wayland"
   - "--socket=fallback-x11"
   - "--socket=session-bus"
   - "--socket=system-bus"
-  - "--socket=pulseaudio"
+  - "--socket=pulseaudio" # FOr Audio Plugin
 
   - "--filesystem=xdg-data/Steam:ro"          # GameLauncher For Steam
   - "--filesystem=xdg-data/lutris:ro"         # GameLauncher For Lutris
