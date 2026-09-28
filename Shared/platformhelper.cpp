@@ -459,6 +459,8 @@ QStringList PlatformHelper::makeHostContext(const QString &program, const QStrin
  */
 bool checkHasFlatpakSpawnPrivileges()
 {
+    if(PlatformHelper::checkFlatpakFeature("Session Bus Policy", "org.freedesktop.Flatpak", "talk"))
+        return true;
     QFile f(QStringLiteral("/.flatpak-info"));
     if (!f.open(QIODevice::ReadOnly)) {
         return false;
@@ -470,24 +472,88 @@ bool checkHasFlatpakSpawnPrivileges()
 /**
  * @brief Check for a specific feature or permission in the Flatpak sandbox info file.
  *
- * @param group         the INI section group.
- * @param key           the INI key to inspect.
- * @param expectedValue the value to search for.
+ * @param group         the INI section group. 'Application', 'Instance', 'Context', 'Session Bus Policy', 'Environments' and more
+ * @param key           the INI key to inspect. 'name',   'branch' ,  'filesystems' ,   'org.freedesktop.Flatpak' , 'XDG_DATA_DIRS'
+ * @param expectedValue the value to search for. 'org.davidedmundson.kiot', 'master', '/run/docker.sock', 'talk' , '/usr/share/runtime/share'
  * @return @c true if the value is present in the specified section, otherwise @c false.
+ */
+/**
+ * @brief Check for a specific feature or permission in the Flatpak sandbox info file.
  */
 bool PlatformHelper::checkFlatpakFeature(const QString &group, const QString &key, const QString &expectedValue)
 {
+    QFile file(QStringLiteral("/.flatpak-info"));
+    if (!file.open(QIODevice::ReadOnly | QIODevice::Text)) {
+        qCDebug(helper) << "Could not open /.flatpak-info file";
+        return false;
+    }
+
+    QTextStream in(&file);
+    QString currentGroup;
+    bool inTargetGroup = false;
+
+    while (!in.atEnd()) {
+        QString line = in.readLine().trimmed();
+
+        // Ignorer tomme linjer og kommentarer (standard for keyfile er # eller ;)
+        if (line.isEmpty() || line.startsWith('#') || line.startsWith(';'))
+            continue;
+
+        // Sjekk etter seksjoner, f.eks. [Application]
+        if (line.startsWith('[') && line.endsWith(']')) {
+            currentGroup = line.mid(1, line.length() - 2);
+            inTargetGroup = (currentGroup == group);
+            continue;
+        }
+
+        // Hvis vi er i riktig gruppe, let etter nøkkelen
+        if (inTargetGroup) {
+            int equalIndex = line.indexOf('=');
+            if (equalIndex != -1) {
+                QString currentKey = line.left(equalIndex).trimmed();
+                if (currentKey == key) {
+                    QString rawValue = line.mid(equalIndex + 1).trimmed();
+                    
+                    // Flatpak bruker semikolon som separator (og ofte en avsluttende ';' på slutten)
+                    QStringList values = rawValue.split(';', Qt::SkipEmptyParts);
+                    
+                    qCDebug(helper) << "Flatpak feature check (manual):" << group << key << expectedValue << values;
+                    return values.contains(expectedValue);
+                }
+            }
+        }
+    }
+
+    qCDebug(helper) << "Group or Key not found in /.flatpak-info:" << group << key;
+    return false;
+}
+/*
+ORiginale not working because ; is comments
+bool PlatformHelper::checkFlatpakFeature(const QString &group, const QString &key, const QString &expectedValue)
+{
     QSettings info(QStringLiteral("/.flatpak-info"), QSettings::IniFormat);
-    
+    if (!info.childGroups().contains(group)) {
+    // Group exists
+        qCDebug(helper) << "Group:" << group << "does not exist in the flatpak-info file";
+        qCDebug(helper) << "Flatpak groups found:" << info.childGroups(); 
+        return false;
+    }
+    info.beginGroup(group);
+    if(!info.childKeys().contains(key)) {
+        qCDebug(helper) << "Key:" << key << "does not exist in the flatpak-info file";
+        qCDebug(helper) << "Flat keys found:" << info.childKeys();
+        return false;
+    }
     // Hent strengen fra seksjonen (f.eks. "Session Bus Policy/org.freedesktop.Flatpak")
-    QString rawValue = info.value(group + QStringLiteral("/") + key).toString();
-    
+    auto rawValue = info.value(key);
+    qCDebug(helper) << "Flatpak feature check:" << group << key << expectedValue << rawValue;
+    QString ll = rawValue.toString();
     // Del opp på semikolon og kommategn hvis det er en liste
-    QStringList values = rawValue.split(QChar(';'), Qt::SkipEmptyParts);
-    
+    QStringList values = ll.split(";");
+    qCDebug(helper) << "Flatpak feature check:" << group << key << expectedValue << values;
     return values.contains(expectedValue);
 }
-
+*/
 
 /**
  * @brief Build a host-ready @ref PlatformHelper::ProcessContext from a QProcess.
