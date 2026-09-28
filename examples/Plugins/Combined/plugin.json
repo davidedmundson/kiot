@@ -1,5 +1,5 @@
 {
     "name": "TemplatePlugin",
     "version": "0.0.1",
-    "description": "Just a template of a description of some plugin for flatpak"
+    "description": "Template Plugin for KIOT" 
 }

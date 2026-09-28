@@ -74,6 +74,7 @@ target_link_libraries(${PROJECT_NAME} PRIVATE ${PLUGIN_LINK_LIBS})
 # ==============================================================================
 target_compile_definitions(${PROJECT_NAME} PRIVATE
     PROJECT_NAME="kiot"
+    PARENT_APP_NAME="kiot"
     PLUGIN_NAME="${PROJECT_NAME}"
     PLUGIN_VERSION="${PROJECT_VERSION}"
     PLUGIN_DESCRIPTION="${PROJECT_DESCRIPTION}"

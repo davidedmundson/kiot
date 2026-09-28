@@ -39,6 +39,7 @@ while true; do
     echo "1 Install dependencies (Arch/Debian, tested on Manjaro via pacman)"
     echo "2 Native build and install menu"
     echo "3 Flatpak build and install menu"
+    echo "4 Genereate new plugin from template"
     echo
     echo "======================================="
     read -rp "Select an option: " choice
@@ -61,6 +62,11 @@ while true; do
         3)
             echo "Opening Flatpak build menu..."
             run_script "flatpak.sh"
+            pause
+            ;;
+        4)
+            echo "Generating new plugin..."
+            run_script "plugincreator.sh"
             pause
             ;;
         *)
