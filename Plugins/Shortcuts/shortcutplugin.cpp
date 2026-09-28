@@ -33,6 +33,17 @@ QVersionNumber ShortcutPlugin::version() const
 
 bool ShortcutPlugin::checkCompatibility()
 {
+    if (PlatformHelper::isFlatpak()) {
+        auto appId = PlatformHelper::generateServiceName();
+        
+        bool hasKGlobalAccelTalk = PlatformHelper::checkFlatpakFeature("Session Bus Policy", "org.kde.kglobalaccel", "talk");
+        if (!hasKGlobalAccelTalk) {
+            qCWarning(plugin_logger) << "Missing required Flatpak D-Bus permission to talk to org.kde.kglobalaccel.";
+            qCInfo(plugin_logger) << "To fix this, run:";
+            qCInfo(plugin_logger) << "  flatpak --user override --talk-name=org.kde.kglobalaccel " + appId;
+            return false;
+        }
+    }
     return true;
 }
 

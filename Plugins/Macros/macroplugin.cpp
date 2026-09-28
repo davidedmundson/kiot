@@ -57,11 +57,16 @@ QVersionNumber MacroPlugin::version() const
 
 bool MacroPlugin::checkCompatibility()
 {
-    if(!VirtualKeyboardDevice::hasUinputAccess())
-    {
-        qCWarning(plugin_logger) << "Failed to get uinput access. Check if the user has the required permissions.";
+    if (PlatformHelper::isFlatpak()) {
+        qCWarning(plugin_logger) << "MacroPlugin requires direct character device node access (/dev/uinput), which is structurally blocked by the Flatpak sandbox.";
+        qCInfo(plugin_logger) << "MacroPlugin is disabled in Flatpak environments to maintain 100% reliable native behavior.";
         return false;
     }
+    if (!VirtualKeyboardDevice::hasUinputAccess()) {
+        qCWarning(plugin_logger) << "No write access to /dev/uinput. Ensure the user is in the 'input' group on the host.";
+        return false;
+    }
+
     return true;
 }
 

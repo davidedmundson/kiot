@@ -76,12 +76,9 @@ void Gamepad::updateState()
                 connected = true;
                 devName = QString::fromUtf8(name);
 
-                // --- HER ER TRIKSET ---
-                // Finn foreldre-enheten som faktisk har USB/BT attributtene
                 struct udev_device *parent = udev_device_get_parent_with_subsystem_devtype(dev, "usb", "usb_device");
                 
                 if (!parent) {
-                    // Hvis det er Bluetooth (f.eks. DualSense), sjekk "bluetooth" subsystemet
                     parent = udev_device_get_parent_with_subsystem_devtype(dev, "bluetooth", nullptr);
                 }
 

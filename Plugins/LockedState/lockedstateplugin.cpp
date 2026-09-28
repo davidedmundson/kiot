@@ -34,6 +34,29 @@ QVersionNumber LockedStatePlugin::version() const
 
 bool LockedStatePlugin::checkCompatibility()
 {
+    if (PlatformHelper::isFlatpak()) {
+        auto appId = PlatformHelper::generateServiceName();
+        
+        // Sjekk tilgang til ScreenSaver på sesjonsbussen
+        bool hasScreenSaverTalk = PlatformHelper::checkFlatpakFeature("Session Bus Policy", "org.freedesktop.ScreenSaver", "talk");
+        // Sjekk tilgang til login1 på systembussen
+        bool hasLogin1Talk = PlatformHelper::checkFlatpakFeature("System Bus Policy", "org.freedesktop.login1", "talk");
+
+        if (!hasScreenSaverTalk || !hasLogin1Talk) {
+            qCWarning(plugin_logger) << "Missing required Flatpak D-Bus permissions for LockedState plugin.";
+            
+            if (!hasScreenSaverTalk) {
+                qCInfo(plugin_logger) << "To fix ScreenSaver access, run:";
+                qCInfo(plugin_logger) << "  flatpak --user override --talk-name=org.freedesktop.ScreenSaver " + appId;
+            }
+            if (!hasLogin1Talk) {
+                qCInfo(plugin_logger) << "To fix systemd login1 access, run:";
+                qCInfo(plugin_logger) << "  flatpak --user override --system-talk-name=org.freedesktop.login1 " + appId;
+            }
+            return false;
+        }
+    }
+
     return true;
 }
 

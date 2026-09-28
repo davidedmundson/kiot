@@ -35,6 +35,22 @@ QVersionNumber NightModePlugin::version() const
 
 bool NightModePlugin::checkCompatibility()
 {
+    auto desktopEnvironment = PlatformHelper::detectDesktopEnvironment();
+    if (desktopEnvironment != "kde") {
+        return false;
+    }
+
+    if (PlatformHelper::isFlatpak()) {
+        auto appId = PlatformHelper::generateServiceName();
+        
+        bool hasKWinTalk = PlatformHelper::checkFlatpakFeature("Session Bus Policy", "org.kde.KWin", "talk");
+        if (!hasKWinTalk) {
+            qCWarning(plugin_logger) << "Missing required Flatpak permission to talk to org.kde.KWin.";
+            qCInfo(plugin_logger) << "To fix this, run:";
+            qCInfo(plugin_logger) << "  flatpak --user override --talk-name=org.kde.KWin " + appId;
+            return false;
+        }
+    }
     return true;
 }
 

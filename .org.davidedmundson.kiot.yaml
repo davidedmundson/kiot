@@ -25,12 +25,12 @@ finish-args:
   - "--share=ipc"
   - "--share=network"
  # - "--device=all" #FOr camera plugin gamepad plugin
-  - "--device=input" # For GamePad Plugin
+  - "--device=input" # For GamePad and MAcro Plugin
   - "--allow=bluetooth" #Bluetooth plugin
   - "--socket=wayland"
   - "--socket=fallback-x11"
   - "--socket=session-bus"
-  - "--socket=system-bus"
+  - "--socket=system-bus" #Safe to remove now?
   - "--socket=pulseaudio" # FOr Audio Plugin
 
   - "--filesystem=xdg-data/Steam:ro"          # GameLauncher For Steam
@@ -39,9 +39,10 @@ finish-args:
   - "--filesystem=xdg-config/heroic:ro"       # GameLauncher for Heroic
   - "--filesystem=xdg-config/kdeglobals:ro"   #Accent colour
   - "--filesystem=/run/docker.sock"           #Docker
-  - "--talk-name=org.freedesktop.systemd1"    #SystemD
-  - "--talk-name=org.kde.StatusNotifierWatcher" #For notifications?
-  - "--own-name=org.kde.StatusNotifierItem-2-2" #For notifications?
+  - "--talk-name=org.kde.StatusNotifierWatcher" #For systray icon
+  - "--own-name=org.kde.StatusNotifierItem-2-2" #For systray icon
+  - "--talk-name=org.freedesktop.Notifications" # FOr Notification plugins
+  - "--talk-name=org.freedesktop.systemd1"   #SystemD plugins
   - "--talk-name=org.kde.KWin"                #Kwin and active window integration
   - "--talk-name=org.bluez"                   #BLuetooth integration
   - "--talk-name=org.freedesktop.Flatpak"     # FOr Custom Sensor, Scripts, GameLauncher and more plugins
@@ -50,7 +51,9 @@ finish-args:
   - "--talk-name=org.mpris.MediaPlayer2.*"    #mpris
   - "--talk-name=org.freedesktop.portal.*"    #Portal used in autostartup with background manager
   - "--talk-name=org.freedesktop.Inhibit" # Active plugin
-  - "--talk-name=org.freedesktop.ScreenSaver" #Active plugin
+  - "--talk-name=org.freedesktop.ScreenSaver" #Active plugin and locked state plugin
+  - "--system-talk-name=org.freedesktop.login1" # Locked state plugin
+  - "--talk-name=org.gnome.SessionManager" #Active plugin
   - "--talk-name=org.freedesktop.UPower" # Battery plugin
   - "--talk-name=org.kde.KScreen" #Screen plugin
 

@@ -36,6 +36,18 @@ QVersionNumber PowControlelrPlugin::version() const
 
 bool PowControlelrPlugin::checkCompatibility()
 {
+    if (PlatformHelper::isFlatpak()) {
+        auto appId = PlatformHelper::generateServiceName();
+        
+        bool hasLogin1Talk = PlatformHelper::checkFlatpakFeature("System Bus Policy", "org.freedesktop.login1", "talk");
+        if (!hasLogin1Talk) {
+            qCWarning(plugin_logger) << "Missing required Flatpak system D-Bus permission for systemd login1 (power control).";
+            qCInfo(plugin_logger) << "To fix this, run:";
+            qCInfo(plugin_logger) << "  flatpak --user override --system-talk-name=org.freedesktop.login1 " + appId;
+            return false;
+        }
+    }
+
     return true;
 }
 
