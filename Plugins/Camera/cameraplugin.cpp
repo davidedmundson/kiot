@@ -37,11 +37,20 @@ QVersionNumber CameraPlugin::version() const
     return QVersionNumber::fromString(version);
 }
 
+
 bool CameraPlugin::checkCompatibility()
 {
+    if (PlatformHelper::isFlatpak()) {
+        bool hasDeviceAccess = PlatformHelper::checkFlatpakFeature("Context", "devices", "all");
+        if (!hasDeviceAccess) {
+            qCWarning(plugin_logger) << "Missing required Flatpak device access to monitor webcams.";
+            qCInfo(plugin_logger) << "To fix this, you can grant access using Flatseal or by running:";
+            qCInfo(plugin_logger) << "  flatpak --user override --device=all " + PlatformHelper::generateServiceName(); 
+            return false;
+        }
+    }
     return true;
 }
-
 bool CameraPlugin::enabledByDefault()
 {
     if(!checkCompatibility())

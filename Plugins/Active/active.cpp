@@ -50,7 +50,7 @@ bool ActivePlugin::checkCompatibility()
         if (!hasAccessScreen) {
             qCWarning(plugin_logger) << "Missing required Flatpak permission for ScreenSaver D-Bus interface.";
             qCInfo(plugin_logger) << "To fix this, run:";
-            qCInfo(plugin_logger) << "  flatpak --user override --talk-name=org.freedesktop.ScreenSaver" << appId;
+            qCInfo(plugin_logger) << "  flatpak --user override --talk-name=org.freedesktop.ScreenSaver " + appId;
             return false;
         }
 
@@ -59,7 +59,7 @@ bool ActivePlugin::checkCompatibility()
         if (!hasAccessInhibit) {
             qCWarning(plugin_logger) << "Missing required Flatpak permission for Inhibit D-Bus interface.";
             qCInfo(plugin_logger) << "To fix this, run:";
-            qCInfo(plugin_logger) << "  flatpak --user override --talk-name=org.freedesktop.Inhibit" << appId;
+            qCInfo(plugin_logger) << "  flatpak --user override --talk-name=org.freedesktop.Inhibit " + appId;
             return false;
         }
     }
