@@ -24,8 +24,8 @@ add-extensions:
 finish-args:
   - "--share=ipc"
   - "--share=network"
- # - "--device=all" #FOr camera plugin gamepad plugin
-  - "--device=input" # For GamePad and MAcro Plugin
+  - "--device=all" #FOr camera plugin gamepad plugin
+ # - "--device=input" # For GamePad and MAcro Plugin
   - "--allow=bluetooth" #Bluetooth plugin
   - "--socket=wayland"
   - "--socket=fallback-x11"
