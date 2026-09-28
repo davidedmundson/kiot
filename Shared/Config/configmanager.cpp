@@ -12,11 +12,8 @@ namespace KIOTShared {
 
 namespace Config {
 
-// Statisk variabel som sikrer at Core KUN kan opprettes ÉN gang under hele kjøringen
 static bool s_coreInstantiated = false;
-// Vi holder styr på den EKTESKAPELIGE Core-instansen via en pointer
 static ConfigManager* s_coreInstance = nullptr;
-// Destruktør: Frigjør Core-låsen BARE dersom det er den ekte Core-instansen som slettes
 ConfigManager::~ConfigManager()
 {
     if (this == s_coreInstance) {
