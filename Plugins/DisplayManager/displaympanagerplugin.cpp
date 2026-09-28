@@ -50,10 +50,23 @@ QVersionNumber DisplayManager::version() const
 
 bool DisplayManager::checkCompatibility()
 {
-    auto desktopEnviornment = PlatformHelper::detectDesktopEnvironment();
-    if(desktopEnviornment == "kde")
-        return true;
-    return false;
+    auto desktopEnvironment = PlatformHelper::detectDesktopEnvironment();
+    if (desktopEnvironment != "kde") {
+        return false;
+    }
+
+    if (PlatformHelper::isFlatpak()) {
+        auto appId = PlatformHelper::generateServiceName();
+        
+        bool hasFlatpakTalk = PlatformHelper::checkFlatpakFeature("Session Bus Policy", "org.kde.KScreen", "talk");
+        if (!hasFlatpakTalk) {
+            qCWarning(disp_logger) << "Missing required Flatpak permission to talk to org.kde.KScreen.";
+            qCInfo(disp_logger) << "To fix this, run:";
+            qCInfo(disp_logger) << "  flatpak --user override --talk-name=org.kde.KScreen " + appId;
+            return false;
+        }
+    }
+    return true;
 }
 
 bool DisplayManager::enabledByDefault()
