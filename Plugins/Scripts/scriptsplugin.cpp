@@ -41,11 +41,22 @@ QVersionNumber ScriptsPlugin::version() const
     return QVersionNumber::fromString(version);
 }
 
+
 bool ScriptsPlugin::checkCompatibility()
 {
+    if (PlatformHelper::isFlatpak()) {
+        auto appId = PlatformHelper::generateServiceName();
+        
+        bool hasFlatpakTalk = PlatformHelper::checkFlatpakFeature("Session Bus Policy", "org.freedesktop.Flatpak", "talk");
+        if (!hasFlatpakTalk) {
+            qCWarning(customSensors) << "Missing required Flatpak permission to talk to org.freedesktop.Flatpak.";
+            qCInfo(customSensors) << "To fix this, run:";
+            qCInfo(customSensors) << "  flatpak --user override --talk-name=org.freedesktop.Flatpak " + appId;
+            return false;
+        }
+    }
     return true;
 }
-
 bool ScriptsPlugin::enabledByDefault()
 {
     if (!checkCompatibility()) {
