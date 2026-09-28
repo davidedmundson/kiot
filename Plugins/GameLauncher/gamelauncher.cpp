@@ -59,17 +59,64 @@ QVersionNumber GameLauncherPlugin::version() const
     return QVersionNumber::fromString(version);
 }
 
+
 bool GameLauncherPlugin::checkCompatibility()
 {
-    bool launcher = false;
+    if (PlatformHelper::isFlatpak()) {
+        auto appId = PlatformHelper::generateServiceName();
+        
+        bool hasFlatpakTalk = PlatformHelper::checkFlatpakFeature("Session Bus Policy", "org.freedesktop.Flatpak", "talk");
+        if (!hasFlatpakTalk) {
+            qCWarning(plugin_logger) << "Missing required Flatpak permission to talk to org.freedesktop.Flatpak.";
+            qCInfo(plugin_logger) << "To fix this, run:";
+            qCInfo(plugin_logger) << "  flatpak --user override --talk-name=org.freedesktop.Flatpak " + appId;
+            return false;
+        }
+
+        bool hasSteamAccess = PlatformHelper::checkFlatpakFeature("Context", "filesystems", "xdg-data/Steam:ro");
+        if (!hasSteamAccess) {
+            qCWarning(plugin_logger) << "Missing required Flatpak permission for Steam launcher filesystem.";
+            qCInfo(plugin_logger) << "To fix this, run:";
+            qCInfo(plugin_logger) << "  flatpak --user override --filesystem=xdg-data/Steam:ro " + appId;
+        }
+        
+        bool hasLutrisAccess = PlatformHelper::checkFlatpakFeature("Context", "filesystems", "xdg-data/lutris:ro");
+        if (!hasLutrisAccess) {
+            qCWarning(plugin_logger) << "Missing required Flatpak permission for Lutris launcher filesystem.";
+            qCInfo(plugin_logger) << "To fix this, run:";
+            qCInfo(plugin_logger) << "  flatpak --user override --filesystem=xdg-data/lutris:ro " + appId;
+        }
+
+        bool hasHeroicAccess = PlatformHelper::checkFlatpakFeature("Context", "filesystems", "xdg-config/heroic:ro");
+        if (!hasHeroicAccess) {
+            qCWarning(plugin_logger) << "Missing required Flatpak permission for Heroic launcher filesystem.";
+            qCInfo(plugin_logger) << "To fix this, run:";
+            qCInfo(plugin_logger) << "  flatpak --user override --filesystem=xdg-config/heroic:ro " + appId;
+        }
+
+        bool hasFaugusAccess = PlatformHelper::checkFlatpakFeature("Context", "filesystems", "xdg-data/faugus-launcher:ro");
+        if (!hasFaugusAccess) {
+            qCWarning(plugin_logger) << "Missing required Flatpak permission for Faugus launcher filesystem.";
+            qCInfo(plugin_logger) << "To fix this, run:";
+            qCInfo(plugin_logger) << "  flatpak --user override --filesystem=xdg-data/faugus-launcher:ro " + appId;
+        }
+    }
+
+
+    bool launcherFound = false;
     for (auto *scanner : m_scanners) {
-        if (scanner->isLauncherInstalled())
-        {   
-            launcher = true;
+        if (scanner->isLauncherInstalled()) {   
+            launcherFound = true;
             break; 
         }
     }
-    return launcher;
+    
+    if (!launcherFound) {
+        qCWarning(plugin_logger) << "No supported game launchers found on the system.";
+        return false;
+    }
+
+    return true;
 }
 
 

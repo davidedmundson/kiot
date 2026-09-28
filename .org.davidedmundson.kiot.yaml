@@ -25,6 +25,7 @@ finish-args:
   - "--share=ipc"
   - "--share=network"
  # - "--device=all" #FOr camera plugin gamepad plugin
+  - "--device=input" # For GamePad Plugin
   - "--allow=bluetooth" #Bluetooth plugin
   - "--socket=wayland"
   - "--socket=fallback-x11"
@@ -33,6 +34,7 @@ finish-args:
   - "--socket=pulseaudio" # FOr Audio Plugin
 
   - "--filesystem=xdg-data/Steam:ro"          # GameLauncher For Steam
+  - "--filesystem=xdg-data/faugus-launcher:ro"# GameLauncher For faugus-launcher
   - "--filesystem=xdg-data/lutris:ro"         # GameLauncher For Lutris
   - "--filesystem=xdg-config/heroic:ro"       # GameLauncher for Heroic
   - "--filesystem=xdg-config/kdeglobals:ro"   #Accent colour
@@ -42,7 +44,7 @@ finish-args:
   - "--own-name=org.kde.StatusNotifierItem-2-2" #For notifications?
   - "--talk-name=org.kde.KWin"                #Kwin and active window integration
   - "--talk-name=org.bluez"                   #BLuetooth integration
-  - "--talk-name=org.freedesktop.Flatpak"     # FOr Custom Sensor, Scripts and more plugins
+  - "--talk-name=org.freedesktop.Flatpak"     # FOr Custom Sensor, Scripts, GameLauncher and more plugins
   - "--talk-name=org.kde.kglobalaccel"        #Shortcuts integration
   - "--talk-name=org.mpris.MediaPlayer2"      #mpris
   - "--talk-name=org.mpris.MediaPlayer2.*"    #mpris
