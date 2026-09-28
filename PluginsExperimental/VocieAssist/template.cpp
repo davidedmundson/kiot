@@ -62,24 +62,28 @@ bool TemplatePlugin::startPlugin()
         qCInfo(tplogger) << "mesa so sowwi, " << name() << "not supported on your system";
         return false;
     }
-    if(m_dndSensor)
+    if(m_voiceAssistantNode)
         stopPlugin();
-    m_dndSensor = new BinarySensor(this);
-    m_dndSensor->setId(QStringLiteral("Teplate_FlatpakExtension"));
-    m_dndSensor->setName(QStringLiteral("Test Flatpak Extensions"));
+    VoiceAssistantConfig config;
 
-    m_dndSensor->setState(true);
 
-    qCInfo(tplogger) << name() << "plugin started successfully";
-    return true;
+    m_voiceAssistantNode = new VoiceAssistantNode(config);
+    if (m_voiceAssistantNode->Start()) {
+        qCInfo(tplogger) << name() << "plugin started successfully";
+        return true;
+    }
+    qCInfo(tplogger) << name() << "plugin failed to start";
+    return false;
 }
 
 bool TemplatePlugin::stopPlugin()
 {
-    if(m_dndSensor)
+    if(m_voiceAssistantNode)
     {
-        m_dndSensor->deleteLater();
-        m_dndSensor = nullptr;
+        if(m_voiceAssistantNode->IsRunning())
+            m_voiceAssistantNode->Stop();
+        delete m_voiceAssistantNode;
+        m_voiceAssistantNode = nullptr;
     }
     qCInfo(tplogger) << name() << "plugin stopped";
     return true;
