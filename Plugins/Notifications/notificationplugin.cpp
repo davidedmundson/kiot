@@ -38,6 +38,18 @@ QVersionNumber NotificationPlugin::version() const
 
 bool NotificationPlugin::checkCompatibility()
 {
+    if (PlatformHelper::isFlatpak()) {
+        auto appId = PlatformHelper::generateServiceName();
+        
+        bool hasNotificationsTalk = PlatformHelper::checkFlatpakFeature("Session Bus Policy", "org.freedesktop.Notifications", "talk");
+        if (!hasNotificationsTalk) {
+            qCWarning(plugin_logger) << "Missing required Flatpak D-Bus permission for desktop notifications.";
+            qCInfo(plugin_logger) << "To fix this, run:";
+            qCInfo(plugin_logger) << "  flatpak --user override --talk-name=org.freedesktop.Notifications " + appId;
+            return false;
+        }
+    }
+
     return true;
 }
 bool NotificationPlugin::enabledByDefault()

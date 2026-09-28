@@ -34,6 +34,20 @@ QVersionNumber MprisPlugin::version() const
 
 bool MprisPlugin::checkCompatibility()
 {
+    if (PlatformHelper::isFlatpak()) {
+        auto appId = PlatformHelper::generateServiceName();
+        
+        bool hasMprisBase = PlatformHelper::checkFlatpakFeature("Session Bus Policy", "org.mpris.MediaPlayer2", "talk");
+        bool hasMprisWildcard = PlatformHelper::checkFlatpakFeature("Session Bus Policy", "org.mpris.MediaPlayer2.*", "talk");
+
+        if (!hasMprisBase || !hasMprisWildcard) {
+            qCWarning(plugin_logger) << "Missing required Flatpak D-Bus permissions for MPRIS integration.";
+            qCInfo(plugin_logger) << "To fix this, run:";
+            qCInfo(plugin_logger) << "  flatpak --user override --talk-name=org.mpris.MediaPlayer2 --talk-name=org.mpris.MediaPlayer2.* " + appId;
+            return false;
+        }
+    }
+
     return true;
 }
 

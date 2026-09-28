@@ -48,7 +48,18 @@ QVersionNumber SystemdPlugin::version() const
 
 bool SystemdPlugin::checkCompatibility()
 {
-    // Add custom system checks here if needed
+    if (PlatformHelper::isFlatpak()) {
+        auto appId = PlatformHelper::generateServiceName();
+        
+        bool hasSystemdTalk = PlatformHelper::checkFlatpakFeature("Session Bus Policy", "org.freedesktop.systemd1", "talk");
+        if (!hasSystemdTalk) {
+            qCWarning(systemdlogger) << "Missing required Flatpak D-Bus permission to talk to org.freedesktop.systemd1.";
+            qCInfo(systemdlogger) << "To fix this, run:";
+            qCInfo(systemdlogger) << "  flatpak --user override --talk-name=org.freedesktop.systemd1 " + appId;
+            return false;
+        }
+    }
+
     return true;
 }
 
