@@ -75,6 +75,17 @@ bool DockerPlugin::isDockerAvailable() const
 
 bool DockerPlugin::checkCompatibility()
 {
+    if (PlatformHelper::isFlatpak()) {
+        auto appId = PlatformHelper::generateServiceName();
+        
+        bool hasDockerSocket = PlatformHelper::checkFlatpakFeature("Context", "filesystems", "/run/docker.sock");
+        if (!hasDockerSocket) {
+            qCWarning(docker) << "Missing required Flatpak permission to use the docker socker /run/docker.sock";
+            qCInfo(docker) << "To fix this, run:";
+            qCInfo(docker) << "  flatpak --user override --filesystem=/run/docker.sock " + appId;
+            return false;
+        }
+    }
     if (!isUserInDockerGroup()) {
         qCWarning(docker) << "User is not in the 'docker' group! Docker integration will not function properly.";
         return false;

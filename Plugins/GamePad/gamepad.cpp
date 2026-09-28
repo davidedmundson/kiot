@@ -50,13 +50,19 @@ void Gamepad::udevEvent()
 
 void Gamepad::updateState()
 {
-    // Sjekk om vi har Gamepadd/joystick enheter
     struct udev_enumerate *enumerate = udev_enumerate_new(m_udev);
     udev_enumerate_add_match_subsystem(enumerate, "input");
     udev_enumerate_scan_devices(enumerate);
 
     struct udev_list_entry *devices = udev_enumerate_get_list_entry(enumerate);
     bool connected = false;
+    QString devName = "Unknown";
+    QString devModel = "Unknown";
+    QString devVendor = "Unknown";
+    QString dev_productName = "Unknown";
+    QString dev_VendorName = "Unknown";
+    QString friendlyControllerName = "Unknown";
+    
     struct udev_list_entry *entry;
     udev_list_entry_foreach(entry, devices)
     {
@@ -64,14 +70,52 @@ void Gamepad::updateState()
         struct udev_device *dev = udev_device_new_from_syspath(m_udev, path);
         if (dev) {
             const char *name = udev_device_get_sysname(dev);
-            if (name && strstr(name, "js") != nullptr) { // enkle js* devices
+            
+            // Vi sjekker om det er en joystick-enhet
+            if (name && strstr(name, "js") != nullptr) {
                 connected = true;
+                devName = QString::fromUtf8(name);
+
+                // --- HER ER TRIKSET ---
+                // Finn foreldre-enheten som faktisk har USB/BT attributtene
+                struct udev_device *parent = udev_device_get_parent_with_subsystem_devtype(dev, "usb", "usb_device");
+                
+                if (!parent) {
+                    // Hvis det er Bluetooth (f.eks. DualSense), sjekk "bluetooth" subsystemet
+                    parent = udev_device_get_parent_with_subsystem_devtype(dev, "bluetooth", nullptr);
+                }
+
+                if (parent) {
+                    const char *vendor = udev_device_get_sysattr_value(parent, "idVendor");
+                    const char *model = udev_device_get_sysattr_value(parent, "idProduct"); // Eller "product" for tekst
+                    const char *model_db = udev_device_get_property_value(parent, "ID_MODEL_FROM_DATABASE");
+                    const char *product_name = udev_device_get_sysattr_value(parent, "product");
+                    const char *vendor_name = udev_device_get_sysattr_value(parent, "manufacturer");
+                    const char *friendlyName = udev_device_get_sysattr_value(dev, "ID_MODEL_ENC");
+                    friendlyControllerName = friendlyName ? QString::fromUtf8(friendlyName) : "Unknown";
+                    dev_productName = product_name ? QString::fromUtf8(product_name) : "Unknown";
+                    dev_VendorName = vendor_name ? QString::fromUtf8(vendor_name) : "Unknown";
+                    devVendor = vendor ? QString::fromUtf8(vendor) : "Unknown";
+                    // Prioriter DB-navn hvis det finnes, ellers bruk Hex-ID
+                    devModel = model_db ? QString::fromUtf8(model_db) : (model ? QString::fromUtf8(model) : "Unknown");
+                }
+                
                 udev_device_unref(dev);
-                break;
+                break; // Vi fant en, stopper her for nå
             }
             udev_device_unref(dev);
         }
     }
     udev_enumerate_unref(enumerate);
+    m_sensor->setAttributes({
+        {"friendlyControllerName", friendlyControllerName},
+        {"devName", devName},
+        {"devModel", devModel},
+        {"productName", dev_productName},
+        {"devVendor", devVendor},
+        {"VendorName", dev_VendorName}
+
+    });
     m_sensor->setState(connected);
+    
 }

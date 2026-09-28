@@ -32,6 +32,27 @@ QVersionNumber GamepadPlugin::version() const
 
 bool GamepadPlugin::checkCompatibility()
 {
+    if (PlatformHelper::isFlatpak()) {
+        auto appId = PlatformHelper::generateServiceName();
+        
+
+        bool hasInputDevice = PlatformHelper::checkFlatpakFeature("Context", "devices", "input");
+        if (!hasInputDevice) {
+            qCWarning(plugin_logger) << "Missing required Flatpak permission for input devices (--device=input).";
+            qCInfo(plugin_logger) << "To fix this, run:";
+            qCInfo(plugin_logger) << "  flatpak --user override --device=input " + appId;
+            return false; 
+        }
+    }
+    
+    // Sjekk om udev faktisk lar seg initialisere
+    struct udev *udev = udev_new();
+    if (!udev) {
+        qCWarning(plugin_logger) << "Failed to initialize udev context";
+        return false;
+    }
+    udev_unref(udev);
+
     return true;
 }
 

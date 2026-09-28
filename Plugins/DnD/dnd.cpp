@@ -35,6 +35,18 @@ QVersionNumber DnDPlugin::version() const
 
 bool DnDPlugin::checkCompatibility()
 {
+
+    if (PlatformHelper::isFlatpak()) {
+        auto appId = PlatformHelper::generateServiceName();
+        
+        bool hasNotifiTalk = PlatformHelper::checkFlatpakFeature("Session Bus Policy", "org.freedesktop.Notifications", "talk");
+        if (!hasNotifiTalk) {
+            qCWarning(plugin_logger) << "Missing required Flatpak permission to talk to org.freedesktop.Notifications";
+            qCInfo(plugin_logger) << "To fix this, run:";
+            qCInfo(plugin_logger) << "  flatpak --user override --talk-name=org.freedesktop.Notifications " + appId;
+            return false;
+        }
+    }
     return true;
 }
 
@@ -54,7 +66,7 @@ bool DnDPlugin::startPlugin()
     m_dndSensor->setId("dnd");
     m_dndSensor->setName("Do not disturb");
 
-    m_dndProperty = new DBusProperty("org.freedesktop.Notifications", "/org/freedesktop/Notifications", "org.freedesktop.Notifications", "Inhibited", qApp);
+    m_dndProperty = new DBusProperty("org.freedesktop.Notifications", "/org/freedesktop/Notifications", "org.freedesktop.Notifications", "Inhibited", this);
     QObject::connect(m_dndProperty, &DBusProperty::valueChanged, this, [this](const QVariant &value) {
         m_dndSensor->setState(value.toBool());
     });
