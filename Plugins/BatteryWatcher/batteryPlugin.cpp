@@ -38,11 +38,11 @@ bool BatteryPlugin::checkCompatibility()
 {
     if (PlatformHelper::isFlatpak()) {
         auto appId = PlatformHelper::generateServiceName();        
-        bool hasUPower = PlatformHelper::checkFlatpakFeature("System Bus Policy", "org.freedesktop.UPower", "talk");
+        bool hasUPower = PlatformHelper::checkFlatpakFeature("Session Bus Policy", "org.freedesktop.UPower", "talk");
         if (!hasUPower) {
             qCWarning(plugin_loggerbatter) << "Missing required Flatpak permission to talk to UPower.";
             qCInfo(plugin_loggerbatter) << "To fix this, you can grant access using Flatseal or by running:";
-            qCInfo(plugin_loggerbatter) << "  flatpak --user override --system-talk-name=org.freedesktop.UPower" << appId;
+            qCInfo(plugin_loggerbatter) << "  flatpak --user override --talk-name=org.freedesktop.UPower" << appId;
             return false;
         }
     }

@@ -24,7 +24,8 @@ add-extensions:
 finish-args:
   - "--share=ipc"
   - "--share=network"
-  - "--device=all"
+#  - "--device=all"
+  - "--allow=bluetooth" #Bluetooth plugin
   - "--socket=wayland"
   - "--socket=fallback-x11"
   - "--socket=session-bus"
