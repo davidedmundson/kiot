@@ -46,7 +46,7 @@ KCM.SimpleKCM {
             onToggled: kcm.settings.tls = checked
         }
         QQC2.CheckBox {
-            Kirigami.FormData.label: i18n("Systray icon:")
+            Kirigami.FormData.label: i18n("Show system tray:")
             checked: kcm.settings.systray
             onToggled: kcm.settings.systray = checked
         }
@@ -54,6 +54,16 @@ KCM.SimpleKCM {
             Kirigami.FormData.label: i18n("Autostart:")
             checked: kcm.settings.autostart
             onToggled: kcm.settings.autostart = checked
+        }
+
+        Item {
+            Kirigami.FormData.isSection: true
+        }
+
+        QQC2.Button {
+            text: i18n("More Settings…")
+            icon.name: "configure"
+            onClicked: kcm.openKiotSettings()
         }
     }
 }
