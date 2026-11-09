@@ -275,7 +275,7 @@ void MainWindow::createIcons()
         p.setPen(Qt::NoPen);
         p.drawEllipse(4, 4, 24, 24);
     }
-    m_connectedIcon = QIcon(connectedPixmap);
+    m_connectedIcon = QIcon::fromTheme(QStringLiteral(APP_ID "-connected"), QIcon(connectedPixmap));
 
     // Disconnected icon (red)
     QPixmap disconnectedPixmap(32, 32);
@@ -287,7 +287,7 @@ void MainWindow::createIcons()
         p.setPen(Qt::NoPen);
         p.drawEllipse(4, 4, 24, 24);
     }
-    m_disconnectedIcon = QIcon(disconnectedPixmap);
+    m_disconnectedIcon = QIcon::fromTheme(QStringLiteral(APP_ID "-disconnected"), QIcon(disconnectedPixmap));
 
     // Connecting icon (yellow)
     QPixmap connectingPixmap(32, 32);
@@ -299,7 +299,7 @@ void MainWindow::createIcons()
         p.setPen(Qt::NoPen);
         p.drawEllipse(4, 4, 24, 24);
     }
-    m_connectingIcon = QIcon(connectingPixmap);
+    m_connectingIcon = QIcon::fromTheme(QStringLiteral(APP_ID "-connecting"), QIcon(connectingPixmap));
 }
 
 
