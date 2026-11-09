@@ -74,7 +74,7 @@ bool HaControl::validateConfig()
         group.writeEntry("user", "mqtt");
         group.writeEntry("password", "mqtt-password-here");
         group.writeEntry("autostart", false);
-        group.writeEntry("useSSL",false);
+        group.writeEntry("tls",false);
         group.writeEntry("discoveryprefix","homeassistant");
         config->sync();
         return false;
