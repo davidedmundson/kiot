@@ -9,6 +9,7 @@
 #include "platformhelper.h"
 #include "dbusproperty.h"
 #include "Transport/transportmanager.h"
+#include "Transport/passwordstore.h"
 #include "Config/configmanager.h"
 
 // Entities

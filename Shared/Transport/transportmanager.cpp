@@ -1,4 +1,5 @@
 #include "transportmanager.h"
+#include "passwordstore.h"
 #include "platformhelper.h"
 #include <KSharedConfig>
 #include <KConfigGroup>
@@ -64,7 +65,6 @@ bool TransportManager::initiateMqttClient()
     m_client->setHostname(group.readEntry("host"));
     m_client->setPort(group.readEntry("port", 1883));
     m_client->setUsername(group.readEntry("user"));
-    m_client->setPassword(group.readEntry("password"));
     m_client->setKeepAlive(3);
 
     if (m_client->hostname().isEmpty()) {
@@ -75,6 +75,14 @@ bool TransportManager::initiateMqttClient()
     }
     
     qCInfo(transportlogger) << "MQTT server configured to" << m_client->hostname();
+
+    PasswordStore::read(group.readEntry("user"), m_client->hostname(), this, [this](const QString &password) {
+        m_client->setPassword(password);
+        m_passwordRead = true;
+        if (m_connectRequested) {
+            doConnect();
+        }
+    });
 
     reconnectTimer = new QTimer(this);
     reconnectTimer->setInterval(5000);
@@ -105,6 +113,10 @@ void TransportManager::handleStateChanged(QMqttClient::ClientState state) {
 
 void TransportManager::doConnect()
 {
+    if (!m_passwordRead) {
+        m_connectRequested = true;
+        return;
+    }
     if(m_client->state() == QMqttClient::Connecting || m_client->state() == QMqttClient::Connected)
     {
         qCInfo(transportlogger) << "Already connected or connecting";

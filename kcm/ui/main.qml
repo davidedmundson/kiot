@@ -31,8 +31,8 @@ KCM.SimpleKCM {
         QQC2.TextField {
             Kirigami.FormData.label: i18n("Password:")
             echoMode: TextInput.Password
-            text: kcm.settings.password
-            onTextChanged: kcm.settings.password = text
+            text: kcm.password
+            onTextChanged: kcm.password = text
         }
             QQC2.TextField {
             Kirigami.FormData.label: i18n("Discovery Prefix:")

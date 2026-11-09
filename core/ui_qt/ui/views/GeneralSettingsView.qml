@@ -66,9 +66,9 @@ ColumnLayout {
         QQC2.TextField {
             id: passwordField
             Layout.fillWidth: true
-            text: root.settingsManager ? root.settingsManager.getPassword() : ""
+            text: root.settingsManager ? root.settingsManager.password : ""
             echoMode: TextInput.Password
-            onEditingFinished: if (root.settingsManager) root.settingsManager.setPassword(text)
+            onEditingFinished: if (root.settingsManager) root.settingsManager.password = text
         }
 
         QQC2.Label { text: "Discovery Prefix:"; Layout.alignment: Qt.AlignRight }
