@@ -89,6 +89,7 @@ if [ "$PM" = "apt" ]; then
         libkf6service-dev
         libkf6kio-dev
         libkf6screen-dev
+        qtkeychain-qt6-dev   # MQTT password in the wallet
     )
     
     system_packages=(
@@ -119,6 +120,7 @@ elif [ "$PM" = "pacman" ]; then
         kservice
         kio
         libkscreen
+        qtkeychain-qt6       # MQTT password in the wallet
     )
     
     system_packages=(

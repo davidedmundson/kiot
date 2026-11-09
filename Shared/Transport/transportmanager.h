@@ -38,6 +38,8 @@ private:
     static TransportManager *s_self;
     QMqttClient *m_client;
     QTimer *reconnectTimer;
+    bool m_passwordRead = false;
+    bool m_connectRequested = false;
     bool initiateMqttClient();
 };
 

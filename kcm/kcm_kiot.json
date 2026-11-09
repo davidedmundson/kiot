@@ -1,8 +1,8 @@
 {
     "KPlugin": {
-        "BugReportUrl": "https://bugs.kde.org/enter_bug.cgi?product=systemsettings&component=kcm_desktoppath",
+        "BugReportUrl": "https://github.com/davidedmundson/kiot/issues",
         "Description": "Settings for KIOT",
-        "Icon": "system-file-manager",
+        "Icon": "org.davidedmundson.kiot",
         "Name": "KIOT"
     },
     "X-KDE-Keywords": "home assistant,mqtt,kiot",
