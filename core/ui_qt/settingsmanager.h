@@ -14,6 +14,7 @@ class SettingsManager : public QObject
     Q_OBJECT
     Q_PROPERTY(QVariantMap configSections READ configSections NOTIFY configSectionsChanged)
     Q_PROPERTY(QVariantList sectionOrder READ sectionOrder NOTIFY sectionOrderChanged)
+    Q_PROPERTY(QString password READ password WRITE setPassword NOTIFY passwordChanged)
 
 public:
     explicit SettingsManager(QObject *parent = nullptr);
@@ -34,22 +35,30 @@ public:
     Q_INVOKABLE void setPort(int port);
     Q_INVOKABLE QString getUser() const;
     Q_INVOKABLE void setUser(const QString &user);
-    Q_INVOKABLE QString getPassword() const;
-    Q_INVOKABLE void setPassword(const QString &password);
+    QString password() const;
+    void setPassword(const QString &password);
     Q_INVOKABLE QString getDiscoveryPrefix() const;
     Q_INVOKABLE void setDiscoveryPrefix(const QString &prefix);
 
 Q_SIGNALS:
     void configSectionsChanged();
     void sectionOrderChanged();
+    void passwordChanged();
 
 private:
     void loadConfigFile();
     void loadFromQSettings();
     void groupNestedSections();
 
+    void restartWhenStored();
+    void loadPassword();
+    void storePassword(const QString &user, const QString &host, const QString &password);
+
     QVariantMap m_configSections;
     QVariantList m_sectionOrder;
+    QString m_password;
+    int m_pendingPasswordWrites = 0;
+    bool m_restartRequested = false;
     
 };
 
