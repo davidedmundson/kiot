@@ -113,10 +113,12 @@ Audio::Audio(QObject *parent)
 //Updates the select entity for application volume controller with active apps
 void Audio::updateSinkInputs()
 {
+    static const QString noApps = QStringLiteral("No active apps");
     QStringList options;
+    PulseAudioQt::SinkInput *firstInput = nullptr;
     bool activeAppStillExists = false;
 
-    for (const auto *input : m_ctx->sinkInputs()) {
+    for (auto *input : m_ctx->sinkInputs()) {
         //qCDebug(plugin_logger_audio) << "Sink input name" << input->name();
         //QVariant appNameVar = input->properties().value(QStringLiteral("application.name"));
         QString appName = input->name();
@@ -126,14 +128,18 @@ void Audio::updateSinkInputs()
         
         if (!appName.isEmpty()) {
             options.append(appName);
+            if (!firstInput) {
+                firstInput = input;
+            }
             if (m_sinkInput && input == m_sinkInput) {
                 activeAppStillExists = true;
             }
         }
     }
 
-    if (options != m_sinkInputSelector->options()) {
-        m_sinkInputSelector->setOptions(options);
+    const QStringList selectOptions = options.isEmpty() ? QStringList{noApps} : options;
+    if (selectOptions != m_sinkInputSelector->options()) {
+        m_sinkInputSelector->setOptions(selectOptions);
     }
 
     if (!activeAppStillExists) {
@@ -142,13 +148,13 @@ void Audio::updateSinkInputs()
         }
         
         if (!options.isEmpty()) {
-            m_sinkInput = m_ctx->sinkInputs().first();
+            m_sinkInput = firstInput;
             m_sinkInputSelector->setState(options.first());
             connect(m_sinkInput, &PulseAudioQt::VolumeObject::volumeChanged, this, &Audio::onSinkInputVolumeChanged);
             onSinkInputVolumeChanged();
         } else {
             m_sinkInput = nullptr;
-            m_sinkInputSelector->setState(QStringLiteral("Ingen aktive apper"));
+            m_sinkInputSelector->setState(noApps);
             m_sinkInputVolume->setValue(0);
         }
     } else {
@@ -238,7 +244,7 @@ void Audio::onSinkInputSelected(const QString &newOption)
                 }
                 m_sinkInput = sinkInput;
                 if(m_sinkInput){
-                    m_sinkInputSelector->setState(m_sinkInput->name());
+                    m_sinkInputSelector->setState(appName);
                     connect(m_sinkInput, &PulseAudioQt::VolumeObject::volumeChanged, this, &Audio::onSinkInputVolumeChanged);
                 }
                 onSinkInputVolumeChanged();
