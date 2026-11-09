@@ -96,8 +96,7 @@ HaControl::HaControl()
     ConfigManager *m_conf = new ConfigManager(this);
     qCDebug(core) << m_conf->filePath();
     if(!validateConfig()) {
-        QProcess::startDetached(QStringLiteral(PROJECT_NAME));
-        QApplication::quit();
+        PlatformHelper::restartApplication();
         return;
     }
     

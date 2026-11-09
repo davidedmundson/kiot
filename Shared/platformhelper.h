@@ -104,6 +104,21 @@ public:
     static bool isFlatpak();
 
     /**
+     * @brief Restart kiot, e.g. to apply changed settings.
+     *
+     * Restarts kiot.service through systemd when it is active, and otherwise starts kiot in a
+     * unit of its own (KIO::CommandLauncherJob), so the new kiot doesn't live in the unit of
+     * the process asking for it, which would end it on exit. In a Flatpak it starts a new kiot.
+     * The new kiot replaces a running one (KDBusService::Replace).
+     */
+    static void restartApplication();
+
+    /**
+     * @brief Start kiot: kiot.service if there is one, otherwise as in restartApplication().
+     */
+    static void startApplication();
+
+    /**
      * @brief Check whether the application is running inside a Snap confinement.
      *
      * @return @c true if the @c SNAP environment variable is set.
