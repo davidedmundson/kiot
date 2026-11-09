@@ -1,0 +1,9 @@
+[Global]
+IconName=@APP_ID@
+Name=Kiot
+Comment=Home Assistant
+
+[Event/notification]
+Name=Home Assistant notification
+Comment=Notification sent from Home Assistant
+Action=Popup

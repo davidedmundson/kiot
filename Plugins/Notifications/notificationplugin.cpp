@@ -6,6 +6,10 @@
 #include "notificationplugin.h"
 #include <KNotification>
 #include <QCoreApplication>
+#include <QDesktopServices>
+#include <QHash>
+#include <QJsonObject>
+#include <QUrl>
 
 
 using KIOTShared::PlatformHelper;
@@ -84,6 +88,33 @@ bool NotificationPlugin::stopPlugin()
 }
 
 
+namespace {
+void sendNotification(const QString &title, const QString &body, const QJsonObject &options = {})
+{
+    static const QHash<QString, KNotification::Urgency> urgencies = {
+        {QStringLiteral("low"), KNotification::LowUrgency},
+        {QStringLiteral("normal"), KNotification::NormalUrgency},
+        {QStringLiteral("high"), KNotification::HighUrgency},
+        {QStringLiteral("critical"), KNotification::CriticalUrgency},
+    };
+    const auto urgency = urgencies.value(options.value(QStringLiteral("urgency")).toString(), KNotification::DefaultUrgency);
+    const auto flags = urgency == KNotification::CriticalUrgency ? KNotification::Persistent : KNotification::CloseOnTimeout;
+
+    // event() sends on the next event loop iteration, so the urgency can still be set
+    auto notification = KNotification::event(QStringLiteral("notification"), title, body, QString(), flags);
+    notification->setUrgency(urgency);
+
+    const QUrl url(options.value(QStringLiteral("url")).toString());
+    if (url.isValid() && !url.isEmpty()) {
+        auto action = notification->addDefaultAction(QStringLiteral("Open"));
+        QObject::connect(action, &KNotificationAction::activated, [url]() {
+            QDesktopServices::openUrl(url);
+        });
+        notification->setHint(QStringLiteral("resident"), true);
+    }
+}
+} // namespace
+
 void NotificationPlugin::notificationCallback(QByteArray message)
     {
         QString title = QString(PROJECT_NAME);
@@ -98,12 +129,12 @@ void NotificationPlugin::notificationCallback(QByteArray message)
             if(obj.contains("title"))
                 title = obj.value("title").toString();
             const QString body = obj.value("message").toString();
-            KNotification::event(KNotification::Notification, title, body);
+            sendNotification(title, body, obj);
  
         } else {
             // Plain text path, should never happen but better safe than sorry
             QString body = QString::fromUtf8(message);
-            KNotification::event(KNotification::Notification, title, body);
+            sendNotification(title, body);
 
         }
 
