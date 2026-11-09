@@ -138,7 +138,7 @@ void SettingsManager::restoreDefaults()
     setUser("");
     setPassword("");
     setDiscoveryPrefix("homeassistant");
-    saveConfigValue("general", "useSSL", false);
+    saveConfigValue("general", "tls", false);
     saveConfigValue("general", "autostart", true);
     
     QProcess::startDetached(QString(PROJECT_NAME), QStringList());
