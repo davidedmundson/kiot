@@ -13,7 +13,6 @@
 #include <QDBusMessage>
 #include <QDBusServiceWatcher>
 #include <QLoggingCategory>
-#include <QProcess>
 #include <QStandardPaths>
 
 Q_DECLARE_LOGGING_CATEGORY(ui)
@@ -54,10 +53,8 @@ public:
     void save() override
     {
         KQuickManagedConfigModule::save();
-        // Like Apply in kiot's own settings window: a new kiot replaces the running one
-        // (KDBusService::Replace) and reads the new settings. Not started if it is not running.
         if (isKiotRunning()) {
-            QProcess::startDetached(QStringLiteral(PROJECT_NAME), {});
+            PlatformHelper::restartApplication();
         }
     }
 
@@ -72,7 +69,7 @@ public:
             watcher->deleteLater();
             activateKiot();
         });
-        QProcess::startDetached(QStringLiteral(PROJECT_NAME), {});
+        PlatformHelper::startApplication();
     }
 
 private:

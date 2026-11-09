@@ -126,8 +126,7 @@ void SettingsManager::deleteNestedConfig(const QString &mainSection, const QStri
 void SettingsManager::applySettings()
 {
     qCDebug(settings_sm) << "Settings applied, restarting " + QString(PROJECT_NAME);
-    QProcess::startDetached(QString(PROJECT_NAME), QStringList());
-    QApplication::quit();
+    PlatformHelper::restartApplication();
 }
 
 void SettingsManager::restoreDefaults()
@@ -141,8 +140,7 @@ void SettingsManager::restoreDefaults()
     saveConfigValue("general", "tls", false);
     saveConfigValue("general", "autostart", true);
     
-    QProcess::startDetached(QString(PROJECT_NAME), QStringList());
-    QApplication::quit();
+    PlatformHelper::restartApplication();
 }
 
 // MQTT settings
