@@ -70,6 +70,7 @@ find_package(Qt6 ${QT_MIN_VERSION} CONFIG REQUIRED COMPONENTS
 
 find_package(KF6 ${KF6_MIN_VERSION} REQUIRED COMPONENTS
     Config
+    KIO
 )
 
 target_link_libraries(${LIB_TARGET}
@@ -79,6 +80,8 @@ target_link_libraries(${LIB_TARGET}
     Qt6::Widgets
     Qt6::Mqtt
     Qt6::DBus
+    PRIVATE
+    KF6::KIOGui
 )
 
 target_compile_definitions(${LIB_TARGET} PRIVATE

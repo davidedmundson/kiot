@@ -177,8 +177,7 @@ void MainWindow::onQuit()
 void MainWindow::onRestart()
 {
     qCDebug(mw) << "Restart requested from system tray";
-    QProcess::startDetached(QStringLiteral(PROJECT_NAME) );
-    QApplication::quit();
+    PlatformHelper::restartApplication();
 }
 
 

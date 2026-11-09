@@ -23,6 +23,12 @@
 #include <QSettings>
 #include <QSysInfo>
 #include <QGuiApplication>
+#include <QDBusConnection>
+#include <QDBusInterface>
+#include <QDBusReply>
+#include <QDBusVariant>
+#include <QProcess>
+#include <KIO/CommandLauncherJob>
 
 
 /**
@@ -611,5 +617,61 @@ void PlatformHelper::startHostProcess(QProcess &process, PlatformHelper::Process
 
 }
 
+
+namespace {
+const QString systemdService = QStringLiteral("org.freedesktop.systemd1");
+const QString systemdPath = QStringLiteral("/org/freedesktop/systemd1");
+const QString systemdManager = QStringLiteral("org.freedesktop.systemd1.Manager");
+
+QString unitName()
+{
+    return QStringLiteral(PROJECT_NAME ".service");
+}
+
+bool isUnitActive()
+{
+    QDBusInterface manager(systemdService, systemdPath, systemdManager, QDBusConnection::sessionBus());
+    const QDBusReply<QDBusObjectPath> unit = manager.call(QStringLiteral("GetUnit"), unitName());
+    if (!unit.isValid()) {
+        return false;
+    }
+    QDBusInterface properties(systemdService, unit.value().path(), QStringLiteral("org.freedesktop.DBus.Properties"), QDBusConnection::sessionBus());
+    const QDBusReply<QDBusVariant> state = properties.call(QStringLiteral("Get"), QStringLiteral("org.freedesktop.systemd1.Unit"), QStringLiteral("ActiveState"));
+    return state.isValid() && state.value().variant().toString() == QLatin1String("active");
+}
+
+void launch()
+{
+    auto job = new KIO::CommandLauncherJob(QStringLiteral(PROJECT_NAME));
+    job->setDesktopName(QStringLiteral(APP_ID));
+    job->start();
+}
+} // namespace
+
+void PlatformHelper::restartApplication()
+{
+    if (isFlatpak()) {
+        QProcess::startDetached(QStringLiteral(PROJECT_NAME), {});
+    } else if (isUnitActive()) {
+        auto message = QDBusMessage::createMethodCall(systemdService, systemdPath, systemdManager, QStringLiteral("RestartUnit"));
+        message << unitName() << QStringLiteral("replace");
+        QDBusConnection::sessionBus().asyncCall(message);
+    } else {
+        launch();
+    }
+}
+
+void PlatformHelper::startApplication()
+{
+    if (isFlatpak()) {
+        QProcess::startDetached(QStringLiteral(PROJECT_NAME), {});
+        return;
+    }
+    QDBusInterface manager(systemdService, systemdPath, systemdManager, QDBusConnection::sessionBus());
+    const QDBusReply<QDBusObjectPath> started = manager.call(QStringLiteral("StartUnit"), unitName(), QStringLiteral("replace"));
+    if (!started.isValid()) {
+        launch();
+    }
+}
 
 } // namespace KIOTShared
