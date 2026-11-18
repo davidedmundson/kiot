@@ -7,7 +7,7 @@
 #include <QObject>
 #include <KIOTShared/kiotshared.h>
 
-class SuspendBlockers;
+class PowerInhibitions;
 
 using KIOTShared::Entities::Button;
 using KIOTShared::PlatformHelper;
@@ -37,6 +37,6 @@ private:
     Button *m_restartButton = nullptr;
     Button *m_suspendButton = nullptr;
     Button *m_hibernateButton = nullptr;
-    SuspendBlockers *m_suspendBlockers = nullptr;
+    PowerInhibitions *m_inhibitions = nullptr; // "Suspend blockers" + "Screen blockers" sensors
     
 };

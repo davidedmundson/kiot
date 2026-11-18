@@ -13,8 +13,8 @@ add_library(${PROJECT_NAME} MODULE
     login1_manager_interface.h
     login1_manager_interface.cpp
     loginddbustypes.h
-    suspendblockers.cpp
-    suspendblockers.h
+    powerinhibitions.cpp
+    powerinhibitions.h
 )
 find_package(Qt6 ${QT_MIN_VERSION} CONFIG REQUIRED COMPONENTS
     Core
