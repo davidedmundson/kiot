@@ -84,17 +84,13 @@ QVariantMap toVariant(const PowerInhibitions::Inhibition &inhibition)
     return map;
 }
 
-Sensor *makeSensor(QObject *parent, const QString &id, const QString &name, const QString &icon, bool enabledByDefault)
+Sensor *makeSensor(QObject *parent, const QString &id, const QString &name, const QString &icon)
 {
     auto sensor = new Sensor(parent);
     sensor->setId(id);
     sensor->setName(name);
     sensor->setHaIcon(icon);
     sensor->setDiscoveryConfig(QStringLiteral("state_class"), QStringLiteral("measurement"));
-    if (!enabledByDefault) {
-        // shows up disabled in Home Assistant, switched on in the entity's settings
-        sensor->setDiscoveryConfig(QStringLiteral("enabled_by_default"), false);
-    }
     return sensor;
 }
 
@@ -120,8 +116,8 @@ void publishSensor(Sensor *sensor, const QList<PowerInhibitions::Inhibition> &in
 
 PowerInhibitions::PowerInhibitions(QObject *parent)
     : QObject(parent)
-    , m_suspendSensor(makeSensor(this, QStringLiteral("suspend_blockers"), QStringLiteral("Suspend blockers"), QStringLiteral("mdi:sleep-off"), true))
-    , m_screenSensor(makeSensor(this, QStringLiteral("screen_blockers"), QStringLiteral("Screen blockers"), QStringLiteral("mdi:monitor-eye"), false))
+    , m_suspendSensor(makeSensor(this, QStringLiteral("suspend_blockers"), QStringLiteral("Suspend blockers"), QStringLiteral("mdi:sleep-off")))
+    , m_screenSensor(makeSensor(this, QStringLiteral("screen_blockers"), QStringLiteral("Screen blockers"), QStringLiteral("mdi:monitor-eye")))
     , m_watcher(new QDBusServiceWatcher(PowerDevilService,
                                         QDBusConnection::sessionBus(),
                                         QDBusServiceWatcher::WatchForRegistration | QDBusServiceWatcher::WatchForUnregistration,
