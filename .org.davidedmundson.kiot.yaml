@@ -56,6 +56,7 @@ finish-args:
   - "--talk-name=org.gnome.SessionManager" #Active plugin
   - "--talk-name=org.freedesktop.UPower" # Battery plugin
   - "--talk-name=org.kde.KScreen" #Screen plugin
+  - "--talk-name=org.kde.Solid.PowerManagement" # PowerController plugin: suspend blockers (PowerDevil)
 
 
 modules:
