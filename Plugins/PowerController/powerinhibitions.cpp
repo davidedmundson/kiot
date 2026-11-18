@@ -1,7 +1,7 @@
 // SPDX-FileCopyrightText: 2026 Thomas Kastenholz <2893148+Thokas@users.noreply.github.com>
 // SPDX-License-Identifier: LGPL-2.1-or-later
 
-#include "suspendblockers.h"
+#include "powerinhibitions.h"
 
 #include <KIOTShared/kiotshared.h>
 
@@ -27,9 +27,9 @@ const QString PropertiesInterface = QStringLiteral("org.freedesktop.DBus.Propert
 const QString ActiveInhibitions = QStringLiteral("ActiveInhibitions");
 
 // a(ssssu): what, who, why, mode, flags (PowerDevil's PolicyAgentInhibition)
-QList<SuspendBlockers::Inhibition> parseActiveInhibitions(const QDBusArgument &arg)
+QList<PowerInhibitions::Inhibition> parseActiveInhibitions(const QDBusArgument &arg)
 {
-    QList<SuspendBlockers::Inhibition> result;
+    QList<PowerInhibitions::Inhibition> result;
     arg.beginArray();
     while (!arg.atEnd()) {
         QString what, who, why, mode;
@@ -44,9 +44,9 @@ QList<SuspendBlockers::Inhibition> parseActiveInhibitions(const QDBusArgument &a
 }
 
 // The deprecated ListInhibitions: (who, why) pairs, as aas (what PowerDevil sends) or a{ss} (what it declares)
-QList<SuspendBlockers::Inhibition> parseLegacyInhibitions(const QDBusArgument &arg)
+QList<PowerInhibitions::Inhibition> parseLegacyInhibitions(const QDBusArgument &arg)
 {
-    QList<SuspendBlockers::Inhibition> result;
+    QList<PowerInhibitions::Inhibition> result;
     if (arg.currentType() == QDBusArgument::MapType) {
         arg.beginMap();
         while (!arg.atEnd()) {
@@ -69,13 +69,13 @@ QList<SuspendBlockers::Inhibition> parseLegacyInhibitions(const QDBusArgument &a
     return result;
 }
 
-bool blocksSleep(const SuspendBlockers::Inhibition &inhibition)
+// "sleep" or "idle" in what; the legacy API doesn't tell, so there every inhibition counts
+bool covers(const PowerInhibitions::Inhibition &inhibition, QLatin1String part)
 {
-    // the legacy API doesn't tell, so there every inhibition counts
-    return inhibition.what.isEmpty() || inhibition.what.split(QLatin1Char(':')).contains(QLatin1String("sleep"));
+    return inhibition.what.isEmpty() || inhibition.what.split(QLatin1Char(':')).contains(part);
 }
 
-QVariantMap toVariant(const SuspendBlockers::Inhibition &inhibition)
+QVariantMap toVariant(const PowerInhibitions::Inhibition &inhibition)
 {
     QVariantMap map{{QStringLiteral("who"), inhibition.who}, {QStringLiteral("why"), inhibition.why}};
     if (!inhibition.what.isEmpty()) {
@@ -83,21 +83,50 @@ QVariantMap toVariant(const SuspendBlockers::Inhibition &inhibition)
     }
     return map;
 }
+
+Sensor *makeSensor(QObject *parent, const QString &id, const QString &name, const QString &icon, bool enabledByDefault)
+{
+    auto sensor = new Sensor(parent);
+    sensor->setId(id);
+    sensor->setName(name);
+    sensor->setHaIcon(icon);
+    sensor->setDiscoveryConfig(QStringLiteral("state_class"), QStringLiteral("measurement"));
+    if (!enabledByDefault) {
+        // shows up disabled in Home Assistant, switched on in the entity's settings
+        sensor->setDiscoveryConfig(QStringLiteral("enabled_by_default"), false);
+    }
+    return sensor;
 }
 
-SuspendBlockers::SuspendBlockers(QObject *parent)
+// state + attributes of one sensor for the inhibitions covering part
+void publishSensor(Sensor *sensor, const QList<PowerInhibitions::Inhibition> &inhibitions, QLatin1String part, const QString &source)
+{
+    QVariantList list;
+    QStringList summary;
+    for (const auto &inhibition : inhibitions) {
+        if (covers(inhibition, part)) {
+            list.append(toVariant(inhibition));
+            summary.append(inhibition.why.isEmpty() ? inhibition.who : inhibition.who + QStringLiteral(": ") + inhibition.why);
+        }
+    }
+    sensor->setAttributes({
+        {QStringLiteral("summary"), summary.isEmpty() ? QStringLiteral("none") : summary.join(QStringLiteral("; "))},
+        {QStringLiteral("inhibitions"), list},
+        {QStringLiteral("source"), source},
+    });
+    sensor->setState(QString::number(list.size()));
+}
+}
+
+PowerInhibitions::PowerInhibitions(QObject *parent)
     : QObject(parent)
-    , m_sensor(new Sensor(this))
+    , m_suspendSensor(makeSensor(this, QStringLiteral("suspend_blockers"), QStringLiteral("Suspend blockers"), QStringLiteral("mdi:sleep-off"), true))
+    , m_screenSensor(makeSensor(this, QStringLiteral("screen_blockers"), QStringLiteral("Screen blockers"), QStringLiteral("mdi:monitor-eye"), false))
     , m_watcher(new QDBusServiceWatcher(PowerDevilService,
                                         QDBusConnection::sessionBus(),
                                         QDBusServiceWatcher::WatchForRegistration | QDBusServiceWatcher::WatchForUnregistration,
                                         this))
 {
-    m_sensor->setId(QStringLiteral("suspend_blockers"));
-    m_sensor->setName(QStringLiteral("Suspend blockers"));
-    m_sensor->setHaIcon(QStringLiteral("mdi:sleep-off"));
-    m_sensor->setDiscoveryConfig(QStringLiteral("state_class"), QStringLiteral("measurement"));
-
     auto bus = QDBusConnection::sessionBus();
     bus.connect(PowerDevilService,
                 PolicyAgentPath,
@@ -113,18 +142,20 @@ SuspendBlockers::SuspendBlockers(QObject *parent)
         refresh();
     });
     connect(m_watcher, &QDBusServiceWatcher::serviceUnregistered, this, [this]() {
-        qCInfo(plugin_logger) << "PowerDevil left the session bus, suspend blockers unknown";
+        qCInfo(plugin_logger) << "PowerDevil left the session bus, suspend/screen blockers unknown";
         setUnknown();
     });
 
     setUnknown();
-    m_sensor->runtimeRegistration(); // no-op before the MQTT connection, registers when started at runtime
+    // no-op before the MQTT connection, registers when the plugin is started at runtime
+    m_suspendSensor->runtimeRegistration();
+    m_screenSensor->runtimeRegistration();
     refresh();
 }
 
-SuspendBlockers::~SuspendBlockers() = default;
+PowerInhibitions::~PowerInhibitions() = default;
 
-void SuspendBlockers::onPropertiesChanged(const QString &interface, const QVariantMap &changed, const QStringList &invalidated)
+void PowerInhibitions::onPropertiesChanged(const QString &interface, const QVariantMap &changed, const QStringList &invalidated)
 {
     // PowerDevil only names the changed properties (invalidated), without values
     if (interface == PolicyAgentInterface && (changed.contains(ActiveInhibitions) || invalidated.contains(ActiveInhibitions))) {
@@ -132,14 +163,14 @@ void SuspendBlockers::onPropertiesChanged(const QString &interface, const QVaria
     }
 }
 
-void SuspendBlockers::onLegacyInhibitionsChanged()
+void PowerInhibitions::onLegacyInhibitionsChanged()
 {
     if (m_legacy) {
         refreshLegacy();
     }
 }
 
-void SuspendBlockers::refresh()
+void PowerInhibitions::refresh()
 {
     if (m_legacy) {
         refreshLegacy();
@@ -171,7 +202,7 @@ void SuspendBlockers::refresh()
     });
 }
 
-void SuspendBlockers::refreshLegacy()
+void PowerInhibitions::refreshLegacy()
 {
     auto message = QDBusMessage::createMethodCall(PowerDevilService, PolicyAgentPath, PolicyAgentInterface, QStringLiteral("ListInhibitions"));
     const quint64 request = ++m_request;
@@ -191,39 +222,25 @@ void SuspendBlockers::refreshLegacy()
     });
 }
 
-void SuspendBlockers::setUnknown()
+void PowerInhibitions::setUnknown()
 {
     // "None" = unknown in Home Assistant (an empty payload would be ignored and keep the old count)
     m_published = false;
     m_last.clear();
-    m_sensor->setAttributes({{QStringLiteral("summary"), QStringLiteral("unknown (PowerDevil not available)")}});
-    m_sensor->setState(QStringLiteral("None"));
+    for (auto sensor : {m_suspendSensor, m_screenSensor}) {
+        sensor->setAttributes({{QStringLiteral("summary"), QStringLiteral("unknown (PowerDevil not available)")}});
+        sensor->setState(QStringLiteral("None"));
+    }
 }
 
-void SuspendBlockers::publish(const QList<Inhibition> &inhibitions, const QString &source)
+void PowerInhibitions::publish(const QList<Inhibition> &inhibitions, const QString &source)
 {
     if (m_published && inhibitions == m_last) {
         return;
     }
     m_published = true;
     m_last = inhibitions;
-
-    QVariantList blockers, screen;
-    QStringList summary;
-    for (const auto &inhibition : inhibitions) {
-        if (blocksSleep(inhibition)) {
-            blockers.append(toVariant(inhibition));
-            summary.append(inhibition.why.isEmpty() ? inhibition.who : inhibition.who + QStringLiteral(": ") + inhibition.why);
-        } else {
-            screen.append(toVariant(inhibition));
-        }
-    }
-    qCDebug(plugin_logger) << "Suspend blockers:" << (summary.isEmpty() ? QStringLiteral("none") : summary.join(QStringLiteral("; ")));
-    m_sensor->setAttributes({
-        {QStringLiteral("summary"), summary.isEmpty() ? QStringLiteral("none") : summary.join(QStringLiteral("; "))},
-        {QStringLiteral("blockers"), blockers},
-        {QStringLiteral("screen_inhibitions"), screen},
-        {QStringLiteral("source"), source},
-    });
-    m_sensor->setState(QString::number(blockers.size()));
+    publishSensor(m_suspendSensor, inhibitions, QLatin1String("sleep"), source);
+    publishSensor(m_screenSensor, inhibitions, QLatin1String("idle"), source);
+    qCDebug(plugin_logger) << "Inhibitions:" << inhibitions.size() << "from" << source;
 }
