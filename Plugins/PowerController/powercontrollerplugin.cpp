@@ -6,6 +6,7 @@
 #include <QDBusConnection>
 #include <QCoreApplication>
 #include "login1_manager_interface.h"
+#include "suspendblockers.h"
 
 
 DEFINE_PLUGIN_LOGGER(plugin_logger,PLUGIN_NAME)
@@ -46,6 +47,12 @@ bool PowControlelrPlugin::checkCompatibility()
             qCInfo(plugin_logger) << "  flatpak --user override --system-talk-name=org.freedesktop.login1 " + appId;
             return false;
         }
+        // only the "Suspend blockers" sensor needs PowerDevil: without it the buttons still work, the sensor is unknown
+        if (!PlatformHelper::checkFlatpakFeature("Session Bus Policy", "org.kde.Solid.PowerManagement", "talk")) {
+            qCWarning(plugin_logger) << "Missing Flatpak D-Bus permission for PowerDevil, the suspend blockers sensor stays unknown.";
+            qCInfo(plugin_logger) << "To fix this, run:";
+            qCInfo(plugin_logger) << "  flatpak --user override --talk-name=org.kde.Solid.PowerManagement " + appId;
+        }
     }
 
     return true;
@@ -61,10 +68,12 @@ bool PowControlelrPlugin::enabledByDefault()
 
 bool PowControlelrPlugin::startPlugin()
 {
-    if(m_restartButton || m_hibernateButton || m_powerButton || m_suspendButton)
+    if(m_restartButton || m_hibernateButton || m_powerButton || m_suspendButton || m_suspendBlockers)
         stopPlugin();
 
     setupPowerButtons();
+    // no parent, deleted in stopPlugin(): the plugin library is unloaded right after stopPlugin()
+    m_suspendBlockers = new SuspendBlockers();
     qCInfo(plugin_logger) << name() << " plugin started successfully";
     return true;
 }
@@ -98,6 +107,9 @@ bool PowControlelrPlugin::stopPlugin()
         m_powerButton->deleteLater();
         m_powerButton = nullptr;
     }
+    // synchronously (not deleteLater): its code lives in this plugin, which PluginManager unloads after stopPlugin()
+    delete m_suspendBlockers;
+    m_suspendBlockers = nullptr;
     qCInfo(plugin_logger) << name() << " plugin stopped";
     return true;
 }
