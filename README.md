@@ -206,7 +206,7 @@ MPRISPlayer=true
 |---------|-------------|-------------|
 | User Activity | Binary Sensor | Detects when user is active/inactive |
 | Locked State | Lock | Screen lock state monitoring and control |
-| Power Control | Button + Sensor | Suspend, hibernate, power off, and restart; what currently blocks suspend, and (disabled by default) what keeps the screen from dimming/locking: PowerDevil's inhibitions, with who and why |
+| Power Control | Button + Sensor | Suspend, hibernate, power off, and restart; what currently blocks suspend, and what keeps the screen from dimming/locking: PowerDevil's inhibitions, with who and why |
 | Camera Activity | Binary Sensor | Detects when camera is in use |
 | Accent Colour | Sensor | Current desktop accent color |
 | Shortcuts | Select + Device Trigger | Register custom shortcuts for HA automations AND trigger any Global shortcut via DBus |

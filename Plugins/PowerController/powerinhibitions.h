@@ -24,8 +24,7 @@ class Sensor;
  * "sleep" = suspend, "idle" = the idle actions for the screen (dim, turn off, automatic lock).
  *
  * - "Suspend blockers" (suspend_blockers): the number of active inhibitions covering sleep.
- * - "Screen blockers" (screen_blockers): the number covering idle. Disabled in Home Assistant by default
- *   (enabled_by_default false), to be switched on in the entity's settings.
+ * - "Screen blockers" (screen_blockers): the number covering idle (incl. those covering sleep too).
  *
  * Attributes of both: `summary` ("who: why; ..." or "none"), `inhibitions` (who, why, what) and `source`.
  *
