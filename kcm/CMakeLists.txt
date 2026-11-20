@@ -26,6 +26,7 @@ include_directories("${CMAKE_CURRENT_BINARY_DIR}")
 
 find_package(Qt6 ${QT_MIN_VERSION} CONFIG REQUIRED COMPONENTS
     Core
+    DBus
 )
 
 find_package(KF6 ${KF6_MIN_VERSION} REQUIRED COMPONENTS
@@ -56,6 +57,9 @@ kconfig_target_kcfg_file(kcm_kiot
 
 target_link_libraries(kcm_kiot PRIVATE
     Qt6::Core
+    Qt6::DBus
+    KF6::CoreAddons
+    KIOTShared::KIOTShared
     KF6::ConfigCore
     KF6::I18n
     KF6::KCMUtils

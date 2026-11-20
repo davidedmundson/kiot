@@ -119,11 +119,12 @@ More in depth examples can be found here [examples](examples/README.md)
 host=192.168.1.100
 port=1883
 user=mqtt_user
-password=secure_password
 tls=false
 autostart=false 
 discoveryprefix=homeassistant #For auto device detection in home assistant use default 
 ```
+
+The MQTT password is kept in the wallet (KWallet or the Secret Service; in the Flatpak through the Secret portal), not in this file: set it in kiot's settings or in System Settings. A `password=` line here, as older versions wrote it, is moved into the wallet on the next start; without a wallet it stays here.
 
 #### Scripts Configuration
 ```ini

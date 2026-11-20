@@ -10,6 +10,7 @@ message(STATUS "[CMake] Generating Shared library (.so) for ${LIB_TARGET}")
 
 set(KIOT_SHARED_SRC
     Transport/transportmanager.cpp
+    Transport/passwordstore.cpp
     Config/configmanager.cpp
     entities/entity.cpp
     entities/binarysensor.cpp
@@ -41,6 +42,7 @@ target_sources(${LIB_TARGET} PUBLIC
         Plugins/plugininterface.h
         Plugins/uiinterface.h
         Transport/transportmanager.h
+        Transport/passwordstore.h
         Config/configmanager.h
         entities/entity.h
         entities/binarysensor.h
@@ -70,7 +72,10 @@ find_package(Qt6 ${QT_MIN_VERSION} CONFIG REQUIRED COMPONENTS
 
 find_package(KF6 ${KF6_MIN_VERSION} REQUIRED COMPONENTS
     Config
+    KIO
 )
+
+find_package(Qt6Keychain 0.15 CONFIG REQUIRED)
 
 target_link_libraries(${LIB_TARGET}
     PUBLIC
@@ -79,6 +84,9 @@ target_link_libraries(${LIB_TARGET}
     Qt6::Widgets
     Qt6::Mqtt
     Qt6::DBus
+    PRIVATE
+    KF6::KIOGui
+    Qt6Keychain::Qt6Keychain
 )
 
 target_compile_definitions(${LIB_TARGET} PRIVATE

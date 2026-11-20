@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: LGPL-2.1-or-later
 #include "core/core.h"
 #include "settingsmanager.h"
+#include "Transport/passwordstore.h"
 #include <KSharedConfig>
 #include <KConfigGroup>
 #include <QVariantMap>
@@ -17,6 +18,7 @@ SettingsManager::SettingsManager(QObject *parent)
     : QObject(parent)
 {
     loadConfigFile();
+    loadPassword();
     qCDebug(settings_sm) << "SettingsManager initialized with KSharedConfig";
 }
 
@@ -126,23 +128,25 @@ void SettingsManager::deleteNestedConfig(const QString &mainSection, const QStri
 void SettingsManager::applySettings()
 {
     qCDebug(settings_sm) << "Settings applied, restarting " + QString(PROJECT_NAME);
-    QProcess::startDetached(QString(PROJECT_NAME), QStringList());
-    QApplication::quit();
+    restartWhenStored();
 }
 
 void SettingsManager::restoreDefaults()
 {
     qCDebug(settings_sm) << "Restoring default settings";
+    const QString oldUser = getUser();
+    const QString oldHost = getHost();
     setHost("homeassistant.local");
     setPort(1883);
     setUser("");
-    setPassword("");
+    storePassword(oldUser, oldHost, QString());
+    m_password.clear();
+    Q_EMIT passwordChanged();
     setDiscoveryPrefix("homeassistant");
-    saveConfigValue("general", "useSSL", false);
+    saveConfigValue("general", "tls", false);
     saveConfigValue("general", "autostart", true);
     
-    QProcess::startDetached(QString(PROJECT_NAME), QStringList());
-    QApplication::quit();
+    restartWhenStored();
 }
 
 // MQTT settings
@@ -153,7 +157,10 @@ QString SettingsManager::getHost() const
 
 void SettingsManager::setHost(const QString &host)
 {
-    saveConfigValue("general", "host", host);
+    if (host != getHost()) {
+        saveConfigValue("general", "host", host);
+        loadPassword();
+    }
 }
 
 int SettingsManager::getPort() const
@@ -173,17 +180,53 @@ QString SettingsManager::getUser() const
 
 void SettingsManager::setUser(const QString &user)
 {
-    saveConfigValue("general", "user", user);
+    if (user != getUser()) {
+        saveConfigValue("general", "user", user);
+        loadPassword();
+    }
 }
 
-QString SettingsManager::getPassword() const
+QString SettingsManager::password() const
 {
-    return getConfigValue("general", "password", "").toString();
+    return m_password;
 }
 
 void SettingsManager::setPassword(const QString &password)
 {
-    saveConfigValue("general", "password", password);
+    if (password == m_password) {
+        return;
+    }
+    m_password = password;
+    Q_EMIT passwordChanged();
+    storePassword(getUser(), getHost(), password);
+}
+
+void SettingsManager::loadPassword()
+{
+    KIOTShared::Transport::PasswordStore::read(getUser(), getHost(), this, [this](const QString &password) {
+        m_password = password;
+        Q_EMIT passwordChanged();
+    });
+}
+
+void SettingsManager::storePassword(const QString &user, const QString &host, const QString &password)
+{
+    ++m_pendingPasswordWrites;
+    KIOTShared::Transport::PasswordStore::write(user, host, password, this, [this](bool) {
+        if (--m_pendingPasswordWrites == 0 && m_restartRequested) {
+            PlatformHelper::restartApplication();
+        }
+    });
+}
+
+// The password is written asynchronously: restart once it is stored
+void SettingsManager::restartWhenStored()
+{
+    if (m_pendingPasswordWrites > 0) {
+        m_restartRequested = true;
+    } else {
+        PlatformHelper::restartApplication();
+    }
 }
 
 QString SettingsManager::getDiscoveryPrefix() const

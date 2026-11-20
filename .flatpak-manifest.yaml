@@ -100,6 +100,16 @@ modules:
         tag: v6.7.90
         commit: 3e390ebcffc67564c9b83e90f3a6fada264c1c0a
 
+  - name: qtkeychain
+    buildsystem: cmake-ninja
+    config-opts:
+      - -DBUILD_TRANSLATIONS=OFF
+    sources:
+      - type: git
+        url: https://github.com/frankosterfeld/qtkeychain.git
+        tag: 0.17.0
+        commit: 875f77d9f61bd97fd84cca47ce3bc71186dfbd09
+
   - name: kiot
     buildsystem: cmake-ninja
     sources:

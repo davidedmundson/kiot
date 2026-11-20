@@ -74,7 +74,7 @@ bool HaControl::validateConfig()
         group.writeEntry("user", "mqtt");
         group.writeEntry("password", "mqtt-password-here");
         group.writeEntry("autostart", false);
-        group.writeEntry("useSSL",false);
+        group.writeEntry("tls",false);
         group.writeEntry("discoveryprefix","homeassistant");
         config->sync();
         return false;
@@ -96,8 +96,7 @@ HaControl::HaControl()
     ConfigManager *m_conf = new ConfigManager(this);
     qCDebug(core) << m_conf->filePath();
     if(!validateConfig()) {
-        QProcess::startDetached(QStringLiteral(PROJECT_NAME));
-        QApplication::quit();
+        PlatformHelper::restartApplication();
         return;
     }
     
