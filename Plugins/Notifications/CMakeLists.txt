@@ -21,10 +21,13 @@ find_package(KF6 ${KF6_MIN_VERSION} REQUIRED COMPONENTS
 
 )
 
+find_package(Qt6 REQUIRED COMPONENTS Gui)
+
 target_link_libraries(${PROJECT_NAME} PRIVATE
     KIOTShared
     KF6::Notifications
     KF6::CoreAddons
+    Qt6::Gui
 )
 
 # Plasser den ferdige .so-filen direkte i plugins-katalogen der Core forventer å finne den
@@ -45,3 +48,5 @@ install(TARGETS ${PROJECT_NAME}
     LIBRARY DESTINATION ${CMAKE_INSTALL_DATADIR}/${PARENT_APP_NAME}/plugins
     RUNTIME DESTINATION ${KDE_INSTALL_BINDIR}
 )
+configure_file(kiot.notifyrc.in ${CMAKE_CURRENT_BINARY_DIR}/kiot.notifyrc @ONLY)
+install(FILES ${CMAKE_CURRENT_BINARY_DIR}/kiot.notifyrc DESTINATION ${KDE_INSTALL_KNOTIFYRCDIR})

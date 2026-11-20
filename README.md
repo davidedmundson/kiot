@@ -223,7 +223,7 @@ MPRISPlayer=true
 | Docker | Switch | Docker container control and status as attributes |
 | MPRIS | Media Player | MPRIS media player control [Custom Integration](https://github.com/TheOddPirate/mqtt_media_player)|
 | Game Launcher | Select | Game launcher for steam/heroic/lutris/Faugus games|
-| Notifications | Notify | Send notifications to KDE via MQTT |
+| Notifications | Notify | Send notifications to KDE via MQTT, with urgency and a link [README](Plugins/Notifications/README.md)|
 | SystemD | Switch | Systemd user service control|
 | DisplayManager | Number, Select, Switch | Screen control and management |
 | Macro executor | Notify | Execute macros from HA via virtual keyboard [README](Plugins/Macros/README.md)|
