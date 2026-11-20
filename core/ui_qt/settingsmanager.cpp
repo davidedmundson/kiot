@@ -126,8 +126,7 @@ void SettingsManager::deleteNestedConfig(const QString &mainSection, const QStri
 void SettingsManager::applySettings()
 {
     qCDebug(settings_sm) << "Settings applied, restarting " + QString(PROJECT_NAME);
-    QProcess::startDetached(QString(PROJECT_NAME), QStringList());
-    QApplication::quit();
+    PlatformHelper::restartApplication();
 }
 
 void SettingsManager::restoreDefaults()
@@ -138,11 +137,10 @@ void SettingsManager::restoreDefaults()
     setUser("");
     setPassword("");
     setDiscoveryPrefix("homeassistant");
-    saveConfigValue("general", "useSSL", false);
+    saveConfigValue("general", "tls", false);
     saveConfigValue("general", "autostart", true);
     
-    QProcess::startDetached(QString(PROJECT_NAME), QStringList());
-    QApplication::quit();
+    PlatformHelper::restartApplication();
 }
 
 // MQTT settings

@@ -79,11 +79,11 @@ ColumnLayout {
             onEditingFinished: if (root.settingsManager) root.settingsManager.setDiscoveryPrefix(text)
         }
 
-        QQC2.Label { text: "Use SSL:"; Layout.alignment: Qt.AlignRight }
+        QQC2.Label { text: "Use TLS:"; Layout.alignment: Qt.AlignRight }
         QQC2.CheckBox {
             id: sslCheckbox
-            checked: root.settingsManager ? root.settingsManager.getConfigValue("general", "useSSL", false) : false
-            onToggled: if (root.settingsManager) root.settingsManager.saveConfigValue("general", "useSSL", checked)
+            checked: root.settingsManager ? root.settingsManager.getConfigValue("general", "tls", false) : false
+            onToggled: if (root.settingsManager) root.settingsManager.saveConfigValue("general", "tls", checked)
         }
 
         QQC2.Label { text: "Show system tray:"; Layout.alignment: Qt.AlignRight }

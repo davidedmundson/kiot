@@ -44,6 +44,11 @@ int main(int argc, char **argv)
     qCInfo(main_cpp) << "Starting" << PROJECT_NAME << "version:" << PROJECT_VERSION;
     MainWindow mainWindow;
     HaControl appControl;
+    QObject::connect(&service, &KDBusService::activateRequested, &mainWindow, [&mainWindow]() {
+        mainWindow.show();
+        mainWindow.raise();
+        mainWindow.activateWindow();
+    });
 
     KSignalHandler::self()->watchSignal(SIGTERM);
     KSignalHandler::self()->watchSignal(SIGINT);

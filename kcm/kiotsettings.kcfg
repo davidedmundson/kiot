@@ -20,7 +20,7 @@
         </entry>
         <entry name="discoveryprefix" type="String">
             <label>Discovery Prefix</label>
-            <default></default>
+            <default>homeassistant</default>
         </entry>
         <entry name="tls" type="Bool">
             <label>Use TLS</label>
