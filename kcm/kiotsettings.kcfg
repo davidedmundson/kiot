@@ -14,10 +14,6 @@
             <label>MQTT username</label>
             <default></default>
         </entry>
-        <entry name="password" type="String">
-            <label>MQTT password</label>
-            <default></default>
-        </entry>
         <entry name="discoveryprefix" type="String">
             <label>Discovery Prefix</label>
             <default>homeassistant</default>
