@@ -25,6 +25,9 @@ SystemDWatcher::SystemDWatcher(QObject *parent)
         qCWarning(SystemD) << "Failed to connect to systemd user D-Bus";
         return;
     }
+    // systemd sends the units' PropertiesChanged signals only while some client is subscribed;
+    // the subscription ends with our bus connection
+    m_systemdUser->asyncCall("Subscribe");
     if (!ensureConfig()) {
         qCWarning(SystemD) << "Failed to ensure config";
         return;
