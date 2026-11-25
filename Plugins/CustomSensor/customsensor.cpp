@@ -17,6 +17,8 @@ DEFINE_PLUGIN_LOGGER(customSensors,CustomSensors)
 constexpr qint64 MinimumIntervalMs = 1000;
 // QTimer takes the interval as an int: about 24.8 days
 constexpr qint64 MaximumIntervalMs = std::numeric_limits<int>::max();
+// A command still running after max(interval, this) is killed
+constexpr int MinimumCommandTimeoutMs = 5 * 60 * 1000;
 
 static const QHash<QString, double> unitToMs = {
     {QStringLiteral("s"), 1000.0},
@@ -130,6 +132,18 @@ void CustomSensor::poll()
         m_process->deleteLater();
         m_process = nullptr;
     });
+    // finished() never comes for a command that can't be started
+    connect(m_process, &QProcess::errorOccurred, this, [this](QProcess::ProcessError error) {
+        if (error != QProcess::FailedToStart) {
+            return;
+        }
+        qCWarning(customSensors) << "Command failed to start:" << m_process->errorString();
+        m_process->deleteLater();
+        m_process = nullptr;
+    });
+    // A command that hangs is killed, so it can't stop the sensor for good; finished() then
+    // clears m_process and the next poll starts it again
+    QTimer::singleShot(std::max(m_timer->interval(), MinimumCommandTimeoutMs), m_process, &QProcess::kill);
 
     m_process->start();
 }
