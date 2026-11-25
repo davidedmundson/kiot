@@ -167,9 +167,11 @@ private Q_SLOTS:
         QVERIFY(!TransportManager::mqttClient());
         QTRY_VERIFY(unconfigured.isNull());
 
+        // the password of a first run that hasn't been configured yet: not a reason to give up
         KiotTest::writeGeneralConfig({{QStringLiteral("host"), QStringLiteral("127.0.0.1")},
                                       {QStringLiteral("port"), m_broker.port()},
-                                      {QStringLiteral("user"), QString()}});
+                                      {QStringLiteral("user"), QString()},
+                                      {QStringLiteral("password"), QStringLiteral("mqtt-password-here")}});
 
         m_observer = new QMqttClient(this);
         m_observer->setHostname(QStringLiteral("127.0.0.1"));
