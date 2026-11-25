@@ -172,7 +172,8 @@ QStringList DockerSwitch::listAllContainers(int retries)
     QStringList names;
     QByteArray response;
 
-    const QByteArray request = "GET /containers/json HTTP/1.0\r\n\r\n";
+    // all=1: stopped containers too
+    const QByteArray request = "GET /containers/json?all=1 HTTP/1.0\r\n\r\n";
 
     while (retries-- > 0) {
         if (!callDockerSocket(request, response))
