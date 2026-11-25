@@ -82,8 +82,8 @@ QString PlayerContainer::dbusname() const
 
 void PlayerContainer::Play()
 {
-    Q_ASSERT_X(m_canPlay.value(), Q_FUNC_INFO, qUtf8Printable(identity()));
     if (!m_canPlay.value()) {
+        qCWarning(mpris) << m_busName << "can't play, ignoring the command";
         return;
     }
     m_playerIface->Play();
@@ -91,8 +91,8 @@ void PlayerContainer::Play()
 
 void PlayerContainer::Pause()
 {
-    Q_ASSERT_X(m_canPause.value(), Q_FUNC_INFO, qUtf8Printable(identity()));
     if (!m_canPause.value()) {
+        qCWarning(mpris) << m_busName << "can't pause, ignoring the command";
         return;
     }
     m_playerIface->Pause();
@@ -100,8 +100,8 @@ void PlayerContainer::Pause()
 
 void PlayerContainer::Stop()
 {
-    Q_ASSERT_X(m_canStop.value(), Q_FUNC_INFO, qUtf8Printable(identity()));
     if (!m_canStop.value()) {
+        qCWarning(mpris) << m_busName << "can't stop, ignoring the command";
         return;
     }
     m_playerIface->Stop();
@@ -109,8 +109,8 @@ void PlayerContainer::Stop()
 
 void PlayerContainer::Next()
 {
-    Q_ASSERT_X(m_canGoNext.value(), Q_FUNC_INFO, qUtf8Printable(identity()));
     if (!m_canGoNext.value()) {
+        qCWarning(mpris) << m_busName << "can't go to the next track, ignoring the command";
         return;
     }
     m_playerIface->Next();
@@ -118,8 +118,8 @@ void PlayerContainer::Next()
 
 void PlayerContainer::Previous()
 {
-    Q_ASSERT_X(m_canGoPrevious.value(), Q_FUNC_INFO, qUtf8Printable(identity()));
     if (!m_canGoPrevious.value()) {
+        qCWarning(mpris) << m_busName << "can't go to the previous track, ignoring the command";
         return;
     }
     m_playerIface->Previous();
@@ -142,8 +142,8 @@ void PlayerContainer::seek(qlonglong pos)
 {
     qlonglong delta = pos - position();
 
-    Q_ASSERT_X(m_canSeek.value(), Q_FUNC_INFO, qUtf8Printable(identity()));
     if (!m_canSeek.value()) {
+        qCWarning(mpris) << m_busName << "can't seek, ignoring the command";
         return;
     }
     m_playerIface->Seek(delta);
