@@ -170,10 +170,39 @@ private Q_SLOTS:
         QVERIFY(!config.contains(QStringLiteral("flat")));
         QVERIFY(!readJson(config.filePath()).contains(QStringLiteral("flat")));
 
+        config.setValue(QStringLiteral("group/other"), 3);
         config.remove(QStringLiteral("group/key"));
-        // remove() takes the path as one top-level key, unlike value(), setValue() and contains()
-        QEXPECT_FAIL("", "ConfigManager::remove() ignores '/' in the key path", Continue);
+        // a key path, as value(), setValue() and contains() take it
         QVERIFY(!config.contains(QStringLiteral("group/key")));
+        QCOMPARE(config.value(QStringLiteral("group/other")).toInt(), 3);
+        QVERIFY(!readJson(config.filePath()).value(QStringLiteral("group")).toObject().contains(QStringLiteral("key")));
+
+        // paths that lead nowhere change nothing
+        config.remove(QStringLiteral("group/missing"));
+        config.remove(QStringLiteral("nothing/here"));
+        config.remove(QStringLiteral("group/other/deeper"));
+        QCOMPARE(config.value(QStringLiteral("group/other")).toInt(), 3);
+    }
+
+    void testFileCreatedLaterIsWatched()
+    {
+        ConfigManager config(QStringLiteral("later"));
+        QVERIFY(!QFile::exists(config.filePath()));
+        config.setValue(QStringLiteral("a"), 1);
+
+        writeJson(config.filePath(), QJsonObject{{QStringLiteral("a"), 2}});
+        QTRY_COMPARE(config.value(QStringLiteral("a")).toInt(), 2);
+    }
+
+    void testOwnWritesAreNotExternalChanges()
+    {
+        ConfigManager config(QStringLiteral("own"), QJsonObject{{QStringLiteral("a"), 1}});
+        QSignalSpy changed(&config, &ConfigManager::configChanged);
+        config.setValue(QStringLiteral("a"), 5);
+        // QFileSystemWatcher reports the write a moment later
+        QTest::qWait(500);
+        QCOMPARE(changed.count(), 1);
+        QCOMPARE(changed.first().at(0).toString(), QStringLiteral("a"));
     }
 
     void testExternalEditIsReloaded()

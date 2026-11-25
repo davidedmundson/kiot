@@ -13,6 +13,30 @@ namespace KIOTShared {
 namespace Config {
 
 static bool s_coreInstantiated = false;
+
+namespace {
+// Removes the last of @p parts from the objects the others lead to; false if it isn't there.
+bool removeRawValue(QJsonObject &target, QStringList parts)
+{
+    const QString key = parts.takeFirst();
+    if (parts.isEmpty()) {
+        if (!target.contains(key)) {
+            return false;
+        }
+        target.remove(key);
+        return true;
+    }
+    if (!target.value(key).isObject()) {
+        return false;
+    }
+    QJsonObject child = target.value(key).toObject();
+    if (!removeRawValue(child, parts)) {
+        return false;
+    }
+    target.insert(key, child);
+    return true;
+}
+} // namespace
 static ConfigManager* s_coreInstance = nullptr;
 ConfigManager::~ConfigManager()
 {
@@ -187,18 +211,7 @@ QJsonValue ConfigManager::getRawValue(const QJsonObject &source, const QString &
 void ConfigManager::setValue(const QString &keyPath, const QJsonValue &value)
 {
     setRawValue(m_data, keyPath, value);
-    m_isSaving = true;
-    
-    QFile file(m_filePath);
-    if (file.open(QIODevice::WriteOnly | QIODevice::Truncate)) {
-        QJsonDocument doc(m_data);
-        file.write(doc.toJson(QJsonDocument::Indented));
-        file.close();
-    } else {
-        qCWarning(lcConfig) << "Kunne ikke skrive konfigurasjon til fil:" << m_filePath;
-        emit configWriteError(m_filePath, file.errorString());
-    }
-    m_isSaving = false; 
+    writeFile();
     emit configChanged(keyPath, value);
 }
 
@@ -235,18 +248,7 @@ void ConfigManager::validateAndMergeDefaults()
     if (m_defaultData.isEmpty()) return;
 
     if (mergeObjects(m_data, m_defaultData)) {
-        QFile file(m_filePath);
-        m_isSaving = true;
-        if (file.open(QIODevice::WriteOnly | QIODevice::Truncate)) {
-            QJsonDocument doc(m_data);
-            file.write(doc.toJson(QJsonDocument::Indented));
-            file.close();
-        }else{
-            qCDebug(lcConfig) << "Failed to open file for writing:" << file.errorString();
-            emit configWriteError(m_filePath, file.errorString());
-        }
-        m_isSaving = false; 
-
+        writeFile();
     }
 }
 
@@ -281,35 +283,34 @@ bool ConfigManager::contains(const QString &keyPath) const
 
 void ConfigManager::remove(const QString &keyPath)
 {
-    m_data.remove(keyPath);
-    QFile file(m_filePath);
-    m_isSaving = true;
-    if (file.open(QIODevice::WriteOnly | QIODevice::Truncate)) {
-        QJsonDocument doc(m_data);
-        file.write(doc.toJson(QJsonDocument::Indented));
-        file.close();
-    }else{
-        qCDebug(lcConfig) << "Failed to open file for writing:" << file.errorString();
-        emit configWriteError(m_filePath, file.errorString());
-    }
-    m_isSaving = false; 
-
+    // a key path like value() and setValue() take: "group/key" removes key from group
+    removeRawValue(m_data, keyPath.split('/'));
+    writeFile();
 }
 
 void ConfigManager::resetToDefaults()
 {
     m_data = m_defaultData;
-    QFile file(m_filePath);
+    writeFile();
+}
+
+void ConfigManager::writeFile()
+{
     m_isSaving = true;
+    QFile file(m_filePath);
     if (file.open(QIODevice::WriteOnly | QIODevice::Truncate)) {
         QJsonDocument doc(m_data);
         file.write(doc.toJson(QJsonDocument::Indented));
         file.close();
-    }else{
-        qCDebug(lcConfig) << "Failed to open file for writing:" << file.errorString();
+    } else {
+        qCWarning(lcConfig) << "Failed to open file for writing:" << m_filePath << file.errorString();
         emit configWriteError(m_filePath, file.errorString());
     }
-    m_isSaving = false; 
+    m_isSaving = false;
+    // a file that didn't exist when this ConfigManager was made isn't watched yet
+    if (m_fileWatcher && !m_fileWatcher->files().contains(m_filePath) && QFile::exists(m_filePath)) {
+        m_fileWatcher->addPath(m_filePath);
+    }
 }
 
 
@@ -335,6 +336,11 @@ void ConfigManager::handleFileChanged(const QString &path)
 
         if (parseError.error == QJsonParseError::NoError && doc.isObject()) {
             QJsonObject newData = doc.object();
+            // QFileSystemWatcher reports this object's own writes too, after m_isSaving is long
+            // false again: what is on disk then is what is in memory, and nothing changed
+            if (newData == m_data) {
+                return;
+            }
             //Here we update with new info from outside edits before sending signal
             m_data = newData;
 
