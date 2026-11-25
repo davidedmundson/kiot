@@ -195,7 +195,7 @@ void GameLauncherPlugin::createGameEntity()
         const QString &displayName = it.key();
       //  qCDebug(plugin_logger) << "Checking if" << sanitizeGameName(displayName) << "is enabled in config";
         
-        if (settings.hasKey(sanitizeGameName(displayName))) {
+        if (settings.readEntry(sanitizeGameName(displayName), true)) {
             options.append(displayName);
         }
     }
@@ -312,7 +312,8 @@ void GameLauncherPlugin::onOptionSelected(const QString &option)
         return;
     }
 
-        if (!m_games.contains(option)) {
+        // only games enabled in the config are options; m_games holds every game found
+        if (!m_games.contains(option) || !m_select->options().contains(option)) {
             qCWarning(plugin_logger) << "Game not found in data:" << option;
             setToDefault();
             return;
