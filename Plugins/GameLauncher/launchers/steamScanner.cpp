@@ -48,11 +48,16 @@ QMap<QString, GameData>  SteamScanner::scanGames()
                 qCWarning(steamlogger) << "Game directory for " << GameName <<  "does not exist:" << gamePath;
                 continue;
             }
+            // Proton and the Steam Linux Runtime are compatibility tools (they ship a
+            // toolmanifest.vdf), and 228980 installs the Steamworks redistributables: not games
+            if (QFile::exists(gamePath + "/toolmanifest.vdf") || it.key() == QLatin1String("228980")) {
+                continue;
+            }
             QString gamePrefix = basePath + "/compatdata/" + appState.value("appid","0").toString();
             QDir pfxdir(gamePrefix);
             if (!pfxdir.exists()) {
-                qCWarning(steamlogger) << "Prefix directory for " << GameName <<  "does not exist:" << gamePrefix;
-                continue;
+                // native Linux games run without a Proton prefix
+                gamePrefix.clear();
             }
             
             GameData data;
