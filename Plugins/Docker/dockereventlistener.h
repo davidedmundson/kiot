@@ -29,8 +29,9 @@ public:
     /**
      * @brief Constructs a DockerEventListener instance.
      * @param parent Optional parent QObject.
+     * @param socketPath The Docker socket to listen on (another one in tests).
      */
-    explicit DockerEventListener(QObject *parent = nullptr);
+    explicit DockerEventListener(QObject *parent = nullptr, const QString &socketPath = QStringLiteral("/var/run/docker.sock"));
 
     /**
      * @brief Safely signals the background thread to stop listening and exit.
@@ -60,6 +61,9 @@ private:
      * @return bool True if the event was successfully parsed and relates to a container.
      */
     bool processEventLine(const QByteArray &line);
+
+    /// Path of the Docker UNIX socket.
+    const QString m_socketPath;
 
     /// Atomic flag used to safely signal the background thread to terminate its loop.
     std::atomic<bool> m_stop{false};
