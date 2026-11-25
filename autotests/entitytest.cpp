@@ -4,6 +4,7 @@
 // The parts of Entity that need no broker: ids, topics, icons and the conversion of attribute
 // values. Everything that publishes is in mqttentitiestest.
 
+#include <QCryptographicHash>
 #include <QHostInfo>
 #include <QJsonArray>
 #include <QJsonObject>
@@ -62,6 +63,12 @@ private Q_SLOTS:
         QTest::newRow("mqtt wildcards") << QStringLiteral("a/+/#") << QStringLiteral("a");
         QTest::newRow("empty") << QString() << QStringLiteral("empty_entity_id_detected_integration_error");
         QTest::newRow("only symbols") << QStringLiteral("!!!") << QStringLiteral("empty_entity_id_detected_integration_error");
+        QTest::newRow("umlaut") << QStringLiteral("Kopfhörer") << QStringLiteral("kopfhorer");
+        QTest::newRow("accents") << QStringLiteral("Café Crème") << QStringLiteral("cafe_creme");
+        QTest::newRow("letters spelled out") << QStringLiteral("Østlie Straße Æble") << QStringLiteral("ostlie_strasse_aeble");
+        QTest::newRow("compatibility forms") << QStringLiteral("ﬁle²") << QStringLiteral("file2");
+        QTest::newRow("no latin letters") << QStringLiteral("游戏")
+                                          << QStringLiteral("id_") + QString::fromLatin1(QCryptographicHash::hash(QStringLiteral("游戏").toUtf8(), QCryptographicHash::Sha1).toHex().left(12));
     }
 
     void testIdSanitizing()
@@ -79,6 +86,7 @@ private Q_SLOTS:
         QTest::newRow("umlaut") << QStringLiteral("Kopfhörer");
         QTest::newRow("accent") << QStringLiteral("Café Script");
         QTest::newRow("cjk") << QStringLiteral("游戏");
+        QTest::newRow("cyrillic") << QStringLiteral("Наушники");
     }
 
     void testIdIsValidForHomeAssistantDiscovery()
@@ -89,7 +97,6 @@ private Q_SLOTS:
         TestEntity entity;
         entity.setId(id);
         static const QRegularExpression valid(QStringLiteral("^[a-zA-Z0-9_-]+$"));
-        QEXPECT_FAIL("", "sanitizeForMqttTopic() keeps non-ASCII letters (QChar::isLetterOrNumber)", Continue);
         QVERIFY2(valid.match(entity.id()).hasMatch(), qPrintable(entity.id()));
     }
 
@@ -97,7 +104,12 @@ private Q_SLOTS:
     {
         TestEntity entity;
         entity.setId(QStringLiteral("Night Mode"));
-        QCOMPARE(entity.hostname(), QHostInfo::localHostName().toLower());
+        // the host name is the node id of every discovery topic, so it is sanitized like an id
+        static const QRegularExpression valid(QStringLiteral("^[a-z0-9_-]+$"));
+        QVERIFY2(valid.match(entity.hostname()).hasMatch(), qPrintable(entity.hostname()));
+        if (valid.match(QHostInfo::localHostName().toLower()).hasMatch()) {
+            QCOMPARE(entity.hostname(), QHostInfo::localHostName().toLower());
+        }
         QCOMPARE(entity.baseTopic(), QStringLiteral("desk/%1/night_mode").arg(entity.hostname()));
     }
 

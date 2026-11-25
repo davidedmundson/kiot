@@ -36,8 +36,8 @@ void MediaPlayer::init()
     setDiscoveryConfig("state_albumart_topic", baseTopic() + "/albumart");
     setDiscoveryConfig("state_mediatype_topic", baseTopic() + "/mediatype");
     setDiscoveryConfig("command_play_topic", baseTopic() + "/play");
-    setDiscoveryConfig("command_pause_topic", baseTopic() + "/playpause");
-    setDiscoveryConfig("command_playpause_topic", baseTopic() + "/mediatype");
+    setDiscoveryConfig("command_pause_topic", baseTopic() + "/pause");
+    setDiscoveryConfig("command_playpause_topic", baseTopic() + "/playpause");
     setDiscoveryConfig("command_next_topic", baseTopic() + "/next");
     setDiscoveryConfig("command_previous_topic", baseTopic() + "/previous");
     setDiscoveryConfig("command_volume_topic", baseTopic() + "/set_volume");
@@ -47,12 +47,6 @@ void MediaPlayer::init()
                        QVariantMap({{"topic", topixPrefix() + "/" + hostname() + "/connected"},
                                     {"payload_available", "on"},
                                     {"payload_not_available", "off"}}));
-    setDiscoveryConfig("device",
-                       QVariantMap({{"name", hostname()},
-                                    {"identifiers", "linux_ha_bridge_" + hostname()},
-                                    {"sw_version", QStringLiteral(PROJECT_VERSION)},
-                                    {"manufacturer", "Linux HA Bridge"},
-                                    {"model", "Linux"}}));
     sendRegistration();
     // subscriptions
     auto mqtt = TransportManager::mqttClient() ;
@@ -117,6 +111,10 @@ void MediaPlayer::onPlayPauseCommand(const QString &payload)
     if (payload == "Pause")
         pause();
     else if (payload == "Play")
+        play();
+    else if (m_state.value("state").toString().compare("playing", Qt::CaseInsensitive) == 0)
+        pause();
+    else
         play();
 }
 void MediaPlayer::onStopCommand(const QString &)

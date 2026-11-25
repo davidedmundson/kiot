@@ -53,8 +53,7 @@ void Image::init()
         qCDebug(imgentity) << "Image entity is in URL mode";
         setDiscoveryConfig("url_topic", baseTopic() + "/url");
 
-    }
-    {
+    } else {
         qCDebug(imgentity) << "Image entity is in image mode";
         setDiscoveryConfig("image_topic", baseTopic() + "/image");
         setDiscoveryConfig("image_encoding", "b64");

@@ -38,7 +38,12 @@ struct Message {
 
 QString host()
 {
-    return QHostInfo::localHostName().toLower();
+    // as Entity puts it into the topics, which the host name of a CI container needn't be already
+    static const QString name = [] {
+        Sensor probe;
+        return probe.hostname();
+    }();
+    return name;
 }
 
 QString baseTopic(const QString &id)
@@ -517,9 +522,10 @@ private Q_SLOTS:
         urlImage.runtimeRegistration();
         const QJsonObject urlConfig = waitForJson(discoveryTopic(QStringLiteral("image"), QStringLiteral("test_image_url")), since);
         QCOMPARE(urlConfig.value(QStringLiteral("url_topic")).toString(), baseTopic(QStringLiteral("test_image_url")) + QStringLiteral("/url"));
-        // image_topic and url_topic are exclusive in Home Assistant's schema, which rejects the config
-        QEXPECT_FAIL("", "Image::init() lacks an else: URL mode also sets image_topic and content_type", Continue);
+        // image_topic and url_topic are exclusive in Home Assistant's schema, and content_type goes
+        // with image_topic only: either would make it reject the config
         QVERIFY(!urlConfig.contains(QStringLiteral("image_topic")));
+        QVERIFY(!urlConfig.contains(QStringLiteral("content_type")));
     }
 
     void testMediaPlayer()
@@ -534,14 +540,18 @@ private Q_SLOTS:
         const QJsonObject config = waitForJson(discoveryTopic(QStringLiteral("media_player"), QStringLiteral("test_player")), since);
         QCOMPARE(config.value(QStringLiteral("command_play_topic")).toString(), base + QStringLiteral("/play"));
         QCOMPARE(config.value(QStringLiteral("command_volume_topic")).toString(), base + QStringLiteral("/set_volume"));
-        // the play/pause toggle is sent to the topic the player publishes its media type on
-        QEXPECT_FAIL("", "MediaPlayer::init() sets command_playpause_topic to .../mediatype", Continue);
-        QVERIFY(config.value(QStringLiteral("command_playpause_topic")).toString() != config.value(QStringLiteral("state_mediatype_topic")).toString());
+        QCOMPARE(config.value(QStringLiteral("command_pause_topic")).toString(), base + QStringLiteral("/pause"));
+        // not the topic the player publishes its media type on
+        QCOMPARE(config.value(QStringLiteral("command_playpause_topic")).toString(), base + QStringLiteral("/playpause"));
+        // the same device as every other entity of this host
+        QCOMPARE(config.value(QStringLiteral("device")).toObject().value(QStringLiteral("model")).toString(), QStringLiteral(PROJECT_NAME));
 
         QVERIFY(waitSubscribed(base + QStringLiteral("/play")));
         QVERIFY(waitSubscribed(base + QStringLiteral("/set_volume")));
         QVERIFY(waitSubscribed(base + QStringLiteral("/setposition")));
+        QVERIFY(waitSubscribed(base + QStringLiteral("/playpause")));
         QSignalSpy play(&player, &MediaPlayer::playRequested);
+        QSignalSpy pause(&player, &MediaPlayer::pauseRequested);
         QSignalSpy volume(&player, &MediaPlayer::volumeChanged);
         QSignalSpy position(&player, &MediaPlayer::positionChanged);
         const qsizetype beforeCommands = mark();
@@ -554,6 +564,12 @@ private Q_SLOTS:
         QCOMPARE(volume.first().at(0).toDouble(), 0.25);
         QTRY_COMPARE(position.count(), 1);
         QCOMPARE(position.first().at(0).toLongLong(), 1500000); // seconds from HA, microseconds for MPRIS
+
+        // the toggle pauses a playing player, whatever its payload
+        const qsizetype beforeToggle = mark();
+        send(base + QStringLiteral("/playpause"), "");
+        QTRY_COMPARE(pause.count(), 1);
+        QCOMPARE(waitForMessage(base + QStringLiteral("/state"), beforeToggle), QByteArray("paused"));
 
         const qsizetype beforeState = mark();
         player.setState({{QStringLiteral("state"), QStringLiteral("Paused")}, {QStringLiteral("title"), QStringLiteral("Song")}});
