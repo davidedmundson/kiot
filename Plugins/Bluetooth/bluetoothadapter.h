@@ -26,6 +26,7 @@ public:
 
 private:
     void ensureConfig();
+    void setAdapter(const BluezQt::AdapterPtr &adapter);
     void update();
 
     Switch *m_switch = nullptr;
