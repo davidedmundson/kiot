@@ -16,6 +16,7 @@ set(MPRIS_SRCS
     abstractplayercontainer.cpp
     playercontainer.h
     playercontainer.cpp
+    metadatafallback.h
     mprismultiplexer.h
     mprismultiplexer.cpp
     mprismultiplexer.h
