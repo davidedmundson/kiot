@@ -32,3 +32,5 @@ ctest --output-on-failure
 `mqttentitiestest` starts a mosquitto broker of its own (the `mosquitto` package) and skips without one; `KIOT_MQTT_TESTS=required` turns that skip into a failure. No test touches your own `~/.config/kiotrc` or desktop session: each runs with temporary XDG directories and no session bus.
 
 A test that pins a known bug uses `QEXPECT_FAIL`: it passes while the bug is there and fails once the bug is fixed, so remove the `QEXPECT_FAIL` together with the fix.
+
+The workflow `.github/workflows/tests.yml` builds everything and runs the tests on every push, on GitHub and on Forgejo alike; the Flatpak workflows run on GitHub only.
