@@ -5,6 +5,7 @@
 #define LUTRISSCANNER_H
 
 #include "gamebase.h"
+#include <QJsonObject>
 #include <QList>
 
 
@@ -15,6 +16,10 @@ public:
     QString launcherName() const override { return "Lutris"; }
     bool isLauncherInstalled() const override;
     QMap<QString, GameData> scanGames() override;
+
+    // Id of the game in Lutris' game-paths.json ({"<id>": "<full exe path>"}) whose path is the
+    // game's exe; a relative exe (as the game's .yml may give it) must match whole path components
+    static QString gameIdForExe(const QJsonObject &gamePaths, const QString &exe);
 
 private:
     struct YamlInfo {

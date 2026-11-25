@@ -138,6 +138,22 @@ QMap<QString, GameData> LutrisScanner::scanGames()
 }
 
 
+QString LutrisScanner::gameIdForExe(const QJsonObject &gamePaths, const QString &exe)
+{
+    // no exe: in the .yml (e.g. Steam or DOSBox games): no id
+    if (exe.trimmed().isEmpty()) {
+        return QString();
+    }
+    const QString exePath = QDir::cleanPath(exe.trimmed());
+    for (auto it = gamePaths.begin(); it != gamePaths.end(); ++it) {
+        const QString path = QDir::cleanPath(it.value().toString());
+        if (QDir::isAbsolutePath(exePath) ? path == exePath : path.endsWith(QLatin1Char('/') + exePath)) {
+            return it.key();
+        }
+    }
+    return QString();
+}
+
 QMap<QString, LutrisScanner::YamlInfo> LutrisScanner::getLutrisGames()
 {
     QMap<QString, YamlInfo> games;
@@ -189,15 +205,7 @@ QMap<QString, LutrisScanner::YamlInfo> LutrisScanner::getLutrisGames()
     while (yamlIt.hasNext()) {
         YamlInfo inf = parseYamlFile(yamlIt.next());
         
-        QString matchingKey;
-
-        for (auto it = gamePaths.begin(); it != gamePaths.end(); ++it) {
-            if (it.value().toString().contains(inf.exepath)) {
-                matchingKey = it.key();
-                break;
-            }
-        }
-        inf.gameId = matchingKey;
+        inf.gameId = gameIdForExe(gamePaths, inf.exepath);
         yamlGames[inf.gameName] = inf;
     }
     return yamlGames;
