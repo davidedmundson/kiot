@@ -36,9 +36,8 @@ bool LutrisScanner::isLauncherInstalled() const
         }
         
         process.start();
-        process.waitForFinished();
-        
-        if (process.exitCode() == 0) {
+        // exitCode() is 0 too when `which` could not be started (not installed)
+        if (process.waitForFinished() && process.exitStatus() == QProcess::NormalExit && process.exitCode() == 0) {
             return true;
         }       
     }
