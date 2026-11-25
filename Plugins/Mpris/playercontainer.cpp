@@ -153,7 +153,12 @@ void PlayerContainer::seek(qlonglong pos)
 
 void PlayerContainer::setPosition(qlonglong value)
 {
-    if (m_position == value) {
+    if (!m_canSeek.value()) {
+        qCWarning(mpris) << m_busName << "can't seek, ignoring the position";
+        return;
+    }
+    if (m_trackId.value().isEmpty()) {
+        qCWarning(mpris) << m_busName << "gives no track id, can't set the position";
         return;
     }
 

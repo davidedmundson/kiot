@@ -88,7 +88,7 @@ void MprisMultiplexer::setupMediaPlayer()
     });
     connect(m_playerEntity, &MediaPlayer::positionChanged, this, [this](qint64 pos) {
         if (m_activePlayer)
-            m_activePlayer->seek(pos);
+            m_activePlayer->setPosition(pos);
     });
     connect(m_playerEntity, &MediaPlayer::playMediaRequested, this, [this](QString payload) {
         if (!m_activePlayer)
