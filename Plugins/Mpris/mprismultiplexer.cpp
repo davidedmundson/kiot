@@ -22,6 +22,7 @@
 #include <QNetworkRequest>
 #include <QNetworkReply>
 #include <QFile>
+#include <QUrl>
 #include <QJsonDocument>
 #include <QJsonObject>
 #include <QJsonParseError>
@@ -291,10 +292,11 @@ void MprisMultiplexer::updateMediaPlayerEntity(PlayerContainer *container)
     QString artUrl = state.value("art").toString();
     if (m_playerEntity->state()["art"] != state.value("art").toString()) {
         if (artUrl.startsWith("file://")) {
-            QString path = artUrl.mid(QString("file://").length());
-            QFile f(path);
+            QFile f(QUrl(artUrl).toLocalFile());
             if (f.open(QIODevice::ReadOnly))
                 state["albumart"] = f.readAll().toBase64();
+            else
+                state["albumart"] = "";
         } else if (artUrl.startsWith("https://")) {
             qCDebug(mpris) << "Downloading artwork from" << artUrl;
             state["albumart"] = ""; // the image follows when downloaded, the old one belongs to another track
