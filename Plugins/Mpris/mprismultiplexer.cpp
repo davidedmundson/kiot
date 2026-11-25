@@ -21,7 +21,6 @@
 #include <QNetworkAccessManager>
 #include <QNetworkRequest>
 #include <QNetworkReply>
-#include <QEventLoop>
 #include <QFile>
 #include <QJsonDocument>
 #include <QJsonObject>
@@ -207,25 +206,35 @@ void MprisMultiplexer::handleActivePlayer(PlayerContainer *container)
     }
 }
 
-QString MprisMultiplexer::downloadArtAsBase64(const QString &url)
+void MprisMultiplexer::downloadArt(const QString &url)
 {
-    QNetworkAccessManager manager;
-    QNetworkRequest request(url);
-    QNetworkReply *reply = manager.get(request);
-
-    QEventLoop loop;
-    QObject::connect(reply, &QNetworkReply::finished, &loop, &QEventLoop::quit);
-    loop.exec();
-
-    QByteArray data;
-    if (reply->error() == QNetworkReply::NoError) {
-        data = reply->readAll();
-    } else {
-        qCWarning(mpris) << "Failed to download artwork:" << reply->errorString();
+    if (m_artReply && m_artReply->isRunning()) {
+        if (m_artReply->request().url() == QUrl(url)) {
+            return;
+        }
+        m_artReply->abort();
+    }
+    if (!m_network) {
+        m_network = new QNetworkAccessManager(this);
+        m_network->setAutoDeleteReplies(true);
+        m_network->setTransferTimeout(30000);
     }
 
-    reply->deleteLater();
-    return data.toBase64();
+    QNetworkReply *reply = m_network->get(QNetworkRequest(QUrl(url)));
+    m_artReply = reply;
+    connect(reply, &QNetworkReply::finished, this, [this, reply, url]() {
+        if (reply->error() != QNetworkReply::NoError) {
+            if (reply->error() != QNetworkReply::OperationCanceledError) {
+                qCWarning(mpris) << "Failed to download artwork:" << reply->errorString();
+            }
+            return;
+        }
+        // the player may have moved on to another track since the request
+        if (m_playerEntity->state().value("art").toString() != url) {
+            return;
+        }
+        m_playerEntity->setState({{QStringLiteral("albumart"), reply->readAll().toBase64()}});
+    });
 }
 
 void MprisMultiplexer::updateMediaPlayerEntity(PlayerContainer *container)
@@ -288,7 +297,8 @@ void MprisMultiplexer::updateMediaPlayerEntity(PlayerContainer *container)
                 state["albumart"] = f.readAll().toBase64();
         } else if (artUrl.startsWith("https://")) {
             qCDebug(mpris) << "Downloading artwork from" << artUrl;
-            state["albumart"] = downloadArtAsBase64(artUrl);
+            state["albumart"] = ""; // the image follows when downloaded, the old one belongs to another track
+            downloadArt(artUrl);
         } else {
             state["albumart"] = "";
         }
