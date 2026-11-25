@@ -11,7 +11,7 @@ A plain text message is shown as it is. A JSON object can set more; all fields b
 | `message` | The text of the notification |
 | `title` | Optional: the title (default: `kiot`) |
 | `urgency` | Optional: `low`, `normal`, `high` or `critical` (default: `normal`). A critical notification is shown even in Do Not Disturb mode and stays until it is dismissed |
-| `url` | Optional: opened when the notification is clicked, e.g. a Home Assistant dashboard |
+| `url` | Optional: opened when the notification is clicked, e.g. a Home Assistant dashboard. Only `http`, `https` and `mailto` links; others are ignored |
 
 Example, from a Home Assistant script or automation:
 

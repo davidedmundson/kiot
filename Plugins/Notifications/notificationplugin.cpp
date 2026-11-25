@@ -4,6 +4,7 @@
 
 
 #include "notificationplugin.h"
+#include "notificationurl.h"
 #include <KNotification>
 #include <QCoreApplication>
 #include <QDesktopServices>
@@ -105,12 +106,14 @@ void sendNotification(const QString &title, const QString &body, const QJsonObje
     notification->setUrgency(urgency);
 
     const QUrl url(options.value(QStringLiteral("url")).toString());
-    if (url.isValid() && !url.isEmpty()) {
+    if (isOpenableNotificationUrl(url)) {
         auto action = notification->addDefaultAction(QStringLiteral("Open"));
         QObject::connect(action, &KNotificationAction::activated, [url]() {
             QDesktopServices::openUrl(url);
         });
         notification->setHint(QStringLiteral("resident"), true);
+    } else if (!url.isEmpty()) {
+        qCWarning(plugin_logger) << "Not offering to open" << url << "from a notification: only http, https and mailto links are allowed";
     }
 }
 } // namespace
