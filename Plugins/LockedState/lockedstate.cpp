@@ -9,7 +9,9 @@
 #include <QDBusMessage>
 #include <QDBusPendingCall>
 #include <QDBusPendingReply>
+#include <QDBusPendingCallWatcher>
 
+DECLARE_LOGGER(plugin_logger);
 
 LockedState::LockedState(QObject *parent)
     : QObject(parent)
@@ -26,15 +28,27 @@ LockedState::LockedState(QObject *parent)
                                           SLOT(screenLockedChanged(bool)));
     connect(m_locked, &Lock::stateChangeRequested, this, &LockedState::stateChangeRequested);
 
+    // the screen locker may not be up yet
     auto isLocked = QDBusMessage::createMethodCall("org.freedesktop.ScreenSaver", "/ScreenSaver", "org.freedesktop.ScreenSaver", "GetActive");
-    auto pendingCall = QDBusConnection::sessionBus().asyncCall(isLocked);
-    pendingCall.waitForFinished();
-    const bool locked = pendingCall.reply().arguments().at(0).toBool();
-    m_locked->setState(locked);
+    auto watcher = new QDBusPendingCallWatcher(QDBusConnection::sessionBus().asyncCall(isLocked), this);
+    connect(watcher, &QDBusPendingCallWatcher::finished, this, [this](QDBusPendingCallWatcher *call) {
+        call->deleteLater();
+        const QDBusPendingReply<bool> reply = *call;
+        if (reply.isError()) {
+            // an error reply carries the error text as its argument, which isn't the locked state
+            qCWarning(plugin_logger) << "Cannot read whether the screen is locked:" << reply.error().message();
+            return;
+        }
+        // ActiveChanged arrived first, it is newer than this reply
+        if (!m_activeChangedSeen) {
+            m_locked->setState(reply.value());
+        }
+    });
 }
 
 void LockedState::screenLockedChanged(bool active)
 {
+    m_activeChangedSeen = true;
     m_locked->setState(active);
 }
 

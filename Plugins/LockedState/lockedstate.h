@@ -17,4 +17,5 @@ private Q_SLOTS:
 
 private:
     Lock *m_locked;
+    bool m_activeChangedSeen = false;
 };
