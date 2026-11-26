@@ -8,10 +8,17 @@
 #include <KProcess>
 #include <KSandbox>
 #include <KIOTShared/kiotshared.h>
+#include <algorithm>
+#include <cmath>
+#include <limits>
 using KIOTShared::PlatformHelper;
 DEFINE_PLUGIN_LOGGER(customSensors,CustomSensors)
 
 constexpr qint64 MinimumIntervalMs = 1000;
+// QTimer takes the interval as an int: about 24.8 days
+constexpr qint64 MaximumIntervalMs = std::numeric_limits<int>::max();
+// A command still running after max(interval, this) is killed
+constexpr int MinimumCommandTimeoutMs = 5 * 60 * 1000;
 
 static const QHash<QString, double> unitToMs = {
     {QStringLiteral("s"), 1000.0},
@@ -31,6 +38,15 @@ static const QHash<QString, double> unitToMs = {
     {QStringLiteral("days"), 86400000.0},
 };
 
+// A span qint64 can't hold (or inf/nan) counts as unparsable; casting it would be undefined
+static qint64 toMs(double ms)
+{
+    if (!(std::abs(ms) < 9.0e18)) {
+        return -1;
+    }
+    return (qint64)ms;
+}
+
 qint64 parseTimeSpanToMs(const QString &text)
 {
     const QString trimmed = text.trimmed();
@@ -41,7 +57,7 @@ qint64 parseTimeSpanToMs(const QString &text)
     bool parsedAsBareNumber = false;
     const double bareSeconds = trimmed.toDouble(&parsedAsBareNumber);
     if (parsedAsBareNumber) {
-        return (qint64)(bareSeconds * 1000.0);
+        return toMs(bareSeconds * 1000.0);
     }
 
     double totalMs = 0.0;
@@ -63,7 +79,7 @@ qint64 parseTimeSpanToMs(const QString &text)
         totalMs += value * unitMsMultiplier.value();
     }
 
-    return (qint64)totalMs;
+    return toMs(totalMs);
 }
 
 CustomSensor::CustomSensor(const QString &id, const QString &name, const QString &command, qint64 intervalMs, QObject *parent)
@@ -75,7 +91,10 @@ CustomSensor::CustomSensor(const QString &id, const QString &name, const QString
     m_sensor->setName(name);
 
     m_timer = new QTimer(this);
-    m_timer->setInterval(std::max(intervalMs, MinimumIntervalMs));
+    if (intervalMs > MaximumIntervalMs) {
+        qCWarning(customSensors) << "Interval of custom sensor" << id << "is longer than" << MaximumIntervalMs << "ms, using that";
+    }
+    m_timer->setInterval(int(std::clamp(intervalMs, MinimumIntervalMs, MaximumIntervalMs)));
     connect(m_timer, &QTimer::timeout, this, &CustomSensor::poll);
     m_timer->start();
 
@@ -113,6 +132,18 @@ void CustomSensor::poll()
         m_process->deleteLater();
         m_process = nullptr;
     });
+    // finished() never comes for a command that can't be started
+    connect(m_process, &QProcess::errorOccurred, this, [this](QProcess::ProcessError error) {
+        if (error != QProcess::FailedToStart) {
+            return;
+        }
+        qCWarning(customSensors) << "Command failed to start:" << m_process->errorString();
+        m_process->deleteLater();
+        m_process = nullptr;
+    });
+    // A command that hangs is killed, so it can't stop the sensor for good; finished() then
+    // clears m_process and the next poll starts it again
+    QTimer::singleShot(std::max(m_timer->interval(), MinimumCommandTimeoutMs), m_process, &QProcess::kill);
 
     m_process->start();
 }

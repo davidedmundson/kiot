@@ -7,6 +7,10 @@ env:
 
 jobs:
   release:
+    # Flatpak needs unprivileged user namespaces for its build sandbox (bubblewrap), which a Forgejo runner's
+    # job container doesn't have: GitHub only, as are its
+    # releases (gh, action-gh-release).
+    if: github.server_url == 'https://github.com'
     runs-on: ubuntu-latest
 
     steps:

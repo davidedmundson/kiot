@@ -1,0 +1,72 @@
+# Builds kiot with every plugin, the System Settings module and the tests, and runs the tests (autotests/,
+# ctest) on every push and pull request: PlatformHelper, ConfigManager,
+# Entity's ids and attribute conversion, every entity type against a real mosquitto broker (discovery,
+# state, commands, re-registration, reconnect, broker restart) and the GameLauncher's VDF parser. Tests
+# that pin a known bug are QEXPECT_FAIL: they pass while the bug is there and fail once it is fixed, so
+# the fix removes the QEXPECT_FAIL with it. KIOT_MQTT_TESTS=required makes a missing broker an error
+# rather than a skip.
+#
+# The same file runs on GitHub and on a Forgejo runner with the label ubuntu-latest: the job runs in its own
+# ubuntu:26.04 container either way (Ubuntu's 24.04 runner image has no KF6 new enough), installs what it
+# needs from apt and checks out with actions/checkout. The Flatpak workflows next to it run on GitHub only.
+name: tests
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    container:
+      image: ubuntu:26.04
+    steps:
+      - name: dependencies
+        run: |
+          # git and nodejs for the checkout and cache actions (a Forgejo runner runs them with the container's
+          # node), mosquitto for the MQTT tests, the rest scripts/dependencies.sh's list as Ubuntu names it
+          pkgs="git ca-certificates nodejs mosquitto cmake ninja-build g++ pkg-config extra-cmake-modules
+            qt6-base-dev qt6-base-private-dev qt6-declarative-dev
+            libkf6config-dev libkf6coreaddons-dev libkf6dbusaddons-dev libkf6notifications-dev
+            libkf6idletime-dev libkf6globalaccel-dev libkf6kcmutils-dev libkf6i18n-dev libkf6solid-dev
+            libkf6bluezqt-dev libkf6pulseaudioqt-dev libkf6service-dev libkf6kio-dev libkscreen-dev
+            libudev-dev libsystemd-dev libpulse-dev libxkbcommon-dev"
+          apt-get -qq -o Acquire::Retries=3 update && DEBIAN_FRONTEND=noninteractive \
+            apt-get -y -qq -o Acquire::Retries=3 install --no-install-recommends $pkgs >/dev/null
+      - name: checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          path: src
+          # the token isn't left in src/.git/config
+          persist-credentials: false
+      # Ubuntu has no QtMqtt package (the Flatpak manifests build it too): the qtmqtt release of the Qt
+      # version Ubuntu has, built once and kept in the runner's cache under that version. A Qt update in
+      # Ubuntu gives a new key and so a new build.
+      - name: qt version
+        id: qt
+        run: echo "version=$(dpkg-query -W -f='${Version}' qt6-base-dev | sed -E 's/[+~-].*//')" >> "$GITHUB_OUTPUT"
+      - name: qtmqtt cache
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: /cache/qtmqtt
+          key: qtmqtt-${{ steps.qt.outputs.version }}-ubuntu26.04
+      - name: qtmqtt
+        env:
+          QT_VERSION: ${{ steps.qt.outputs.version }}
+        run: |
+          if [ ! -d /cache/qtmqtt/usr ]; then
+            git clone -q --depth 1 --branch "v$QT_VERSION" https://github.com/qt/qtmqtt.git /tmp/qtmqtt
+            cmake -S /tmp/qtmqtt -B /tmp/qtmqtt/build -G Ninja -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=/usr \
+              -DQT_BUILD_EXAMPLES=OFF -DQT_BUILD_TESTS=OFF >/dev/null
+            cmake --build /tmp/qtmqtt/build
+            DESTDIR=/cache/qtmqtt cmake --install /tmp/qtmqtt/build >/dev/null
+          fi
+          cp -a /cache/qtmqtt/. /
+      - name: build
+        run: |
+          cmake -S src -B build -G Ninja -DCMAKE_BUILD_TYPE=Debug
+          cmake --build build
+      - name: tests
+        env:
+          KIOT_MQTT_TESTS: required
+        run: cd build && ctest --output-on-failure
