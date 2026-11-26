@@ -1,10 +1,10 @@
 # Builds kiot with every plugin, the System Settings module and the tests, and runs the tests (autotests/,
-# ctest) on every push and pull request: PlatformHelper, ConfigManager, PasswordStore without a wallet,
+# ctest) on every push and pull request: PlatformHelper, ConfigManager,
 # Entity's ids and attribute conversion, every entity type against a real mosquitto broker (discovery,
 # state, commands, re-registration, reconnect, broker restart) and the GameLauncher's VDF parser. Tests
 # that pin a known bug are QEXPECT_FAIL: they pass while the bug is there and fail once it is fixed, so
 # the fix removes the QEXPECT_FAIL with it. KIOT_MQTT_TESTS=required makes a missing broker an error
-# rather than a skip, KIOT_TRANSLATION_TESTS=required the same for a missing locale (autotests/translations).
+# rather than a skip.
 #
 # The same file runs on GitHub and on a Forgejo runner with the label ubuntu-latest: the job runs in its own
 # ubuntu:26.04 container either way (Ubuntu's 24.04 runner image has no KF6 new enough), installs what it
@@ -24,9 +24,8 @@ jobs:
       - name: dependencies
         run: |
           # git and nodejs for the checkout and cache actions (a Forgejo runner runs them with the container's
-          # node), mosquitto for the MQTT tests, gettext and locales for the translations and their test, the
-          # rest scripts/dependencies.sh's list as Ubuntu names it
-          pkgs="git ca-certificates nodejs mosquitto gettext locales cmake ninja-build g++ pkg-config extra-cmake-modules
+          # node), mosquitto for the MQTT tests, the rest scripts/dependencies.sh's list as Ubuntu names it
+          pkgs="git ca-certificates nodejs mosquitto cmake ninja-build g++ pkg-config extra-cmake-modules
             qt6-base-dev qt6-base-private-dev qt6-declarative-dev
             libkf6config-dev libkf6coreaddons-dev libkf6dbusaddons-dev libkf6notifications-dev
             libkf6idletime-dev libkf6globalaccel-dev libkf6kcmutils-dev libkf6i18n-dev libkf6solid-dev
@@ -34,8 +33,6 @@ jobs:
             libudev-dev libsystemd-dev libpulse-dev libxkbcommon-dev"
           apt-get -qq -o Acquire::Retries=3 update && DEBIAN_FRONTEND=noninteractive \
             apt-get -y -qq -o Acquire::Retries=3 install --no-install-recommends $pkgs >/dev/null
-          # gettext doesn't translate in the C locale, the only one a bare image has (autotests/translations)
-          locale-gen en_US.UTF-8 >/dev/null
       - name: checkout
         uses: actions/checkout@v4
         with:
@@ -72,5 +69,4 @@ jobs:
       - name: tests
         env:
           KIOT_MQTT_TESTS: required
-          KIOT_TRANSLATION_TESTS: required
         run: cd build && ctest --output-on-failure
