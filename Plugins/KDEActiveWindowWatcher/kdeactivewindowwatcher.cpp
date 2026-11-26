@@ -66,7 +66,8 @@ void KDEActiveWindowWatcher::readScriptResource()
     file.close();
     scriptContent.replace("org.davidedmundson.kiot", PlatformHelper::generateServiceName());
 
-    QString tempPath = QStandardPaths::writableLocation(QStandardPaths::TempLocation) + "/activewindow_kwin.js";
+    // private to the user (0700), unlike /tmp
+    QString tempPath = QStandardPaths::writableLocation(QStandardPaths::RuntimeLocation) + "/activewindow_kwin.js";
     if (QFile::exists(tempPath)) QFile::remove(tempPath);
 
     QFile outFile(tempPath);

@@ -1,7 +1,7 @@
 // SPDX-FileCopyrightText: 2025 Odd Østlie <theoddpirate@gmail.com>
 // SPDX-License-Identifier: LGPL-2.1-or-later
 
-var lastPayload = {};
+var lastPayload = "";
 var currentWindow = null;
 
 function updateActiveWindow(w) {
@@ -20,10 +20,11 @@ function updateActiveWindow(w) {
         pid: w.pid
     };
 
-    if (payload === lastPayload) {
+    var json = JSON.stringify(payload);
+    if (json === lastPayload) {
         return;
     }
-    lastPayload = payload;
+    lastPayload = json;
     callDBus('org.davidedmundson.kiot.ActiveWindow', '/ActiveWindow', 'org.davidedmundson.kiot.ActiveWindow', 'UpdateAttributes', payload);
 }
 
@@ -41,14 +42,20 @@ function onOutputChanged(){
     updateActiveWindow(currentWindow);
 }
 function watchWindow(w) {
-    if (!w) return;
-
     if (currentWindow) {
-        currentWindow.captionChanged.disconnect(onCaptionChanged);
-        currentWindow.frameGeometryChanged.disconnect(onGeometryChanged);
-        currentWindow.fullScreenChanged.disconnect(onFullScreenChanged);
-        currentWindow.outputChanged.disconnect(onOutputChanged);
+        // the window may be gone already (closed while nothing else was active); its
+        // connections went with it, and throwing here would keep currentWindow stale for good
+        try {
+            currentWindow.captionChanged.disconnect(onCaptionChanged);
+            currentWindow.frameGeometryChanged.disconnect(onGeometryChanged);
+            currentWindow.fullScreenChanged.disconnect(onFullScreenChanged);
+            currentWindow.outputChanged.disconnect(onOutputChanged);
+        } catch (e) {
+        }
+        currentWindow = null;
     }
+
+    if (!w) return;
 
     currentWindow = w;
     currentWindow.captionChanged.connect(onCaptionChanged);
