@@ -20,3 +20,17 @@ Drop a file into the integrations folder and add it to the CMakeLists.txt. There
 It seems like it would be sane to use native integration (like the mobile phone), but it didn't pan out.
 
 The native integration is fine for sensors, but you can't expose switches or actions very well, you can only do string matching on notification text which felt hacky all round. 
+
+# Tests
+
+The tests are in `autotests/` and build with the rest (`BUILD_TESTING`, on by default). Run them from the build directory:
+
+```sh
+ctest --output-on-failure
+```
+
+`mqttentitiestest` starts a mosquitto broker of its own (the `mosquitto` package) and skips without one; `KIOT_MQTT_TESTS=required` turns that skip into a failure. No test touches your own `~/.config/kiotrc` or desktop session: each runs with temporary XDG directories and no session bus.
+
+A test that pins a known bug uses `QEXPECT_FAIL`: it passes while the bug is there and fails once the bug is fixed, so remove the `QEXPECT_FAIL` together with the fix.
+
+The workflow `.github/workflows/tests.yml` builds everything and runs the tests on every push, on GitHub and on Forgejo alike; the Flatpak workflows run on GitHub only.

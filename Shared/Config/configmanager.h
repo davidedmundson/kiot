@@ -79,6 +79,8 @@ private:
 
     QJsonValue getRawValue(const QJsonObject &source, const QString &keyPath) const;
     void setRawValue(QJsonObject &target, const QString &keyPath, const QJsonValue &value);
+    // Writes m_data to m_filePath and watches the file from then on
+    void writeFile();
 
 private Q_SLOTS:
     void handleFileChanged(const QString &path);
