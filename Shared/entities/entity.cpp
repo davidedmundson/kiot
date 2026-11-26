@@ -18,12 +18,15 @@
 
 #include "entity.h"
 #include "Transport/transportmanager.h"
+#include <QCryptographicHash>
+#include <QHash>
 #include <QHostInfo>
 #include <QSysInfo>
 #include <QJsonDocument>
 #include <QJsonObject>
 #include <QJsonArray>
 #include <QMqttClient>
+#include <algorithm>
 //#include <KConfigGroup>
 
 
@@ -32,16 +35,33 @@ using KIOTShared::Transport::TransportManager;
 namespace KIOTShared {
 namespace Entities {
 
+// Home Assistant accepts only [a-zA-Z0-9_-] as the node and object id of a discovery topic (TOPIC_MATCHER
+// in homeassistant/components/mqtt/discovery.py). A letter with an accent or umlaut becomes its base
+// letter, a few letters that don't decompose that way are spelled out, anything else becomes '_'.
 static QString sanitizeForMqttTopic(const QString &input)
 {
-    QString result = input;
-    // Replace spaces with underscores
-    result = result.replace(' ', '_');
-    // Remove or replace other problematic characters
-    for (int i = 0; i < result.length(); ++i) {
-        QChar c = result.at(i);
-        if (!c.isLetterOrNumber() && c != '_' && c != '-') {
-            result[i] = '_';
+    static const QHash<QChar, QString> spelledOut = {
+        {QChar(0x00DF), QStringLiteral("ss")}, // ß
+        {QChar(0x00E6), QStringLiteral("ae")}, // æ
+        {QChar(0x00F8), QStringLiteral("o")}, // ø
+        {QChar(0x0153), QStringLiteral("oe")}, // œ
+        {QChar(0x0111), QStringLiteral("d")}, // đ
+        {QChar(0x00F0), QStringLiteral("d")}, // ð
+        {QChar(0x0142), QStringLiteral("l")}, // ł
+        {QChar(0x00FE), QStringLiteral("th")}, // þ
+    };
+    QString result;
+    const QString decomposed = input.toLower().normalized(QString::NormalizationForm_KD);
+    for (const QChar c : decomposed) {
+        if (c.category() == QChar::Mark_NonSpacing) {
+            continue; // the accent of é, the dots of ö, once they are apart from their letter
+        }
+        if ((c >= u'a' && c <= u'z') || (c >= u'0' && c <= u'9') || c == u'_' || c == u'-') {
+            result += c;
+        } else if (const auto it = spelledOut.constFind(c); it != spelledOut.constEnd()) {
+            result += *it;
+        } else {
+            result += u'_';
         }
     }
     // Remove consecutive underscores
@@ -54,13 +74,15 @@ static QString sanitizeForMqttTopic(const QString &input)
     }
     while (result.endsWith('_')) {
         result.chop(1);
-    }    
-    // Ensure it's not empty
+    }
     if (result.isEmpty()) {
-        result = "empty_entity_id_detected_integration_error";
-    }    
-    // Convert to lowercase for consistency
-    result = result.toLower();
+        // A name in a script without Latin letters (e.g. "游戏") leaves nothing: a stable id from its hash
+        const bool hasLetters = std::any_of(input.cbegin(), input.cend(), [](QChar c) {
+            return c.isLetterOrNumber();
+        });
+        result = hasLetters ? QStringLiteral("id_") + QString::fromLatin1(QCryptographicHash::hash(input.toUtf8(), QCryptographicHash::Sha1).toHex().left(12))
+                            : QStringLiteral("empty_entity_id_detected_integration_error");
+    }
     return result;
 }
 
@@ -72,7 +94,8 @@ Entity::Entity(QObject *parent):
 
 QString Entity::hostname() const
 {
-    return QHostInfo::localHostName().toLower();
+    // the node id of every discovery topic: a host name like "desk.example.org" needs the same
+    return sanitizeForMqttTopic(QHostInfo::localHostName());
 }
 
 QString Entity::baseTopic() const
