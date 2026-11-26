@@ -579,8 +579,7 @@ private Q_SLOTS:
 
     void testRuntimeRegistrationTwice()
     {
-        // Audio re-registers its output volume each time ~/.config/plasmaparc changes, Bluetooth a
-        // device's switch each time it comes back
+        // Audio re-registers its output volume each time ~/.config/plasmaparc changes
         const QString base = baseTopic(QStringLiteral("test_twice"));
         Switch sw;
         sw.setId(QStringLiteral("test_twice"));
@@ -593,7 +592,30 @@ private Q_SLOTS:
         send(base + QStringLiteral("/set"), "true");
         send(base + QStringLiteral("/set"), "false");
         QTRY_VERIFY(!requested.isEmpty() && requested.last().at(0).toBool() == false);
-        QEXPECT_FAIL("", "init() connects the command handler again to the subscription QtMqtt hands back", Continue);
+        QCOMPARE(requested.count(), 2);
+    }
+
+    void testRuntimeRegistrationNewRange()
+    {
+        // what Audio does when the raised maximum volume is switched on or off
+        const QString base = baseTopic(QStringLiteral("test_range"));
+        Number number;
+        number.setId(QStringLiteral("test_range"));
+        number.setName(QStringLiteral("Range"));
+        number.setRange(0, 100);
+        number.runtimeRegistration();
+        QVERIFY(waitSubscribed(base + QStringLiteral("/set")));
+
+        const qsizetype since = mark();
+        number.setRange(0, 150);
+        number.runtimeRegistration();
+        const QJsonObject config = waitForJson(discoveryTopic(QStringLiteral("number"), QStringLiteral("test_range")), since);
+        QCOMPARE(config.value(QStringLiteral("max")).toVariant().toInt(), 150);
+
+        QSignalSpy requested(&number, &Number::valueChangeRequested);
+        send(base + QStringLiteral("/set"), "120");
+        send(base + QStringLiteral("/set"), "30");
+        QTRY_VERIFY(!requested.isEmpty() && requested.last().at(0).toInt() == 30);
         QCOMPARE(requested.count(), 2);
     }
 

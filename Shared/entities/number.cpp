@@ -18,6 +18,7 @@ Number::Number(QObject *parent)
     : Entity(parent)
 {
     setHaType("number");
+    setRange(m_min, m_max, m_step, m_unit);
 }
 
 void Number::setRange(int min, int max, int step, const QString &unit)
@@ -26,16 +27,16 @@ void Number::setRange(int min, int max, int step, const QString &unit)
     m_max = max;
     m_step = step;
     m_unit = unit;
+    setDiscoveryConfig("min", QString::number(m_min));
+    setDiscoveryConfig("max", QString::number(m_max));
+    setDiscoveryConfig("step", QString::number(m_step));
+    setDiscoveryConfig("unit_of_measurement", m_unit);
 }
 
 void Number::init()
 {
     setDiscoveryConfig("state_topic", baseTopic());
     setDiscoveryConfig("command_topic", baseTopic() + "/set");
-    setDiscoveryConfig("min", QString::number(m_min));
-    setDiscoveryConfig("max", QString::number(m_max));
-    setDiscoveryConfig("step", QString::number(m_step));
-    setDiscoveryConfig("unit_of_measurement", m_unit);
 
     sendRegistration();
 
