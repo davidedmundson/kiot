@@ -185,6 +185,13 @@ void ScreenController::loadConfigFromSystem()
 {
     auto *operation = new KScreen::GetConfigOperation(KScreen::ConfigOperation::NoOptions, this);
     connect(operation, &KScreen::ConfigOperation::finished, this, [this, operation] {
+        // Keep the current config and output when KScreen fails (e.g. while KWin restarts);
+        // the next configurationChanged() reads it again.
+        if (operation->hasError() || !operation->config()) {
+            qCWarning(disp_logger) << "Failed to read the screen configuration:" << operation->errorString();
+            return;
+        }
+
         if (m_config) {
             disconnect(m_config.data(), nullptr, this, nullptr);
             KScreen::ConfigMonitor::instance()->removeConfig(m_config);
