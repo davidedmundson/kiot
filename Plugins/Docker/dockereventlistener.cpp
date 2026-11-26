@@ -12,8 +12,9 @@
 using KIOTShared::PlatformHelper;
 
 DEFINE_PLUGIN_LOGGER(docker_event_logs, Docker)
-DockerEventListener::DockerEventListener(QObject *parent)
+DockerEventListener::DockerEventListener(QObject *parent, const QString &socketPath)
     : QThread(parent)
+    , m_socketPath(socketPath)
 {
 }
 
@@ -26,7 +27,7 @@ void DockerEventListener::stop()
 void DockerEventListener::run()
 {
     QLocalSocket socket;
-    socket.connectToServer("/var/run/docker.sock", QIODevice::ReadWrite);
+    socket.connectToServer(m_socketPath, QIODevice::ReadWrite);
     if (!socket.waitForConnected(1000)) {
         qCWarning(docker_event_logs) << "Failed to connect to Docker socket";
         return;
@@ -46,12 +47,15 @@ void DockerEventListener::run()
             continue;
         }
 
-        const QByteArray line = socket.readLine().trimmed();
-        if (line.isEmpty())
-            continue;
+        // waitForReadyRead() only wakes up for new data, so every complete line has to be read
+        // now: one wakeup can bring several (the HTTP headers, a burst like kill/die/stop)
+        while (socket.canReadLine()) {
+            const QByteArray line = socket.readLine().trimmed();
+            if (line.isEmpty())
+                continue;
 
-        if (!processEventLine(line))
-            continue;
+            processEventLine(line);
+        }
     }
 
     socket.disconnectFromServer();
