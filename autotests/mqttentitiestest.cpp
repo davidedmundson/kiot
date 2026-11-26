@@ -543,6 +543,7 @@ private Q_SLOTS:
         QCOMPARE(config.value(QStringLiteral("command_pause_topic")).toString(), base + QStringLiteral("/pause"));
         // not the topic the player publishes its media type on
         QCOMPARE(config.value(QStringLiteral("command_playpause_topic")).toString(), base + QStringLiteral("/playpause"));
+        QCOMPARE(config.value(QStringLiteral("command_seek_topic")).toString(), base + QStringLiteral("/setposition"));
         // the same device as every other entity of this host
         QCOMPARE(config.value(QStringLiteral("device")).toObject().value(QStringLiteral("model")).toString(), QStringLiteral(PROJECT_NAME));
 

@@ -42,7 +42,7 @@ void MediaPlayer::init()
     setDiscoveryConfig("command_previous_topic", baseTopic() + "/previous");
     setDiscoveryConfig("command_volume_topic", baseTopic() + "/set_volume");
     setDiscoveryConfig("command_playmedia_topic", baseTopic() + "/playmedia");
-    setDiscoveryConfig("command_seek_position_topic", baseTopic() + "/setposition");
+    setDiscoveryConfig("command_seek_topic", baseTopic() + "/setposition");
     setDiscoveryConfig("availability",
                        QVariantMap({{"topic", topixPrefix() + "/" + hostname() + "/connected"},
                                     {"payload_available", "on"},
