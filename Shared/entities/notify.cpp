@@ -50,6 +50,9 @@ void Notify::init()
     sendRegistration();
 
     auto subscription = TransportManager::mqttClient() ->subscribe(baseTopic() + "/notifications");
+    if (!subscription) {
+        return;
+    }
     connect(subscription, &QMqttSubscription::messageReceived, this, [this](QMqttMessage message) {
         qCDebug(notify) << "Notify message received" << QString::fromUtf8(message.payload());
         emit notificationReceived(message.payload());
