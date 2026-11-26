@@ -174,6 +174,9 @@ void MprisMultiplexer::handleActivePlayer(PlayerContainer *container)
     PlaybackStatus::Status status = container->playbackStatus();
 
     if (status == PlaybackStatus::Playing) {
+        if (m_activePlayer && m_activePlayer != container && m_activePlayer->playbackStatus() == PlaybackStatus::Playing) {
+            return;
+        }
         if (m_activePlayer != container) {
             m_activePlayer = container;
             qCDebug(mpris) << "Active player changed to:" << container->busName();
