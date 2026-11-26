@@ -42,9 +42,8 @@ bool HeroicScanner::isLauncherInstalled() const
         }
         
         process.start();
-        process.waitForFinished();
-        
-        if (process.exitCode() == 0) {
+        // exitCode() is 0 too when `which` could not be started (not installed)
+        if (process.waitForFinished() && process.exitStatus() == QProcess::NormalExit && process.exitCode() == 0) {
             return true;
         }       
     }
@@ -86,12 +85,12 @@ QMap<QString, GameData>  HeroicScanner::scanGames()
     QString heroic_data_path;
 
     QString nativePath = QDir::homePath() + "/.config/heroic/";
-    QString flatpakPath = QDir::homePath() + "/.var/app/com.heroicgameslauncher.hheroiclogger/config/heroic/";
+    QString flatpakPath = QDir::homePath() + "/.var/app/com.heroicgameslauncher.hgl/config/heroic/";
 
     if (QDir(nativePath).exists()) {
         heroic_data_path = "/.config/heroic/";
     } else if (QDir(flatpakPath).exists()) {
-        heroic_data_path = "/.var/app/com.heroicgameslauncher.hheroiclogger/config/heroic/";
+        heroic_data_path = "/.var/app/com.heroicgameslauncher.hgl/config/heroic/";
     } else {
         // ingen Heroic installasjon funnet, returner tidlig
         return QMap<QString, GameData>();
@@ -126,12 +125,12 @@ QMap<QString, GameData> HeroicScanner::getHeroicGames()
     QString heroic_data_path;
 
     QString nativePath = QDir::homePath() + "/.config/heroic/";
-    QString flatpakPath = QDir::homePath() + "/.var/app/com.heroicgameslauncher.hheroiclogger/config/heroic/";
+    QString flatpakPath = QDir::homePath() + "/.var/app/com.heroicgameslauncher.hgl/config/heroic/";
 
     if (QDir(nativePath).exists()) {
         heroic_data_path = "/.config/heroic/";
     } else if (QDir(flatpakPath).exists()) {
-        heroic_data_path = "/.var/app/com.heroicgameslauncher.hheroiclogger/config/heroic/";
+        heroic_data_path = "/.var/app/com.heroicgameslauncher.hgl/config/heroic/";
     } else {
         // ingen Heroic installasjon funnet, returner tidlig
         return QMap<QString, GameData>();

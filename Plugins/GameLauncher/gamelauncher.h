@@ -41,5 +41,5 @@ private:
 
     QVector<GameBase*> m_scanners;
     QMap<QString, GameData> m_games;
-    Select* m_select;
+    Select* m_select = nullptr;
 };
