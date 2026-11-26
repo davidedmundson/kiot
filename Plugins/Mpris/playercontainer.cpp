@@ -11,6 +11,7 @@
 // and stripped it to fit my needs
 
 #include "playercontainer.h"
+#include "metadatafallback.h"
 #include <KIOTShared/kiotshared.h>
 
 using KIOTShared::Entities::MediaPlayer;
@@ -82,8 +83,8 @@ QString PlayerContainer::dbusname() const
 
 void PlayerContainer::Play()
 {
-    Q_ASSERT_X(m_canPlay.value(), Q_FUNC_INFO, qUtf8Printable(identity()));
     if (!m_canPlay.value()) {
+        qCWarning(mpris) << m_busName << "can't play, ignoring the command";
         return;
     }
     m_playerIface->Play();
@@ -91,8 +92,8 @@ void PlayerContainer::Play()
 
 void PlayerContainer::Pause()
 {
-    Q_ASSERT_X(m_canPause.value(), Q_FUNC_INFO, qUtf8Printable(identity()));
     if (!m_canPause.value()) {
+        qCWarning(mpris) << m_busName << "can't pause, ignoring the command";
         return;
     }
     m_playerIface->Pause();
@@ -100,8 +101,8 @@ void PlayerContainer::Pause()
 
 void PlayerContainer::Stop()
 {
-    Q_ASSERT_X(m_canStop.value(), Q_FUNC_INFO, qUtf8Printable(identity()));
     if (!m_canStop.value()) {
+        qCWarning(mpris) << m_busName << "can't stop, ignoring the command";
         return;
     }
     m_playerIface->Stop();
@@ -109,8 +110,8 @@ void PlayerContainer::Stop()
 
 void PlayerContainer::Next()
 {
-    Q_ASSERT_X(m_canGoNext.value(), Q_FUNC_INFO, qUtf8Printable(identity()));
     if (!m_canGoNext.value()) {
+        qCWarning(mpris) << m_busName << "can't go to the next track, ignoring the command";
         return;
     }
     m_playerIface->Next();
@@ -118,8 +119,8 @@ void PlayerContainer::Next()
 
 void PlayerContainer::Previous()
 {
-    Q_ASSERT_X(m_canGoPrevious.value(), Q_FUNC_INFO, qUtf8Printable(identity()));
     if (!m_canGoPrevious.value()) {
+        qCWarning(mpris) << m_busName << "can't go to the previous track, ignoring the command";
         return;
     }
     m_playerIface->Previous();
@@ -142,8 +143,8 @@ void PlayerContainer::seek(qlonglong pos)
 {
     qlonglong delta = pos - position();
 
-    Q_ASSERT_X(m_canSeek.value(), Q_FUNC_INFO, qUtf8Printable(identity()));
     if (!m_canSeek.value()) {
+        qCWarning(mpris) << m_busName << "can't seek, ignoring the command";
         return;
     }
     m_playerIface->Seek(delta);
@@ -153,7 +154,12 @@ void PlayerContainer::seek(qlonglong pos)
 
 void PlayerContainer::setPosition(qlonglong value)
 {
-    if (m_position == value) {
+    if (!m_canSeek.value()) {
+        qCWarning(mpris) << m_busName << "can't seek, ignoring the position";
+        return;
+    }
+    if (m_trackId.value().isEmpty()) {
+        qCWarning(mpris) << m_busName << "gives no track id, can't set the position";
         return;
     }
 
@@ -381,16 +387,7 @@ void PlayerContainer::initBindings()
         if (!m_xesamTitle.value().isEmpty()) {
             return m_xesamTitle.value();
         }
-        const QStringView xesamUrl{m_xesamUrl.value()};
-        if (xesamUrl.isEmpty()) {
-            return QString();
-        }
-        if (int lastSlashPos = xesamUrl.lastIndexOf(QLatin1Char('/')); lastSlashPos < 0 || lastSlashPos == xesamUrl.size() - 1) {
-            return QString();
-        } else {
-            const QStringView lastUrlPart = xesamUrl.sliced(lastSlashPos + 1);
-            return QUrl::fromPercentEncoding(lastUrlPart.toLatin1());
-        }
+        return trackFromXesamUrl(m_xesamUrl.value());
     });
 
     m_artist.setBinding([this] {
@@ -407,18 +404,7 @@ void PlayerContainer::initBindings()
         if (!m_xesamAlbum.value().isEmpty()) {
             return m_xesamAlbum.value();
         }
-        const QStringView xesamUrl{m_xesamUrl.value()};
-        if (!xesamUrl.startsWith(QLatin1String("file:///"))) {
-            return QString();
-        }
-        const QList<QStringView> urlParts = xesamUrl.split(QLatin1Char('/'));
-        if (urlParts.size() < 3) {
-            return QString();
-        }
-        if (auto lastFolderPathIt = std::next(urlParts.crbegin()); !lastFolderPathIt->isEmpty()) {
-            return QUrl::fromPercentEncoding(lastFolderPathIt->toLatin1());
-        }
-        return QString();
+        return albumFromXesamUrl(m_xesamUrl.value());
     });
 
     auto callback = [this] {

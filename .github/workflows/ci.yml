@@ -9,6 +9,9 @@ on:
 jobs:
   flatpak-build:
     name: Flatpak Build
+    # Flatpak needs unprivileged user namespaces for its build sandbox (bubblewrap), which a Forgejo runner's
+    # job container doesn't have: GitHub only.
+    if: github.server_url == 'https://github.com'
     runs-on: ubuntu-latest
     steps:
       - name: Checkout

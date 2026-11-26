@@ -21,8 +21,8 @@
 #include <QNetworkAccessManager>
 #include <QNetworkRequest>
 #include <QNetworkReply>
-#include <QEventLoop>
 #include <QFile>
+#include <QUrl>
 #include <QJsonDocument>
 #include <QJsonObject>
 #include <QJsonParseError>
@@ -88,7 +88,7 @@ void MprisMultiplexer::setupMediaPlayer()
     });
     connect(m_playerEntity, &MediaPlayer::positionChanged, this, [this](qint64 pos) {
         if (m_activePlayer)
-            m_activePlayer->seek(pos);
+            m_activePlayer->setPosition(pos);
     });
     connect(m_playerEntity, &MediaPlayer::playMediaRequested, this, [this](QString payload) {
         if (!m_activePlayer)
@@ -174,6 +174,9 @@ void MprisMultiplexer::handleActivePlayer(PlayerContainer *container)
     PlaybackStatus::Status status = container->playbackStatus();
 
     if (status == PlaybackStatus::Playing) {
+        if (m_activePlayer && m_activePlayer != container && m_activePlayer->playbackStatus() == PlaybackStatus::Playing) {
+            return;
+        }
         if (m_activePlayer != container) {
             m_activePlayer = container;
             qCDebug(mpris) << "Active player changed to:" << container->busName();
@@ -207,25 +210,35 @@ void MprisMultiplexer::handleActivePlayer(PlayerContainer *container)
     }
 }
 
-QString MprisMultiplexer::downloadArtAsBase64(const QString &url)
+void MprisMultiplexer::downloadArt(const QString &url)
 {
-    QNetworkAccessManager manager;
-    QNetworkRequest request(url);
-    QNetworkReply *reply = manager.get(request);
-
-    QEventLoop loop;
-    QObject::connect(reply, &QNetworkReply::finished, &loop, &QEventLoop::quit);
-    loop.exec();
-
-    QByteArray data;
-    if (reply->error() == QNetworkReply::NoError) {
-        data = reply->readAll();
-    } else {
-        qCWarning(mpris) << "Failed to download artwork:" << reply->errorString();
+    if (m_artReply && m_artReply->isRunning()) {
+        if (m_artReply->request().url() == QUrl(url)) {
+            return;
+        }
+        m_artReply->abort();
+    }
+    if (!m_network) {
+        m_network = new QNetworkAccessManager(this);
+        m_network->setAutoDeleteReplies(true);
+        m_network->setTransferTimeout(30000);
     }
 
-    reply->deleteLater();
-    return data.toBase64();
+    QNetworkReply *reply = m_network->get(QNetworkRequest(QUrl(url)));
+    m_artReply = reply;
+    connect(reply, &QNetworkReply::finished, this, [this, reply, url]() {
+        if (reply->error() != QNetworkReply::NoError) {
+            if (reply->error() != QNetworkReply::OperationCanceledError) {
+                qCWarning(mpris) << "Failed to download artwork:" << reply->errorString();
+            }
+            return;
+        }
+        // the player may have moved on to another track since the request
+        if (m_playerEntity->state().value("art").toString() != url) {
+            return;
+        }
+        m_playerEntity->setState({{QStringLiteral("albumart"), reply->readAll().toBase64()}});
+    });
 }
 
 void MprisMultiplexer::updateMediaPlayerEntity(PlayerContainer *container)
@@ -282,13 +295,15 @@ void MprisMultiplexer::updateMediaPlayerEntity(PlayerContainer *container)
     QString artUrl = state.value("art").toString();
     if (m_playerEntity->state()["art"] != state.value("art").toString()) {
         if (artUrl.startsWith("file://")) {
-            QString path = artUrl.mid(QString("file://").length());
-            QFile f(path);
+            QFile f(QUrl(artUrl).toLocalFile());
             if (f.open(QIODevice::ReadOnly))
                 state["albumart"] = f.readAll().toBase64();
+            else
+                state["albumart"] = "";
         } else if (artUrl.startsWith("https://")) {
             qCDebug(mpris) << "Downloading artwork from" << artUrl;
-            state["albumart"] = downloadArtAsBase64(artUrl);
+            state["albumart"] = ""; // the image follows when downloaded, the old one belongs to another track
+            downloadArt(artUrl);
         } else {
             state["albumart"] = "";
         }
