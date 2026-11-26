@@ -32,6 +32,9 @@ NightMode::NightMode(QObject *parent)
     m_switch->setId("nightmode_inhibit");
     m_switch->setName("Night Mode Inhibit");
     QObject::connect(m_switch, &Switch::stateChangeRequested, this, [this](bool state) {
+        if (state == m_inhibitCookie.has_value()) {
+            return;
+        }
         if (state) {
             QDBusReply<uint32_t> reply = m_nightLightIface->inhibit();
             if (!reply.isValid()) {
@@ -39,8 +42,9 @@ NightMode::NightMode(QObject *parent)
                 return;
             }
             m_inhibitCookie = reply.value();
-        } else if (m_inhibitCookie.has_value()) {
+        } else {
             m_nightLightIface->uninhibit(m_inhibitCookie.value());
+            m_inhibitCookie.reset();
         }
         m_switch->setState(state);
     });
