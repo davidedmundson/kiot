@@ -67,7 +67,13 @@ static QString sanitizeForMqttTopic(const QString &input)
 Entity::Entity(QObject *parent):
     QObject(parent)
 {
-    connect(TransportManager::mqttClient() , &QMqttClient::connected, this, &Entity::init);
+    connect(TransportManager::mqttClient(), &QMqttClient::connected, this, [this]() {
+        m_initialised = true;
+        init();
+    });
+    connect(TransportManager::mqttClient(), &QMqttClient::disconnected, this, [this]() {
+        m_initialised = false;
+    });
 }
 
 QString Entity::hostname() const
@@ -179,6 +185,11 @@ void Entity::runtimeRegistration()
     }
     
     qCDebug(base) << "Runtime registration of entity:" << id() << "(" << name() << ")";
+    if (m_initialised) {
+        sendRegistration();
+        return;
+    }
+    m_initialised = true;
     init();
 }
 

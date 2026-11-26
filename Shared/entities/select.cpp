@@ -70,6 +70,10 @@ void Select::init()
         connect(subscription, &QMqttSubscription::messageReceived, this, [this](const QMqttMessage &message) {
             const QString newValue = QString::fromUtf8(message.payload());
             qCDebug(sel) << "Received new value for " << name() << ": " << newValue;
+            if (!m_options.contains(newValue)) {
+                qCWarning(sel) << name() << "ignores" << newValue << "- not one of its options" << m_options;
+                return;
+            }
             // Oppdater lokalt
             m_state = newValue;
             publishState();

@@ -219,6 +219,10 @@ public:
 
         /**
      * @brief Registers this entity with Home Assistant via MQTT at runtime
+     *
+     * @details
+     * For an entity created after the connection is up. On an entity that is already
+     * registered, sends its discovery config again, e.g. after a change to it.
      */
     void runtimeRegistration();
 
@@ -368,6 +372,9 @@ private:
     
     /** @private Current entity attributes (additional contextual data) */
     QVariantMap m_attributes;
+
+    /** @private init() has run on the current connection */
+    bool m_initialised = false;
 };
 
 } // namespace Entities

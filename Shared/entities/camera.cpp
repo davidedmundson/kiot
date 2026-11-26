@@ -49,6 +49,9 @@ void Camera::init()
     // This is not supported by default from Home Assistant's MQTT camera integration,
     // but lets you publish a command and use it from the signal to trigger a fresh image in a integration
     auto subscription = TransportManager::mqttClient() ->subscribe(baseTopic() + "/command");
+    if (!subscription) {
+        return;
+    }
     connect(subscription, &QMqttSubscription::messageReceived, this, [this](const QMqttMessage &message) {
         qCDebug(camentity) << name() << "Camera command received:" << QString::fromUtf8(message.payload());
         emit commandReceived(QString::fromUtf8(message.payload()));
