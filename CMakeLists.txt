@@ -152,6 +152,11 @@ add_subdirectory(core)
 
 
 
+# Unit and integration tests (ctest); KDECMakeSettings provides BUILD_TESTING, ON by default
+if(BUILD_TESTING)
+    add_subdirectory(autotests)
+endif()
+
 # BUilds every Experimental plugin if you set it to ON
 if(BUILD_EXPERIMENTAL_PLUGINS)
     if(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/PluginsExperimental/CMakeLists.txt")

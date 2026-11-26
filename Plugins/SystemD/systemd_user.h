@@ -25,6 +25,9 @@ public:
 
     bool ensureConfig();
 
+    // Unit name from a unit's D-Bus object path, e.g. "app_40foo_2eservice" -> "app@foo.service"
+    static QString pathToUnitName(const QString &path);
+
 private Q_SLOTS:
     void onUnitPropertiesChanged(const QString &interface, const QVariantMap &changedProps, const QStringList &invalidatedProps, const QDBusMessage &msg);
     void performInit();
@@ -35,6 +38,5 @@ private:
     QString sanitizeServiceId(const QString &svc);
     QStringList listUserServices() const;
 
-    QString pathToUnitName(const QString &path) const;
     bool m_initialized = false;
 };

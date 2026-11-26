@@ -25,6 +25,9 @@ SystemDWatcher::SystemDWatcher(QObject *parent)
         qCWarning(SystemD) << "Failed to connect to systemd user D-Bus";
         return;
     }
+    // systemd sends the units' PropertiesChanged signals only while some client is subscribed;
+    // the subscription ends with our bus connection
+    m_systemdUser->asyncCall("Subscribe");
     if (!ensureConfig()) {
         qCWarning(SystemD) << "Failed to ensure config";
         return;
@@ -171,13 +174,28 @@ QStringList SystemDWatcher::listUserServices() const
     return services;
 }
 
-// Convert D-Bus path to proper unit name
-QString SystemDWatcher::pathToUnitName(const QString &path) const
+// Convert D-Bus path to proper unit name. systemd escapes every byte outside [A-Za-z0-9] (and a
+// leading digit) of the UTF-8 name as _XX hex; an invalid escape is taken literally, as systemd does.
+QString SystemDWatcher::pathToUnitName(const QString &path)
 {
-    QString name = path.section('/', -1);
-    name.replace("_2e", ".");
-    name.replace("_2d", "-");
-    return name;
+    const QByteArray label = path.section('/', -1).toLatin1();
+    if (label == "_") {
+        return QString();
+    }
+    QByteArray name;
+    for (int i = 0; i < label.size(); ++i) {
+        if (label[i] == '_' && i + 2 < label.size()) {
+            bool ok = false;
+            const int byte = label.mid(i + 1, 2).toInt(&ok, 16);
+            if (ok) {
+                name.append(char(byte));
+                i += 2;
+                continue;
+            }
+        }
+        name.append(label[i]);
+    }
+    return QString::fromUtf8(name);
 }
 
 // Slot for handling live updates from systemd units
