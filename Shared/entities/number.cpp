@@ -47,7 +47,9 @@ void Number::init()
         connect(subscription, &QMqttSubscription::messageReceived, this, [this](const QMqttMessage &message) {
             bool ok = false;
             int newValue = message.payload().toInt(&ok);
-            if (ok) {
+            if (ok && (newValue < m_min || newValue > m_max)) {
+                qCWarning(numb) << name() << "ignores" << newValue << "- outside" << m_min << "to" << m_max;
+            } else if (ok) {
                 Q_EMIT valueChangeRequested(newValue);
             } else {
                 qCWarning(numb) << "Invalid payload for number entity:" << message.payload();

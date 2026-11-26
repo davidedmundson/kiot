@@ -326,9 +326,7 @@ private Q_SLOTS:
         QTRY_VERIFY(!messagesOn(base, beforeCommands).isEmpty() && messagesOn(base, beforeCommands).last() == "a");
 
         // Home Assistant rejects a state that is not one of the options ("Invalid option for ...")
-        QEXPECT_FAIL("", "Select passes on and publishes any command payload, not only its options", Continue);
         QCOMPARE(selected.count(), 2);
-        QEXPECT_FAIL("", "Select passes on and publishes any command payload, not only its options", Continue);
         QVERIFY(!messagesOn(base, beforeCommands).contains("not-an-option"));
     }
 
@@ -355,8 +353,12 @@ private Q_SLOTS:
         QSignalSpy requested(&number, &Number::valueChangeRequested);
         send(base + QStringLiteral("/set"), "abc");
         send(base + QStringLiteral("/set"), "42");
-        QTRY_COMPARE(requested.count(), 1);
-        QCOMPARE(requested.first().at(0).toInt(), 42);
+        send(base + QStringLiteral("/set"), "151");
+        send(base + QStringLiteral("/set"), "-1");
+        send(base + QStringLiteral("/set"), "150");
+        QTRY_COMPARE(requested.count(), 2);
+        QCOMPARE(requested.at(0).at(0).toInt(), 42);
+        QCOMPARE(requested.at(1).at(0).toInt(), 150);
     }
 
     void testButtonTextAndLock()
