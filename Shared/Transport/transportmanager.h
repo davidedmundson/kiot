@@ -37,7 +37,7 @@ public Q_SLOTS:
 private:
     static TransportManager *s_self;
     QMqttClient *m_client;
-    QTimer *reconnectTimer;
+    QTimer *reconnectTimer = nullptr;
     bool initiateMqttClient();
 };
 

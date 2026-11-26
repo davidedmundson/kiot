@@ -48,23 +48,25 @@ bool TransportManager::initiateMqttClient()
     auto config = KSharedConfig::openConfig(PlatformHelper::configFilePath(), KConfig::SimpleConfig);
     if(!config->hasGroup("general"))
     {
-        qCFatal(transportlogger) << "No MQTT config found";
+        qCWarning(transportlogger) << "No MQTT config found";
         Q_EMIT mqttConfigMissing();
         return false;
     }
     auto group = config->group("general");
 
-    if(group.readEntry("password") == "mqtt-password-here"){
-        qCFatal(transportlogger) << "Default MQTT password detected";
-        Q_EMIT mqttConfigMissing();
-        return false;
+    // Written by the first run for "not configured yet", not a password: the settings window is open for
+    // the user to set one (HaControl::validateConfig)
+    QString password = group.readEntry("password");
+    if(password == "mqtt-password-here"){
+        qCWarning(transportlogger) << "MQTT password not configured yet";
+        password.clear();
     }
     
     m_client = new QMqttClient(this);
     m_client->setHostname(group.readEntry("host"));
     m_client->setPort(group.readEntry("port", 1883));
     m_client->setUsername(group.readEntry("user"));
-    m_client->setPassword(group.readEntry("password"));
+    m_client->setPassword(password);
     m_client->setKeepAlive(3);
 
     if (m_client->hostname().isEmpty()) {
@@ -105,6 +107,9 @@ void TransportManager::handleStateChanged(QMqttClient::ClientState state) {
 
 void TransportManager::doConnect()
 {
+    if (!m_client) {
+        return;
+    }
     if(m_client->state() == QMqttClient::Connecting || m_client->state() == QMqttClient::Connected)
     {
         qCInfo(transportlogger) << "Already connected or connecting";
@@ -123,6 +128,9 @@ void TransportManager::doConnect()
 
 void TransportManager::doDisconnect()
 {
+    if (!m_client) {
+        return;
+    }
     qCInfo(transportlogger) << "Disconnecting from MQTT broker";
     if(reconnectTimer->isActive())
         reconnectTimer->stop();

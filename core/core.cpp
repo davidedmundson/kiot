@@ -106,18 +106,20 @@ HaControl::HaControl()
     validateStartup(autostart);
 
     auto transportManager = new TransportManager(this);
+    if (!TransportManager::mqttClient()) {
+        // no host set: nothing to publish through until the user sets one up in the settings window
+        qCWarning(core) << "MQTT is not configured, not loading the integrations";
+        if (m_mainWindow) {
+            MainWindow::sendNotification(QString(PROJECT_NAME), "Please configure your MQTT settings");
+            m_mainWindow->show();
+        }
+        return;
+    }
 
     if (m_mainWindow) {
         connect(transportManager, &TransportManager::connectionStateChanged, 
                 m_mainWindow, &MainWindow::updateIcon);
     }
-    
-    connect(transportManager, &TransportManager::mqttConfigMissing, this, [this]() {
-        if (m_mainWindow) {
-            MainWindow::sendNotification(QString(PROJECT_NAME), "Please configure your MQTT settings");
-            m_mainWindow->show();
-        }
-    });
 
     m_connectedNode = new ConnectedNode(this);
 
