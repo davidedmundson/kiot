@@ -62,9 +62,9 @@ void BluetoothDeviceSwitch::update()
     if (!m_device)
         return;
     if (!m_device->isPaired()) {
+        // BluetoothAdapterWatcher removes this switch on the deviceChanged that follows, and unregisters it
+        // from Home Assistant only with RemoveDevices=true
         qCDebug(bt) << m_device->name() << " is not paired anymore";
-        m_switch->unRegister();
-        this->deleteLater();
         return;
     }
     
